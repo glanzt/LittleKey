@@ -1,0 +1,1690 @@
+"use client";
+
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import useProgressSync from "@/hooks/useProgressSync";
+
+const HEBREW_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
+
+const KEYBOARD_ROWS = {
+  top: ["ק","ר","א","ט","ו","ן","ם","פ"],
+  middle: ["ש","ד","ג","כ","ע","י","ח","ל","ך","ף"],
+  bottom: ["ז","ס","ב","ה","נ","מ","צ","ת","ץ"]
+};
+
+const NIKUD_MAP = {
+  "\u05E7\u05B8\u05DE\u05B8\u05E5": "\u05B8",
+  "\u05E4\u05B7\u05BC\u05EA\u05B8\u05D7": "\u05B7",
+  "\u05D7\u05B4\u05D9\u05E8\u05B4\u05D9\u05E7": "\u05B4",
+  "\u05E6\u05B5\u05D9\u05E8\u05B5\u05D9": "\u05B5",
+  "\u05E1\u05B6\u05D2\u05BC\u05D5\u05B9\u05DC": "\u05B6",
+  "\u05E9\u05C1\u05D5\u05BC\u05E8\u05D5\u05BC\u05E7": "\u05BC",
+  "\u05D7\u05D5\u05B9\u05DC\u05B8\u05DD": "\u05B9",
+  "\u05E7\u05D5\u05BC\u05D1\u05BC\u05D5\u05BC\u05E5": "\u05BB"
+};
+
+const FINAL_FORMS = { "\u05DB": "\u05DA", "\u05DE": "\u05DD", "\u05E0": "\u05DF", "\u05E4": "\u05E3", "\u05E6": "\u05E5" };
+
+const KEY_TO_LETTER = {};
+HEBREW_LETTERS.forEach(function(l) { KEY_TO_LETTER[l] = l; });
+Object.entries(FINAL_FORMS).forEach(function(entry) { KEY_TO_LETTER[entry[1]] = entry[0]; });
+
+const LETTER_NAMES = {
+  "א": "אלף", "ב": "בית", "ג": "גימל", "ד": "דלת", "ה": "הא", "ו": "ואו",
+  "ז": "זין", "ח": "חית", "ט": "טית", "י": "יוד", "כ": "כף", "ל": "למד",
+  "מ": "מם", "נ": "נון", "ס": "סמך", "ע": "עין", "פ": "פא", "צ": "צדי",
+  "ק": "קוף", "ר": "ריש", "ש": "שין", "ת": "תו"
+};
+
+const SUCCESS_MSGS = [
+  "\u05DB\u05DC \u05D4\u05DB\u05D1\u05D5\u05D3! \uD83C\uDF89",
+  "\u05DE\u05E2\u05D5\u05DC\u05D4! \u2B50",
+  "\u05D9\u05D5\u05E4\u05D9! \uD83C\uDF1F",
+  "\u05E0\u05D4\u05D3\u05E8! \uD83D\uDC4F",
+  "\u05D0\u05EA \u05D0\u05DC\u05D5\u05E4\u05D4! \uD83C\uDFC6",
+  "\u05D5\u05D0\u05D5! \uD83D\uDCAB"
+];
+
+const ERROR_MSGS = [
+  "\u05DB\u05DE\u05E2\u05D8! \u05E0\u05E1\u05D9 \u05E9\u05D5\u05D1 \uD83D\uDCAA",
+  "\u05E2\u05D5\u05D3 \u05E7\u05E6\u05EA! \uD83C\uDF08",
+  "\u05DC\u05D0 \u05E0\u05D5\u05E8\u05D0, \u05E0\u05E1\u05D9 \u05E9\u05D5\u05D1! \uD83D\uDE0A",
+  "\u05E7\u05E8\u05D5\u05D1! \uD83C\uDFAF"
+];
+
+/* ── Audio ── */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx && typeof window !== "undefined") {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function playTone(notes, vol, gap, dur) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  ctx.resume();
+  notes.forEach(function(freq, i) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime + i * gap);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * gap + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + i * gap);
+    osc.stop(ctx.currentTime + i * gap + dur);
+  });
+}
+
+function playSuccess() { playTone([523.25, 659.25, 783.99, 1046.5], 0.18, 0.1, 0.35); }
+function playPerfect() { playTone([523.25, 659.25, 783.99, 1046.5, 1318.51], 0.12, 0.08, 0.4); }
+function playError() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  ctx.resume();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "triangle";
+  osc.frequency.value = 220;
+  gain.gain.setValueAtTime(0.08, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+}
+
+function playClap() {
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+  ctx.resume();
+  for (var i = 0; i < 3; i++) {
+    var t = ctx.currentTime + i * 0.12;
+    var buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for (var j = 0; j < data.length; j++) {
+      data[j] = (Math.random() * 2 - 1) * Math.exp(-j / (data.length / 6));
+    }
+    var src = ctx.createBufferSource();
+    var gain = ctx.createGain();
+    src.buffer = buffer;
+    gain.gain.setValueAtTime(0.35, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(t);
+  }
+}
+
+/* ── Recorded Audio Playback ── */
+var _playbackId = 0;
+var _currentAudio = null;
+var CLIP_OVERLAP_MS = 550;
+
+function stopPlayback() {
+  _playbackId++;
+  if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+}
+
+function playRecording(name, pid) {
+  return new Promise(function(resolve) {
+    if (pid !== _playbackId) { resolve(); return; }
+    var src = "/recordings/" + encodeURIComponent(name) + ".m4a";
+    var audio = new Audio(src);
+    _currentAudio = audio;
+    var resolved = false;
+    function done() {
+      if (resolved) return;
+      resolved = true;
+      _currentAudio = null;
+      resolve();
+    }
+    audio.onended = done;
+    audio.onerror = done;
+    audio.onloadedmetadata = function() {
+      if (audio.duration > CLIP_OVERLAP_MS / 1000) {
+        setTimeout(done, (audio.duration * 1000) - CLIP_OVERLAP_MS);
+      }
+    };
+    audio.play().catch(done);
+  });
+}
+
+function playRecordingSeq(names) {
+  stopPlayback();
+  var id = _playbackId;
+  var chain = Promise.resolve();
+  names.forEach(function(name) {
+    chain = chain.then(function() { return playRecording(name, id); });
+  });
+  return chain;
+}
+
+function speakLetter(letter) {
+  var base = KEY_TO_LETTER[letter] || letter;
+  playRecordingSeq([base]);
+}
+
+/* ── Persistence ── */
+function loadData(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function saveData(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* noop */ }
+}
+
+/* ── Confetti ── */
+function Confetti(props) {
+  const active = props.active;
+  const keyRef = useRef(0);
+  const [renderKey, setRenderKey] = useState(0);
+
+  useEffect(function() {
+    if (active) {
+      keyRef.current += 1;
+      setRenderKey(keyRef.current);
+    }
+  }, [active]);
+
+  if (!active) return null;
+
+  const particles = [];
+  for (let i = 0; i < 35; i++) {
+    particles.push({
+      id: i,
+      x: Math.random() * 100,
+      delay: Math.random() * 0.4,
+      dur: 1.2 + Math.random() * 1,
+      color: ["#FFD700","#FF6B9D","#00D4AA","#7C5CFC","#FF8C42","#45E3FF","#FF4757","#2ED573"][i % 8],
+      size: 6 + Math.random() * 8,
+      drift: -30 + Math.random() * 60
+    });
+  }
+
+  const animName = "cfall" + renderKey;
+
+  return (
+    <div key={renderKey} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 100 }}>
+      {particles.map(function(p) {
+        return (
+          <div key={p.id} style={{
+            position: "absolute",
+            left: p.x + "%",
+            top: "-5%",
+            width: p.size,
+            height: p.size * 1.4,
+            backgroundColor: p.color,
+            borderRadius: p.id % 2 === 0 ? "50%" : "2px",
+            animation: animName + " " + p.dur + "s ease-in " + p.delay + "s forwards",
+          }} />
+        );
+      })}
+      <style>{
+        "@keyframes " + animName + " { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }"
+      }</style>
+    </div>
+  );
+}
+
+/* ── Progress Tracker ── */
+function ProgressTracker(props) {
+  var letterResults = props.letterResults;
+  return (
+    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center", padding: "0.5rem", maxWidth: "100%" }}>
+      {letterResults.map(function(r, i) {
+        var cur = r.status === "current";
+        var perf = r.status === "perfect";
+        var werr = r.status === "withErrors";
+        var helped = r.status === "helpedPerfect" || r.status === "helpedWithErrors";
+        var done = perf || werr || helped;
+
+        var bg = "rgba(0,0,0,0.06)";
+        var col = "#ccc";
+        var bor = "2px solid transparent";
+        var shd = "none";
+        var sc = "scale(1)";
+        var icon = r.letter;
+
+        if (cur) {
+          bg = "white"; col = "#E74C3C"; bor = "3px solid #E74C3C";
+          shd = "0 0 12px rgba(231,76,60,0.3)"; sc = "scale(1.15)";
+        } else if (perf) {
+          bg = "linear-gradient(135deg,#27AE60,#2ECC71)"; col = "white";
+          icon = "\u2713"; shd = "0 2px 8px rgba(39,174,96,0.3)";
+        } else if (werr) {
+          bg = "linear-gradient(135deg,#F39C12,#E67E22)"; col = "white";
+          icon = "\u2713"; shd = "0 2px 8px rgba(243,156,18,0.3)";
+        } else if (helped) {
+          bg = "linear-gradient(135deg,#3498DB,#2980B9)"; col = "white";
+          icon = "\u2713"; shd = "0 2px 8px rgba(52,152,219,0.3)";
+        }
+
+        return (
+          <div key={i} style={{
+            width: 100, height: 100, borderRadius: 24,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: done ? "2.5rem" : "3rem",
+            fontFamily: done ? "inherit" : "'Suez One', serif",
+            fontWeight: cur ? "bold" : "normal",
+            background: bg, color: col, border: bor, boxShadow: shd,
+            transform: sc,
+            transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
+            animation: cur ? "pulseDot 2s ease-in-out infinite" : (done ? "popIn 0.4s ease both" : "none"),
+          }}>
+            {icon}
+          </div>
+        );
+      })}
+      <style>{
+        "@keyframes pulseDot { 0%,100%{ box-shadow: 0 0 12px rgba(231,76,60,0.3) } 50%{ box-shadow: 0 0 20px rgba(231,76,60,0.5) } }" +
+        "@keyframes popIn { 0%{ transform: scale(0.5); opacity: 0 } 100%{ transform: scale(1); opacity: 1 } }"
+      }</style>
+    </div>
+  );
+}
+
+/* ── Flipping Hint Card ── */
+function FlippingHintCard(props) {
+  var letter = props.letter;
+  var onUseHelp = props.onUseHelp;
+  var flipped = props.flipped;
+  var setFlipped = props.setFlipped;
+
+  function handleClick() {
+    if (!flipped) {
+      onUseHelp();
+    }
+    setFlipped(!flipped);
+  }
+
+  var imgSrc = "/letters/" + encodeURIComponent(letter) + ".jpg";
+
+  return (
+    <div style={{ perspective: 800, width: "clamp(6rem, 25vw, 12rem)", height: "clamp(6rem, 25vw, 12rem)" }}>
+      <div onClick={handleClick} style={{
+        width: "100%", height: "100%", position: "relative",
+        transformStyle: "preserve-3d",
+        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1)",
+        cursor: "pointer"
+      }}>
+        {/* Front face */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
+          borderRadius: 18, background: "linear-gradient(135deg, #7C5CFC, #9B7DFF)",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          gap: "0.3rem", color: "white",
+          boxShadow: "0 3px 14px rgba(124,92,252,0.35)"
+        }}>
+          <span style={{ fontSize: "clamp(2rem, 8vw, 3.5rem)" }}>⌨️</span>
+          <span style={{ fontSize: "clamp(0.9rem, 3vw, 1.3rem)", fontFamily: "'Secular One', sans-serif" }}>רמז</span>
+        </div>
+        {/* Back face */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
+          transform: "rotateY(180deg)",
+          borderRadius: 18, overflow: "hidden",
+          boxShadow: "0 3px 14px rgba(0,0,0,0.18)",
+          background: "white"
+        }}>
+          <img src={imgSrc} alt={letter} style={{
+            width: "100%", height: "100%", objectFit: "cover"
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Star rating ── */
+function getStarsForAccuracy(accuracy) {
+  if (accuracy >= 90) return 3;
+  if (accuracy >= 70) return 2;
+  if (accuracy >= 1) return 1;
+  return 0;
+}
+
+/* ── Settings defaults ── */
+var DEFAULT_SETTINGS = {
+  sessionLength: 10,
+  letterSet: HEBREW_LETTERS.slice(),
+  nikud: false,
+  nikudType: Object.keys(NIKUD_MAP)[0],
+  helpLevel: "beginner"
+};
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  MAIN APP                                                                */
+/* ══════════════════════════════════════════════════════════════════════════ */
+export default function LetterHunter() {
+  var _s = useState("home");       var screen = _s[0]; var setScreen = _s[1];
+  var _se = useState(function() { return loadData("lh-settings", DEFAULT_SETTINGS); });
+  var settings = _se[0]; var setSettings = _se[1];
+  var _ss = useState(function() { return loadData("lh-sessions", []); });
+  var sessions = _ss[0]; var setSessions = _ss[1];
+  var _ls = useState(function() { return loadData("lh-letter-stats", {}); });
+  var letterStats = _ls[0]; var setLetterStats = _ls[1];
+  var _lp = useState(function() { return loadData("lh-level-progress", { currentLevel: 1, levels: {} }); });
+  var levelProgress = _lp[0]; var setLevelProgress = _lp[1];
+  var _cgl = useState(null); var currentGameLevel = _cgl[0]; var setCurrentGameLevel = _cgl[1];
+
+  var sync = useProgressSync();
+  var hasPulledRef = useRef(false);
+
+  useEffect(function() { saveData("lh-settings", settings); }, [settings]);
+  useEffect(function() { saveData("lh-sessions", sessions); }, [sessions]);
+  useEffect(function() { saveData("lh-letter-stats", letterStats); }, [letterStats]);
+  useEffect(function() { saveData("lh-level-progress", levelProgress); }, [levelProgress]);
+
+  // Sync settings to server when they change (debounced, skip initial load)
+  var settingsInitRef = useRef(true);
+  useEffect(function() {
+    if (settingsInitRef.current) { settingsInitRef.current = false; return; }
+    if (!sync.isAuthenticated) return;
+    var timer = setTimeout(function() {
+      sync.pushToServer({ settings: settings });
+    }, 1000);
+    return function() { clearTimeout(timer); };
+  }, [settings, sync.isAuthenticated]);
+
+  // Pull progress from server on first authenticated load
+  useEffect(function() {
+    if (!sync.isAuthenticated || hasPulledRef.current) return;
+    hasPulledRef.current = true;
+    sync.pullFromServer().then(function(serverData) {
+      if (!serverData) return;
+      if (serverData.settings) {
+        setSettings(function(local) { return serverData.settings || local; });
+      }
+      if (serverData.levelProgress) {
+        setLevelProgress(function(local) {
+          var merged = { currentLevel: Math.max(local.currentLevel, serverData.levelProgress.currentLevel || 1), levels: {} };
+          var allKeys = new Set(Object.keys(local.levels).concat(Object.keys(serverData.levelProgress.levels || {})));
+          allKeys.forEach(function(k) {
+            var loc = local.levels[k];
+            var srv = (serverData.levelProgress.levels || {})[k];
+            if (loc && srv) {
+              merged.levels[k] = (srv.stars || 0) >= (loc.stars || 0) ? srv : loc;
+            } else {
+              merged.levels[k] = loc || srv;
+            }
+          });
+          return merged;
+        });
+      }
+      if (serverData.letterStats && Object.keys(serverData.letterStats).length > 0) {
+        setLetterStats(function(local) {
+          var merged = {};
+          Object.keys(local).forEach(function(k) { merged[k] = local[k]; });
+          Object.entries(serverData.letterStats).forEach(function(entry) {
+            var k = entry[0]; var srv = entry[1];
+            var loc = merged[k];
+            if (!loc || (srv.attempts || 0) > (loc.attempts || 0)) {
+              merged[k] = srv;
+            }
+          });
+          return merged;
+        });
+      }
+      if (serverData.sessions && serverData.sessions.length > 0) {
+        setSessions(function(local) {
+          var localIds = new Set(local.map(function(s) { return s.id; }));
+          var newOnes = serverData.sessions.filter(function(s) { return !localIds.has(s.id); });
+          return local.concat(newOnes);
+        });
+      }
+    });
+  }, [sync.isAuthenticated]);
+
+  var _seq = useState([]); var sequence = _seq[0]; var setSequence = _seq[1];
+  var _ci = useState(0); var currentIdx = _ci[0]; var setCurrentIdx = _ci[1];
+  var _at = useState([]); var attempts = _at[0]; var setAttempts = _at[1];
+  var _ce = useState(0); var currentErrors = _ce[0]; var setCurrentErrors = _ce[1];
+  var _suc = useState(false); var showSuccess = _suc[0]; var setShowSuccess = _suc[1];
+  var _err = useState(false); var showError = _err[0]; var setShowError = _err[1];
+  var _em = useState(""); var errorMsg = _em[0]; var setErrorMsg = _em[1];
+  var _lsa = useState(null); var letterShownAt = _lsa[0]; var setLetterShownAt = _lsa[1];
+  var _sst = useState(null); var sessionStartTime = _sst[0]; var setSessionStartTime = _sst[1];
+  var _lr = useState([]); var letterResults = _lr[0]; var setLetterResults = _lr[1];
+  var _lpk = useState(null); var lastPressedKey = _lpk[0]; var setLastPressedKey = _lpk[1];
+  var _uh = useState(false); var usedHelp = _uh[0]; var setUsedHelp = _uh[1];
+  var _hf = useState(false); var hintFlipped = _hf[0]; var setHintFlipped = _hf[1];
+
+  // Refs for event handler closure
+  var stateRef = useRef({});
+  stateRef.current = {
+    showSuccess: showSuccess, currentIdx: currentIdx, sequence: sequence,
+    currentErrors: currentErrors, letterShownAt: letterShownAt, attempts: attempts,
+    usedHelp: usedHelp, hintFlipped: hintFlipped, currentGameLevel: currentGameLevel
+  };
+
+  function generateSequence() {
+    var pool = settings.letterSet.slice();
+    if (pool.length === 0) pool = ["א"];
+    var seq = [];
+    for (var i = 0; i < settings.sessionLength; i++) {
+      seq.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    return seq;
+  }
+
+  function startGame(level) {
+    var ctx = getAudioCtx();
+    if (ctx) ctx.resume();
+    var seq = generateSequence();
+    setSequence(seq);
+    setCurrentIdx(0);
+    setAttempts([]);
+    setCurrentErrors(0);
+    setShowSuccess(false);
+    setShowError(false);
+    setLetterShownAt(Date.now());
+    setSessionStartTime(Date.now());
+    setLastPressedKey(null);
+    setUsedHelp(false);
+    setHintFlipped(false);
+    setLetterResults(seq.map(function(l, i) { return { letter: l, status: i === 0 ? "current" : "pending" }; }));
+    setCurrentGameLevel(level != null ? level : null);
+    setScreen("game");
+  }
+
+  function finishSession(fa, seq, startTime, lr, gameLevel) {
+    var correct = fa.filter(function(a) { return a.isCorrect; });
+    // Exclude helped-letter attempts from accuracy/avgTtc
+    var independentAttempts = fa.filter(function(a) { return !a.helped; });
+    var independentCorrect = independentAttempts.filter(function(a) { return a.isCorrect; });
+    var accuracy = independentAttempts.length > 0 ? Math.round((independentCorrect.length / independentAttempts.length) * 100) : 0;
+    var sd = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      mode: "random",
+      totalQuestions: seq.length,
+      completed: correct.length,
+      accuracy: accuracy,
+      avgTtc: independentCorrect.length > 0 ? Math.round(independentCorrect.reduce(function(s, a) { return s + a.ttc; }, 0) / independentCorrect.length) : 0,
+      attempts: fa,
+      sequence: seq.slice(),
+      duration: Date.now() - startTime,
+      letterResults: lr.slice(),
+      level: gameLevel != null ? gameLevel : null
+    };
+    setSessions(function(prev) { return prev.concat([sd]); });
+
+    // Update level progress
+    var newLevelProgressForSync = null;
+    if (gameLevel != null) {
+      setLevelProgress(function(prev) {
+        var newLevels = {};
+        Object.keys(prev.levels).forEach(function(k) { newLevels[k] = prev.levels[k]; });
+        newLevels[gameLevel] = {
+          accuracy: accuracy,
+          stars: getStarsForAccuracy(accuracy),
+          completed: true
+        };
+        var newCurrentLevel = prev.currentLevel;
+        if (gameLevel >= prev.currentLevel) {
+          newCurrentLevel = gameLevel + 1;
+        }
+        var updated = { currentLevel: Math.min(newCurrentLevel, 1001), levels: newLevels };
+        newLevelProgressForSync = updated;
+        return updated;
+      });
+    }
+
+    // Sync to server
+    sync.pushSession({
+      date: sd.date, mode: sd.mode, totalQuestions: sd.totalQuestions,
+      completed: sd.completed, accuracy: sd.accuracy, avgTtc: sd.avgTtc,
+      duration: sd.duration, attempts: sd.attempts, sequence: sd.sequence,
+      letterResults: sd.letterResults, level: sd.level,
+      letterStats: letterStats, levelProgress: newLevelProgressForSync,
+    });
+
+    setScreen("summary");
+  }
+
+  // Auto-speak letter when it changes
+  useEffect(function() {
+    if (screen !== "game") return;
+    var currentLetter = sequence[currentIdx];
+    if (!currentLetter) return;
+    playRecordingSeq(["לחצי על האות", currentLetter]);
+  }, [screen, currentIdx, sequence]);
+
+  // Keyboard handler via ref to avoid stale closures
+  useEffect(function() {
+    if (screen !== "game") return;
+
+    function handler(e) {
+      e.preventDefault();
+      var st = stateRef.current;
+      if (st.showSuccess || st.currentIdx >= st.sequence.length) return;
+
+      var pressedKey = e.key;
+
+      // Spacebar toggles the hint card
+      if (pressedKey === " ") {
+        setHintFlipped(function(prev) {
+          if (!prev) setUsedHelp(true);
+          return !prev;
+        });
+        return;
+      }
+
+      var target = st.sequence[st.currentIdx];
+      var baseLetter = KEY_TO_LETTER[pressedKey];
+
+      setLastPressedKey(pressedKey);
+
+      if (!baseLetter) {
+        setErrorMsg("\u05D1\u05D5\u05D0\u05D9 \u05E0\u05D7\u05E4\u05E9 \u05D0\u05D5\u05EA! \uD83D\uDD0D");
+        setShowError(true);
+        setTimeout(function() { setShowError(false); }, 1200);
+        return;
+      }
+
+      var isCorrect = (baseLetter === target || pressedKey === target);
+      var ttc = Date.now() - st.letterShownAt;
+      var attempt = {
+        letter: target, keyPressed: pressedKey, isCorrect: isCorrect,
+        timestamp: Date.now(), ttc: ttc, helped: st.usedHelp
+      };
+
+      setAttempts(function(prev) { return prev.concat([attempt]); });
+
+      if (isCorrect) {
+        var isPerfect = st.currentErrors === 0;
+        var wasHelped = st.usedHelp;
+        if (isPerfect) playPerfect(); else playSuccess();
+        playClap();
+        setShowSuccess(true);
+
+        var resultStatus;
+        if (wasHelped) {
+          resultStatus = isPerfect ? "helpedPerfect" : "helpedWithErrors";
+        } else {
+          resultStatus = isPerfect ? "perfect" : "withErrors";
+        }
+
+        setLetterResults(function(prev) {
+          return prev.map(function(r, i) {
+            if (i === st.currentIdx) return { letter: r.letter, status: resultStatus };
+            if (i === st.currentIdx + 1) return { letter: r.letter, status: "current" };
+            return r;
+          });
+        });
+
+        // Only update letterStats if NOT helped
+        if (!wasHelped) {
+          setLetterStats(function(prev) {
+            var s = prev[target] || { attempts: 0, correct: 0, totalTtc: 0, bestTtc: Infinity, lastPracticed: null };
+            var updated = {};
+            Object.keys(prev).forEach(function(k) { updated[k] = prev[k]; });
+            updated[target] = {
+              attempts: s.attempts + 1 + st.currentErrors,
+              correct: s.correct + 1,
+              totalTtc: s.totalTtc + ttc,
+              bestTtc: Math.min(s.bestTtc, ttc),
+              lastPracticed: new Date().toISOString()
+            };
+            return updated;
+          });
+        }
+
+        var nextIdx = st.currentIdx + 1;
+        var isLast = nextIdx >= st.sequence.length;
+
+        setTimeout(function() {
+          setShowSuccess(false);
+          setCurrentErrors(0);
+          setLastPressedKey(null);
+          setUsedHelp(false);
+          setHintFlipped(false);
+          if (isLast) {
+            // Need latest attempts - use functional approach
+            setAttempts(function(latestAttempts) {
+              setLetterResults(function(latestLR) {
+                finishSession(latestAttempts, st.sequence, sessionStartTime, latestLR, st.currentGameLevel);
+                return latestLR;
+              });
+              return latestAttempts;
+            });
+          } else {
+            setCurrentIdx(nextIdx);
+            setLetterShownAt(Date.now());
+          }
+        }, 1500);
+      } else {
+        playError();
+        var wrongBase = KEY_TO_LETTER[pressedKey];
+        playRecordingSeq(["בחרת ב", wrongBase]);
+        var newErrors = st.currentErrors + 1;
+        setCurrentErrors(newErrors);
+
+        if (newErrors >= 3) {
+          var rowEntry = Object.entries(KEYBOARD_ROWS).find(function(entry) { return entry[1].indexOf(target) >= 0; });
+          var rowNames = { top: "\u05D4\u05E2\u05DC\u05D9\u05D5\u05E0\u05D4", middle: "\u05D4\u05D0\u05DE\u05E6\u05E2\u05D9\u05EA", bottom: "\u05D4\u05EA\u05D7\u05EA\u05D5\u05E0\u05D4" };
+          var rn = rowEntry ? rowNames[rowEntry[0]] : "";
+          setErrorMsg("\u05E8\u05DE\u05D6: \u05D7\u05E4\u05E9\u05D9 \u05D1\u05E9\u05D5\u05E8\u05D4 " + rn + "! \uD83D\uDCA1");
+        } else {
+          setErrorMsg(ERROR_MSGS[Math.floor(Math.random() * ERROR_MSGS.length)]);
+        }
+        setShowError(true);
+        setTimeout(function() { setShowError(false); setLastPressedKey(null); }, 1200);
+      }
+    }
+
+    window.addEventListener("keydown", handler);
+    return function() { window.removeEventListener("keydown", handler); };
+  }, [screen, sessionStartTime]);
+
+  /* ── Routing ── */
+  if (screen === "home") {
+    return <HomeScreen onStart={function() { setScreen("levels"); }} onParent={function() { setScreen("dashboard"); }} onSettings={function() { setScreen("settings"); }} user={sync.user} isAuthenticated={sync.isAuthenticated} />;
+  }
+  if (screen === "levels") {
+    return (
+      <LevelSelectionScreen
+        levelProgress={levelProgress}
+        onSelectLevel={function(level) { startGame(level); }}
+        onBack={function() { setScreen("home"); }}
+      />
+    );
+  }
+  if (screen === "game") {
+    return (
+      <GameScreen
+        letter={sequence[currentIdx] || "א"}
+        nikud={settings.nikud ? NIKUD_MAP[settings.nikudType] : null}
+        showSuccess={showSuccess} showError={showError}
+        errorMsg={errorMsg} helpLevel={settings.helpLevel}
+        currentErrors={currentErrors} letterResults={letterResults}
+        lastPressedKey={lastPressedKey}
+        onBack={function() { setScreen("levels"); }}
+        onSpeakLetter={function() { setUsedHelp(true); speakLetter(sequence[currentIdx] || "א"); }}
+        onUseHelp={function() { setUsedHelp(true); }}
+        hintFlipped={hintFlipped}
+        setHintFlipped={setHintFlipped}
+        currentGameLevel={currentGameLevel}
+      />
+    );
+  }
+  if (screen === "summary") {
+    var lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+    return (
+      <SummaryScreen
+        session={lastSession} letterResults={letterResults}
+        onHome={function() { setScreen("home"); }}
+        onPlayAgain={function() {
+          if (currentGameLevel != null) {
+            var nextLevel = currentGameLevel + 1;
+            if (nextLevel <= 1000) {
+              startGame(nextLevel);
+            } else {
+              setScreen("levels");
+            }
+          } else {
+            startGame();
+          }
+        }}
+        onLevels={function() { setScreen("levels"); }}
+        onDashboard={function() { setScreen("dashboard"); }}
+        currentGameLevel={currentGameLevel}
+      />
+    );
+  }
+  if (screen === "dashboard") {
+    return (
+      <DashboardScreen
+        sessions={sessions} letterStats={letterStats}
+        onBack={function() { setScreen("home"); }}
+        onClearData={function() { setSessions([]); setLetterStats({}); setLevelProgress({ currentLevel: 1, levels: {} }); }}
+      />
+    );
+  }
+  if (screen === "settings") {
+    return (
+      <SettingsScreen
+        settings={settings} setSettings={setSettings}
+        onBack={function() { setScreen("home"); }}
+      />
+    );
+  }
+  return null;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  LEVEL SELECTION SCREEN                                                   */
+/* ══════════════════════════════════════════════════════════════════════════ */
+function LevelSelectionScreen(props) {
+  var levelProgress = props.levelProgress;
+  var onSelectLevel = props.onSelectLevel;
+  var onBack = props.onBack;
+
+  var LEVELS_PER_PAGE = 20;
+  var TOTAL_LEVELS = 1000;
+  var TOTAL_PAGES = Math.ceil(TOTAL_LEVELS / LEVELS_PER_PAGE);
+
+  var initialPage = Math.floor((levelProgress.currentLevel - 1) / LEVELS_PER_PAGE);
+  var _pg = useState(initialPage);
+  var currentPage = _pg[0]; var setCurrentPage = _pg[1];
+
+  var startLevel = currentPage * LEVELS_PER_PAGE + 1;
+  var endLevel = Math.min(startLevel + LEVELS_PER_PAGE - 1, TOTAL_LEVELS);
+
+  var levelCards = [];
+  for (var i = startLevel; i <= endLevel; i++) {
+    levelCards.push(i);
+  }
+
+  function handleLevelClick(level) {
+    if (level <= levelProgress.currentLevel) {
+      onSelectLevel(level);
+    }
+  }
+
+  function renderStars(stars) {
+    var result = [];
+    for (var s = 0; s < 3; s++) {
+      result.push(
+        <span key={s} style={{
+          fontSize: "clamp(0.8rem, 2.2vw, 1.1rem)",
+          color: s < stars ? "#FFD700" : "rgba(255,255,255,0.35)",
+          textShadow: s < stars ? "0 0 4px rgba(255,215,0,0.5)" : "none"
+        }}>{"\u2605"}</span>
+      );
+    }
+    return result;
+  }
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(170deg, #FFF8E7 0%, #FFECD2 30%, #FCB69F 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      fontFamily: "'Secular One', 'Rubik', sans-serif", direction: "rtl",
+      padding: "1.5rem", position: "relative"
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1rem" }}>
+        <button onClick={onBack} style={{
+          background: "rgba(255,255,255,0.7)", border: "none", borderRadius: 18,
+          padding: "0.9rem 1.8rem", cursor: "pointer", fontSize: "1.5rem",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)", fontFamily: "'Secular One', sans-serif"
+        }}>→ חזרה</button>
+        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2.25rem, 6vw, 3.3rem)", color: "#2C3E50", margin: 0 }}>
+          שלבים 🏆
+        </h1>
+        <div style={{ width: 80 }} />
+      </div>
+
+      {/* Page indicator */}
+      <div style={{ fontSize: "1.5rem", color: "#888", marginBottom: "1.2rem", fontFamily: "'Rubik', sans-serif" }}>
+        עמוד {currentPage + 1} מתוך {TOTAL_PAGES}
+      </div>
+
+      {/* Level grid: 2 rows of 10 */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(10, 1fr)",
+        gap: "clamp(0.4rem, 1.2vw, 0.8rem)",
+        maxWidth: 1050,
+        width: "100%",
+        marginBottom: "2rem"
+      }}>
+        {levelCards.map(function(level) {
+          var levelData = levelProgress.levels[level];
+          var isCompleted = levelData && levelData.completed;
+          var isCurrent = level === levelProgress.currentLevel;
+          var isLocked = level > levelProgress.currentLevel;
+          var stars = levelData ? levelData.stars : 0;
+          var accuracy = levelData ? levelData.accuracy : null;
+
+          var cardBg, cardColor, cardBorder, cardShadow, cardCursor;
+          if (isLocked) {
+            cardBg = "rgba(0,0,0,0.06)";
+            cardColor = "#ccc";
+            cardBorder = "2px solid transparent";
+            cardShadow = "none";
+            cardCursor = "not-allowed";
+          } else if (isCurrent) {
+            cardBg = "linear-gradient(135deg, #E74C3C, #C0392B)";
+            cardColor = "white";
+            cardBorder = "3px solid #E74C3C";
+            cardShadow = "0 4px 16px rgba(231,76,60,0.4)";
+            cardCursor = "pointer";
+          } else if (isCompleted) {
+            cardBg = stars === 3 ? "linear-gradient(135deg, #27AE60, #2ECC71)" :
+                     stars === 2 ? "linear-gradient(135deg, #F39C12, #E67E22)" :
+                     "linear-gradient(135deg, #E67E22, #D35400)";
+            cardColor = "white";
+            cardBorder = "2px solid transparent";
+            cardShadow = "0 2px 10px rgba(0,0,0,0.12)";
+            cardCursor = "pointer";
+          }
+
+          return (
+            <div
+              key={level}
+              onClick={function() { handleLevelClick(level); }}
+              style={{
+                aspectRatio: "1",
+                borderRadius: "clamp(8px, 2vw, 14px)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                background: cardBg,
+                color: cardColor,
+                border: cardBorder,
+                boxShadow: cardShadow,
+                cursor: cardCursor,
+                transition: "all 0.2s ease",
+                position: "relative",
+                animation: isCurrent ? "levelPulse 2s ease-in-out infinite" : "none"
+              }}
+            >
+              {isLocked ? (
+                <span style={{ fontSize: "clamp(1.3rem, 3.5vw, 2rem)", opacity: 0.4 }}>🔒</span>
+              ) : (
+                <>
+                  <span style={{ fontSize: "clamp(1.2rem, 3.3vw, 1.8rem)", fontWeight: "bold", lineHeight: 1.2 }}>{level}</span>
+                  {isCompleted && accuracy !== null ? (
+                    <span style={{ fontSize: "clamp(0.65rem, 1.8vw, 1rem)", opacity: 0.9, lineHeight: 1 }}>{accuracy}%</span>
+                  ) : null}
+                  {isCompleted ? (
+                    <div style={{ display: "flex", gap: 1, marginTop: 2 }}>
+                      {renderStars(stars)}
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pagination controls */}
+      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <button
+          onClick={function() { if (currentPage > 0) setCurrentPage(currentPage - 1); }}
+          disabled={currentPage === 0}
+          style={{
+            width: 78, height: 78, borderRadius: "50%",
+            border: "none", cursor: currentPage === 0 ? "not-allowed" : "pointer",
+            background: currentPage === 0 ? "rgba(0,0,0,0.05)" : "white",
+            fontSize: "2.25rem", color: currentPage === 0 ? "#ccc" : "#2C3E50",
+            boxShadow: currentPage === 0 ? "none" : "0 2px 10px rgba(0,0,0,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center"
+          }}
+        >→</button>
+
+        <span style={{ fontSize: "1.8rem", color: "#555", fontWeight: "600", fontFamily: "'Rubik', sans-serif" }}>
+          {currentPage + 1} / {TOTAL_PAGES}
+        </span>
+
+        <button
+          onClick={function() { if (currentPage < TOTAL_PAGES - 1) setCurrentPage(currentPage + 1); }}
+          disabled={currentPage >= TOTAL_PAGES - 1}
+          style={{
+            width: 78, height: 78, borderRadius: "50%",
+            border: "none", cursor: currentPage >= TOTAL_PAGES - 1 ? "not-allowed" : "pointer",
+            background: currentPage >= TOTAL_PAGES - 1 ? "rgba(0,0,0,0.05)" : "white",
+            fontSize: "2.25rem", color: currentPage >= TOTAL_PAGES - 1 ? "#ccc" : "#2C3E50",
+            boxShadow: currentPage >= TOTAL_PAGES - 1 ? "none" : "0 2px 10px rgba(0,0,0,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center"
+          }}
+        >←</button>
+      </div>
+
+      {/* Play now button */}
+      <button onClick={function() { onSelectLevel(levelProgress.currentLevel); }} style={{
+        padding: "1.2rem 4rem", fontSize: "clamp(1.5rem, 5vw, 2rem)", fontFamily: "'Secular One', sans-serif",
+        background: "linear-gradient(135deg, #E74C3C, #C0392B)", color: "white",
+        border: "none", borderRadius: "60px", cursor: "pointer",
+        boxShadow: "0 8px 30px rgba(231,76,60,0.4), inset 0 2px 0 rgba(255,255,255,0.2)",
+        marginTop: "1.5rem", width: "100%", maxWidth: 420
+      }}>שחקי עכשיו! 🎮</button>
+
+      <style>{
+        "@keyframes levelPulse { 0%,100%{ box-shadow: 0 4px 16px rgba(231,76,60,0.4) } 50%{ box-shadow: 0 4px 24px rgba(231,76,60,0.7), 0 0 40px rgba(231,76,60,0.2) } }"
+      }</style>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  HOME SCREEN                                                             */
+/* ══════════════════════════════════════════════════════════════════════════ */
+function HomeScreen(props) {
+  var onStart = props.onStart;
+  var onParent = props.onParent;
+  var onSettings = props.onSettings;
+  var user = props.user;
+  var isAuthenticated = props.isAuthenticated;
+  var _hp = useState(0); var holdProgress = _hp[0]; var setHoldProgress = _hp[1];
+  var holdRef = useRef(null);
+
+  function startHold() {
+    var start = Date.now();
+    holdRef.current = setInterval(function() {
+      var elapsed = Date.now() - start;
+      setHoldProgress(Math.min(elapsed / 2000, 1));
+      if (elapsed >= 2000) {
+        clearInterval(holdRef.current);
+        setHoldProgress(0);
+        onParent();
+      }
+    }, 50);
+  }
+  function endHold() { clearInterval(holdRef.current); setHoldProgress(0); }
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(170deg, #FFF8E7 0%, #FFECD2 30%, #FCB69F 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Secular One', 'Rubik', sans-serif", direction: "rtl",
+      padding: "2rem", position: "relative", overflow: "hidden"
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden", opacity: 0.06, pointerEvents: "none" }}>
+        {HEBREW_LETTERS.map(function(l, i) {
+          return <div key={i} style={{ position: "absolute", fontSize: (40 + (i * 17) % 60) + "px", fontFamily: "'Suez One', serif", left: ((i * 4.5) % 95) + "%", top: ((i * 7.3) % 90) + "%", transform: "rotate(" + (-20 + (i * 13) % 40) + "deg)", color: "#D35400" }}>{l}</div>;
+        })}
+      </div>
+
+      {/* Auth status indicator */}
+      <div style={{ position: "absolute", top: "1.2rem", left: "1.2rem", zIndex: 10 }}>
+        {isAuthenticated ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.85)", borderRadius: 20, padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #27AE60, #2ECC71)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "0.75rem", fontWeight: "bold" }}>
+              {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
+            </div>
+            <span style={{ fontSize: "0.8rem", color: "#555", fontFamily: "'Rubik', sans-serif", maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name || user?.email}</span>
+          </div>
+        ) : (
+          <a href="/auth/signin" style={{
+            display: "flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,255,255,0.85)", borderRadius: 20,
+            padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", textDecoration: "none",
+            fontSize: "0.85rem", color: "#7C5CFC", fontFamily: "'Secular One', sans-serif", fontWeight: 600,
+          }}>
+            🔑 התחברי
+          </a>
+        )}
+      </div>
+
+      <div style={{ fontSize: "clamp(3rem, 10vw, 6rem)", marginBottom: "0.5rem", animation: "gentleBounce 3s ease-in-out infinite" }}>🎯</div>
+      <h1 style={{ fontSize: "clamp(3rem, 10.5vw, 5.25rem)", fontFamily: "'Suez One', serif", color: "#2C3E50", margin: "0 0 0.5rem", textAlign: "center" }}>ציידת האותיות</h1>
+      <p style={{ fontSize: "clamp(1.5rem, 4.5vw, 1.95rem)", color: "#7F8C8D", fontFamily: "'Rubik', sans-serif", marginBottom: "3rem" }}>בואי נלמד את האותיות! ✨</p>
+
+      <button onClick={onStart} style={{
+        padding: "1.2rem 4rem", fontSize: "clamp(1.5rem, 5vw, 2rem)", fontFamily: "'Secular One', sans-serif",
+        background: "linear-gradient(135deg, #E74C3C, #C0392B)", color: "white",
+        border: "none", borderRadius: "60px", cursor: "pointer",
+        boxShadow: "0 8px 30px rgba(231,76,60,0.4), inset 0 2px 0 rgba(255,255,255,0.2)"
+      }}>בואי נשחק! 🎮</button>
+
+      <div style={{ position: "absolute", bottom: "2rem", left: "2rem" }}>
+        <button
+          onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold}
+          onTouchStart={startHold} onTouchEnd={endHold}
+          style={{
+            width: 56, height: 56, borderRadius: "50%", border: "2px solid rgba(0,0,0,0.1)",
+            background: "conic-gradient(#7C5CFC " + (holdProgress * 360) + "deg, rgba(0,0,0,0.05) 0deg)",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem"
+          }}
+          title="לחיצה ארוכה 2 שניות למסך הורים"
+        >👤</button>
+        <div style={{ fontSize: "0.65rem", color: "#aaa", textAlign: "center", marginTop: 4 }}>הורים</div>
+      </div>
+
+      <button onClick={onSettings} style={{
+        position: "absolute", bottom: "2rem", right: "2rem", width: 56, height: 56, borderRadius: "50%",
+        border: "2px solid rgba(0,0,0,0.1)", background: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: "1.3rem"
+      }}>⚙️</button>
+
+      <style>{"@keyframes gentleBounce { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-12px) } }"}</style>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  GAME SCREEN                                                             */
+/* ══════════════════════════════════════════════════════════════════════════ */
+function GameScreen(props) {
+  var letter = props.letter;
+  var nikud = props.nikud;
+  var showSuccess = props.showSuccess;
+  var showError = props.showError;
+  var errorMsg = props.errorMsg;
+  var helpLevel = props.helpLevel;
+  var currentErrors = props.currentErrors;
+  var letterResults = props.letterResults;
+  var lastPressedKey = props.lastPressedKey;
+  var onBack = props.onBack;
+  var onSpeakLetter = props.onSpeakLetter;
+  var onUseHelp = props.onUseHelp;
+  var hintFlipped = props.hintFlipped;
+  var setHintFlipped = props.setHintFlipped;
+  var currentGameLevel = props.currentGameLevel;
+
+  var displayLetter = nikud ? letter + nikud : letter;
+  var successMsg = useMemo(function() {
+    return SUCCESS_MSGS[Math.floor(Math.random() * SUCCESS_MSGS.length)];
+  }, [showSuccess, letter]);
+
+  var rowHint = useMemo(function() {
+    if (helpLevel !== "beginner") return null;
+    var rowNames = { top: "שורה עליונה ☝️", middle: "שורה אמצעית ✌️", bottom: "שורה תחתונה 👇" };
+    var found = Object.entries(KEYBOARD_ROWS).find(function(entry) { return entry[1].indexOf(letter) >= 0; });
+    return found ? rowNames[found[0]] : null;
+  }, [letter, helpLevel]);
+
+  var bgColor = showSuccess ? "linear-gradient(170deg, #D5F5E3 0%, #A9DFBF 100%)"
+    : showError ? "linear-gradient(170deg, #FDEDEC 0%, #F5B7B1 100%)"
+    : "linear-gradient(170deg, #F8F9FA 0%, #E8F0FE 100%)";
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: bgColor,
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Rubik', sans-serif", direction: "rtl", position: "relative",
+      transition: "background 0.5s ease", overflow: "hidden"
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      <Confetti active={showSuccess} />
+
+      <button onClick={onBack} style={{
+        position: "absolute", top: "1.5rem", left: "1.5rem",
+        background: "rgba(0,0,0,0.05)", border: "none", borderRadius: "50%",
+        width: 40, height: 40, fontSize: "1.2rem", cursor: "pointer", color: "#999"
+      }}>✕</button>
+
+      {currentGameLevel != null ? (
+        <div style={{
+          position: "absolute", top: "1.5rem", right: "1.5rem",
+          background: "rgba(124,92,252,0.15)", borderRadius: 20,
+          padding: "0.3rem 1rem", fontSize: "0.85rem", color: "#7C5CFC",
+          fontWeight: "600", fontFamily: "'Secular One', sans-serif", zIndex: 10
+        }}>
+          שלב {currentGameLevel}
+        </div>
+      ) : null}
+
+      <div style={{ position: "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center" }}>
+        <ProgressTracker letterResults={letterResults} />
+      </div>
+
+      {/* Wrong key floating indicator */}
+      {showError && lastPressedKey && KEY_TO_LETTER[lastPressedKey] ? (
+        <div style={{ position: "absolute", top: "28%", animation: "wrongKeyFloat 1.2s ease-out forwards" }}>
+          <div style={{ fontSize: "3.5rem", fontFamily: "'Suez One', serif", color: "#E74C3C", opacity: 0.7, position: "relative" }}>
+            {lastPressedKey}
+            <div style={{ position: "absolute", top: "50%", left: "-10%", width: "120%", height: 4, background: "#E74C3C", borderRadius: 2, transform: "rotate(-45deg) translateY(-50%)" }} />
+          </div>
+        </div>
+      ) : null}
+
+      {/* Main letter */}
+      <div style={{
+        position: "relative", marginTop: "2rem",
+        animation: showSuccess ? "successBounce 0.6s cubic-bezier(0.34,1.56,0.64,1)" : (showError ? "shakeAnim 0.5s ease" : "letterAppear 0.5s cubic-bezier(0.34,1.56,0.64,1)")
+      }}>
+        {showSuccess ? <div style={{ position: "absolute", inset: -40, borderRadius: "50%", background: "radial-gradient(circle, rgba(39,174,96,0.2) 0%, transparent 70%)", animation: "glowPulse 0.8s ease-in-out infinite" }} /> : null}
+        {showError ? <div style={{ position: "absolute", inset: -30, borderRadius: "50%", background: "radial-gradient(circle, rgba(231,76,60,0.15) 0%, transparent 70%)", animation: "errorFlash 0.5s ease-out" }} /> : null}
+
+        <div style={{
+          fontSize: "clamp(8rem, 35vw, 18rem)", fontFamily: "'Suez One', serif",
+          color: showSuccess ? "#27AE60" : showError ? "#E74C3C" : "#2C3E50",
+          lineHeight: 1, textAlign: "center", transition: "color 0.3s",
+          filter: showSuccess ? "drop-shadow(0 0 40px rgba(39,174,96,0.4))" : showError ? "drop-shadow(0 0 20px rgba(231,76,60,0.2))" : "none"
+        }}>
+          {displayLetter}
+        </div>
+
+        {/* Speaker button */}
+        {!showSuccess && !showError ? (
+          <button onClick={onSpeakLetter} style={{
+            position: "absolute", left: "-3.5rem", top: "50%", transform: "translateY(-50%)",
+            width: 48, height: 48, borderRadius: "50%", border: "none", cursor: "pointer",
+            fontSize: "1.4rem", background: "white",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "transform 0.2s, box-shadow 0.2s"
+          }} title="הקראת האות">🔊</button>
+        ) : null}
+
+        {/* Keyboard hint card */}
+        {!showSuccess && !showError ? (
+          <div style={{ position: "absolute", right: "clamp(-15rem, -32vw, -8rem)", top: "50%", transform: "translateY(-50%)" }}>
+            <FlippingHintCard letter={letter} onUseHelp={onUseHelp} flipped={hintFlipped} setFlipped={setHintFlipped} />
+          </div>
+        ) : null}
+      </div>
+
+      {/* Hint */}
+      {!showSuccess && !showError ? (
+        <p style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.5rem)", color: "#888", marginTop: "1.5rem", fontFamily: "'Secular One', sans-serif" }}>
+          לחצי על האות: <strong style={{ color: "#E74C3C", fontSize: "130%" }}>{letter}</strong>
+        </p>
+      ) : null}
+
+      {rowHint && !showSuccess ? <p style={{ fontSize: "1rem", color: "#aaa", marginTop: "0.3rem" }}>{rowHint}</p> : null}
+
+      {/* Error counter dots */}
+      {currentErrors > 0 && !showSuccess ? (
+        <div style={{ display: "flex", gap: 8, marginTop: "1rem" }}>
+          {[0, 1, 2].map(function(i) {
+            return <div key={i} style={{
+              width: 14, height: 14, borderRadius: "50%",
+              background: i < currentErrors ? "#E74C3C" : "rgba(0,0,0,0.08)",
+              transition: "all 0.3s",
+              transform: i < currentErrors ? "scale(1.3)" : "scale(1)",
+              boxShadow: i < currentErrors ? "0 0 8px rgba(231,76,60,0.4)" : "none"
+            }} />;
+          })}
+        </div>
+      ) : null}
+
+      {/* Success message */}
+      {showSuccess ? (
+        <div style={{ fontSize: "clamp(1.8rem, 6vw, 3rem)", color: "#27AE60", fontFamily: "'Secular One', sans-serif", marginTop: "1rem", animation: "successBounce 0.6s cubic-bezier(0.34,1.56,0.64,1)" }}>
+          {successMsg}
+        </div>
+      ) : null}
+
+      {/* Error message */}
+      {showError ? (
+        <div style={{
+          fontSize: "clamp(1.2rem, 4vw, 1.8rem)", color: "#E74C3C",
+          fontFamily: "'Secular One', sans-serif", animation: "errorSlideIn 0.3s ease",
+          background: "rgba(255,255,255,0.95)", padding: "0.8rem 2rem",
+          borderRadius: 20, boxShadow: "0 4px 20px rgba(231,76,60,0.15)",
+          marginTop: "1rem", border: "2px solid rgba(231,76,60,0.2)"
+        }}>
+          {errorMsg}
+        </div>
+      ) : null}
+
+      <style>{
+        "@keyframes letterAppear { 0%{ transform: scale(0.3) rotate(-10deg); opacity: 0 } 100%{ transform: scale(1) rotate(0); opacity: 1 } }" +
+        "@keyframes successBounce { 0%{ transform: scale(1) } 30%{ transform: scale(1.2) } 60%{ transform: scale(0.95) } 100%{ transform: scale(1) } }" +
+        "@keyframes shakeAnim { 0%,100%{ transform: translateX(0) } 15%{ transform: translateX(-12px) } 30%{ transform: translateX(10px) } 45%{ transform: translateX(-8px) } 60%{ transform: translateX(6px) } }" +
+        "@keyframes errorSlideIn { 0%{ transform: translateY(20px) scale(0.9); opacity: 0 } 100%{ transform: translateY(0) scale(1); opacity: 1 } }" +
+        "@keyframes glowPulse { 0%,100%{ opacity: 0.5; transform: scale(1) } 50%{ opacity: 1; transform: scale(1.1) } }" +
+        "@keyframes errorFlash { 0%{ opacity: 1; transform: scale(0.8) } 100%{ opacity: 0; transform: scale(1.5) } }" +
+        "@keyframes wrongKeyFloat { 0%{ transform: translateY(0) scale(1); opacity: 0.8 } 100%{ transform: translateY(-80px) scale(0.4); opacity: 0 } }"
+      }</style>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  SUMMARY SCREEN                                                          */
+/* ══════════════════════════════════════════════════════════════════════════ */
+function SummaryScreen(props) {
+  var session = props.session;
+  var lr = props.letterResults;
+  var onHome = props.onHome;
+  var onPlayAgain = props.onPlayAgain;
+  var onLevels = props.onLevels;
+  var onDashboard = props.onDashboard;
+  var currentGameLevel = props.currentGameLevel;
+
+  if (!session) return null;
+
+  var ca = session.attempts.filter(function(a) { return a.isCorrect; });
+  var res = session.letterResults || lr || [];
+  var perfectCount = res.filter(function(r) { return r.status === "perfect"; }).length;
+  var withErrorsCount = res.filter(function(r) { return r.status === "withErrors"; }).length;
+  var helpedCount = res.filter(function(r) { return r.status === "helpedPerfect" || r.status === "helpedWithErrors"; }).length;
+  var fastest = ca.length > 0 ? ca.reduce(function(a, b) { return a.ttc < b.ttc ? a : b; }) : null;
+  var slowest = ca.length > 0 ? ca.reduce(function(a, b) { return a.ttc > b.ttc ? a : b; }) : null;
+
+  // Recalculate accuracy excluding helped letters
+  var independentAttempts = session.attempts.filter(function(a) {
+    var letterRes = res.find(function(r) { return r.letter === a.letter && (r.status === "helpedPerfect" || r.status === "helpedWithErrors"); });
+    return !letterRes;
+  });
+  var independentCorrect = independentAttempts.filter(function(a) { return a.isCorrect; });
+  var realAccuracy = independentAttempts.length > 0 ? Math.round((independentCorrect.length / independentAttempts.length) * 100) : 0;
+  var realAvgTtc = independentCorrect.length > 0 ? Math.round(independentCorrect.reduce(function(s, a) { return s + a.ttc; }, 0) / independentCorrect.length) : 0;
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "linear-gradient(170deg, #FFF8E7 0%, #E8F8F5 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Rubik', sans-serif", direction: "rtl", padding: "2rem"
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      <div style={{ fontSize: "4rem", marginBottom: "1rem", animation: "gentleBounce 2s ease-in-out infinite" }}>🏆</div>
+      {currentGameLevel != null ? (
+        <div style={{
+          background: "linear-gradient(135deg, #7C5CFC, #9B7DFF)", borderRadius: 30, padding: "0.4rem 1.5rem",
+          marginBottom: "0.5rem", boxShadow: "0 2px 10px rgba(124,92,252,0.3)",
+          fontSize: "1.1rem", color: "white", fontWeight: "600", fontFamily: "'Secular One', sans-serif"
+        }}>
+          שלב {currentGameLevel}
+        </div>
+      ) : null}
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 6vw, 2.8rem)", color: "#2C3E50", marginBottom: "1.5rem" }}>סיכום משחק</h1>
+
+      {/* Letter result strip */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", marginBottom: "1.5rem", maxWidth: 450 }}>
+        {res.map(function(r, i) {
+          var isHelped = r.status === "helpedPerfect" || r.status === "helpedWithErrors";
+          var bg = r.status === "perfect" ? "linear-gradient(135deg, #27AE60, #2ECC71)" :
+                   r.status === "withErrors" ? "linear-gradient(135deg, #F39C12, #E67E22)" :
+                   isHelped ? "linear-gradient(135deg, #3498DB, #2980B9)" : "rgba(0,0,0,0.06)";
+          var statusIcon = r.status === "perfect" ? "⭐" : r.status === "withErrors" ? "✓" : isHelped ? "👤" : "";
+          return (
+            <div key={i} style={{
+              width: 44, height: 44, borderRadius: 12,
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              background: bg,
+              color: r.status === "pending" ? "#ccc" : "white",
+              fontFamily: "'Suez One', serif", fontSize: "1.1rem",
+              boxShadow: r.status !== "pending" ? "0 2px 8px rgba(0,0,0,0.12)" : "none",
+              animation: "popIn 0.3s ease " + (i * 0.08) + "s both"
+            }}>
+              <span>{r.letter}</span>
+              <span style={{ fontSize: "0.5rem", marginTop: -2 }}>
+                {statusIcon}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Stats grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", maxWidth: 420, width: "100%", marginBottom: "1.5rem" }}>
+        {[
+          { label: "מושלם!", value: perfectCount, icon: "⭐", color: "#27AE60" },
+          { label: "עם טעויות", value: withErrorsCount, icon: "💪", color: "#F39C12" },
+          { label: "עם עזרה", value: helpedCount, icon: "👤", color: "#3498DB" },
+          { label: "דיוק (עצמאי)", value: realAccuracy + "%", icon: "🎯", color: "#7C5CFC" },
+          { label: "זמן ממוצע", value: realAvgTtc > 0 ? (realAvgTtc / 1000).toFixed(1) + "s" : "-", icon: "⏱️", color: "#E74C3C" }
+        ].map(function(stat, i) {
+          return (
+            <div key={i} style={{
+              background: "white", borderRadius: 20, padding: "1.2rem",
+              textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+              animation: "popIn 0.4s ease " + (0.3 + i * 0.1) + "s both"
+            }}>
+              <div style={{ fontSize: "1.5rem" }}>{stat.icon}</div>
+              <div style={{ fontSize: "1.8rem", fontWeight: "700", color: stat.color }}>{stat.value}</div>
+              <div style={{ fontSize: "0.85rem", color: "#999" }}>{stat.label}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {fastest ? (
+        <div style={{ background: "white", borderRadius: 16, padding: "1rem 2rem", maxWidth: 400, width: "100%", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", fontSize: "1rem" }}>
+          <span>🚀 מהירה: <strong>{fastest.letter}</strong> ({(fastest.ttc / 1000).toFixed(1)}s)</span>
+          <span>🐢 איטית: <strong>{slowest.letter}</strong> ({(slowest.ttc / 1000).toFixed(1)}s)</span>
+        </div>
+      ) : null}
+
+      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", marginTop: "1rem" }}>
+        <button onClick={onPlayAgain} style={{ padding: "1rem 2.5rem", fontSize: "1.3rem", fontFamily: "'Secular One'", background: "linear-gradient(135deg, #E74C3C, #C0392B)", color: "white", border: "none", borderRadius: 50, cursor: "pointer", boxShadow: "0 6px 20px rgba(231,76,60,0.3)" }}>
+          {currentGameLevel != null ? "שלב " + (currentGameLevel + 1) + " ▶" : "שחקי שוב! 🎮"}
+        </button>
+        {currentGameLevel != null ? (
+          <button onClick={onLevels} style={{ padding: "1rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#E74C3C", border: "2px solid #E74C3C", borderRadius: 50, cursor: "pointer" }}>שלבים 🗺️</button>
+        ) : null}
+        <button onClick={onDashboard} style={{ padding: "1rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#7C5CFC", border: "2px solid #7C5CFC", borderRadius: 50, cursor: "pointer" }}>דשבורד 📊</button>
+        <button onClick={onHome} style={{ padding: "1rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "2px solid #ddd", borderRadius: 50, cursor: "pointer" }}>דף הבית 🏠</button>
+      </div>
+
+      <style>{
+        "@keyframes gentleBounce { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-8px) } }" +
+        "@keyframes popIn { 0%{ transform: scale(0.5); opacity: 0 } 100%{ transform: scale(1); opacity: 1 } }"
+      }</style>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  DASHBOARD SCREEN                                                        */
+/* ══════════════════════════════════════════════════════════════════════════ */
+function DashboardScreen(props) {
+  var sessions = props.sessions;
+  var letterStats = props.letterStats;
+  var onBack = props.onBack;
+  var onClearData = props.onClearData;
+
+  var _t = useState("overview"); var tab = _t[0]; var setTab = _t[1];
+  var _cc = useState(false); var confirmClear = _cc[0]; var setConfirmClear = _cc[1];
+  var recentSessions = sessions.slice().reverse().slice(0, 20);
+
+  var hardestLetters = useMemo(function() {
+    return Object.entries(letterStats).map(function(entry) {
+      var l = entry[0]; var s = entry[1];
+      return { letter: l, accuracy: s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0, avgTtc: s.correct > 0 ? Math.round(s.totalTtc / s.correct) : 0 };
+    }).sort(function(a, b) { return a.accuracy - b.accuracy; }).slice(0, 5);
+  }, [letterStats]);
+
+  var allLetterData = useMemo(function() {
+    return Object.entries(letterStats).map(function(entry) {
+      var l = entry[0]; var s = entry[1];
+      return {
+        letter: l, attempts: s.attempts, correct: s.correct,
+        accuracy: s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0,
+        avgTtc: s.correct > 0 ? Math.round(s.totalTtc / s.correct) : 0,
+        bestTtc: s.bestTtc === Infinity ? "-" : Math.round(s.bestTtc),
+        lastPracticed: s.lastPracticed ? new Date(s.lastPracticed).toLocaleDateString("he-IL") : "-"
+      };
+    }).sort(function(a, b) { return HEBREW_LETTERS.indexOf(a.letter) - HEBREW_LETTERS.indexOf(b.letter); });
+  }, [letterStats]);
+
+  var accuracyOverTime = useMemo(function() {
+    return sessions.slice(-15).map(function(s, i) {
+      return { idx: i + 1, accuracy: s.accuracy, date: new Date(s.date).toLocaleDateString("he-IL", { day: "numeric", month: "numeric" }) };
+    });
+  }, [sessions]);
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F5F6FA", fontFamily: "'Rubik', sans-serif", direction: "rtl", padding: "1.5rem" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+        <button onClick={onBack} style={{ background: "white", border: "none", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#2C3E50", margin: 0 }}>📊 דשבורד הורים</h1>
+        <div style={{ width: 80 }} />
+      </div>
+
+      <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404" }}>
+        ⚠️ ודאו שהמקלדת מוגדרת על עברית
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        {["overview", "letters", "sessions"].map(function(id) {
+          var labels = { overview: "סקירה", letters: "אותיות", sessions: "סשנים" };
+          return (
+            <button key={id} onClick={function() { setTab(id); }} style={{
+              padding: "0.6rem 1.5rem", borderRadius: 30, border: "none", cursor: "pointer",
+              fontFamily: "'Secular One'", fontSize: "0.95rem",
+              background: tab === id ? "#7C5CFC" : "white", color: tab === id ? "white" : "#666",
+              boxShadow: tab === id ? "0 4px 12px rgba(124,92,252,0.3)" : "0 2px 8px rgba(0,0,0,0.05)"
+            }}>{labels[id]}</button>
+          );
+        })}
+      </div>
+
+      {/* OVERVIEW TAB */}
+      {tab === "overview" ? (
+        sessions.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#999", background: "white", borderRadius: 20 }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🎮</div>
+            <p style={{ fontSize: "1.2rem" }}>עדיין אין נתונים. שחקו משחק ראשון!</p>
+          </div>
+        ) : (
+          <div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", marginBottom: "1.5rem" }}>
+              {[
+                { label: "סשנים", value: sessions.length, color: "#7C5CFC" },
+                { label: "דיוק ממוצע", value: Math.round(sessions.reduce(function(s, x) { return s + x.accuracy; }, 0) / sessions.length) + "%", color: "#27AE60" },
+                { label: "זמן ממוצע", value: (sessions.reduce(function(s, x) { return s + x.avgTtc; }, 0) / sessions.length / 1000).toFixed(1) + "s", color: "#E74C3C" }
+              ].map(function(s, i) {
+                return (
+                  <div key={i} style={{ background: "white", borderRadius: 16, padding: "1rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                    <div style={{ fontSize: "1.6rem", fontWeight: "700", color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: "0.8rem", color: "#999" }}>{s.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {accuracyOverTime.length > 1 ? (
+              <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>דיוק לאורך זמן</h3>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 100 }}>
+                  {accuracyOverTime.map(function(d, i) {
+                    return (
+                      <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <div style={{ fontSize: "0.6rem", color: "#999", marginBottom: 2 }}>{d.accuracy}%</div>
+                        <div style={{ width: "100%", maxWidth: 30, height: d.accuracy * 0.8, background: "linear-gradient(180deg, #7C5CFC, #9B7DFF)", borderRadius: "4px 4px 0 0", minHeight: 4 }} />
+                        <div style={{ fontSize: "0.55rem", color: "#bbb", marginTop: 2 }}>{d.date}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
+            {hardestLetters.length > 0 ? (
+              <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>🔥 אותיות לעבוד עליהן</h3>
+                <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap" }}>
+                  {hardestLetters.map(function(l, i) {
+                    return (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#FFF5F5", borderRadius: 12, padding: "0.6rem 1rem" }}>
+                        <span style={{ fontSize: "1.8rem", fontFamily: "'Suez One', serif" }}>{l.letter}</span>
+                        <div>
+                          <div style={{ fontSize: "0.85rem", fontWeight: "600", color: "#E74C3C" }}>{l.accuracy}%</div>
+                          <div style={{ fontSize: "0.7rem", color: "#999" }}>{(l.avgTtc / 1000).toFixed(1)}s</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )
+      ) : null}
+
+      {/* LETTERS TAB */}
+      {tab === "letters" ? (
+        <div style={{ background: "white", borderRadius: 20, padding: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid #f0f0f0" }}>
+                {["אות", "ניסיונות", "נכון", "דיוק%", "זמן ממוצע", "שיא", "אחרון"].map(function(h) {
+                  return <th key={h} style={{ padding: "0.7rem 0.5rem", textAlign: "center", color: "#999", fontWeight: "600" }}>{h}</th>;
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {allLetterData.length === 0 ? (
+                <tr><td colSpan={7} style={{ textAlign: "center", padding: "2rem", color: "#ccc" }}>אין נתונים עדיין</td></tr>
+              ) : allLetterData.map(function(l, i) {
+                return (
+                  <tr key={i} style={{ borderBottom: "1px solid #f5f5f5" }}>
+                    <td style={{ textAlign: "center", fontSize: "1.4rem", fontFamily: "'Suez One', serif", padding: "0.5rem" }}>{l.letter}</td>
+                    <td style={{ textAlign: "center" }}>{l.attempts}</td>
+                    <td style={{ textAlign: "center" }}>{l.correct}</td>
+                    <td style={{ textAlign: "center", fontWeight: "600", color: l.accuracy < 70 ? "#E74C3C" : "#27AE60" }}>{l.accuracy}%</td>
+                    <td style={{ textAlign: "center" }}>{l.avgTtc > 0 ? (l.avgTtc / 1000).toFixed(1) + "s" : "-"}</td>
+                    <td style={{ textAlign: "center" }}>{l.bestTtc !== "-" ? (l.bestTtc / 1000).toFixed(1) + "s" : "-"}</td>
+                    <td style={{ textAlign: "center", fontSize: "0.75rem", color: "#999" }}>{l.lastPracticed}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {/* SESSIONS TAB */}
+      {tab === "sessions" ? (
+        recentSessions.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "3rem", color: "#ccc", background: "white", borderRadius: 20 }}>אין סשנים עדיין</div>
+        ) : (
+          <div>
+            {recentSessions.map(function(s, i) {
+              var sResults = s.letterResults || s.sequence.map(function(l) { return { letter: l, status: "perfect" }; });
+              return (
+                <div key={i} style={{ background: "white", borderRadius: 16, padding: "1rem 1.5rem", marginBottom: "0.8rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.85rem", color: "#999" }}>
+                      {new Date(s.date).toLocaleDateString("he-IL")} {new Date(s.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    <span style={{ fontSize: "0.8rem", color: "#bbb" }}>אקראי</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.5rem" }}>
+                    <span style={{ fontWeight: "600" }}>✅ {s.completed}/{s.totalQuestions}</span>
+                    <span style={{ color: s.accuracy >= 70 ? "#27AE60" : "#E74C3C", fontWeight: "600" }}>🎯 {s.accuracy}%</span>
+                    <span>⏱️ {(s.avgTtc / 1000).toFixed(1)}s</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 4, marginTop: "0.5rem", flexWrap: "wrap" }}>
+                    {sResults.map(function(r, j) {
+                      var isHelped = r.status === "helpedPerfect" || r.status === "helpedWithErrors";
+                      var bgc = r.status === "perfect" ? "#F0FFF0" : r.status === "withErrors" ? "#FFF8E1" : isHelped ? "#EBF5FB" : "#FFF5F5";
+                      var clr = r.status === "perfect" ? "#27AE60" : r.status === "withErrors" ? "#F39C12" : isHelped ? "#3498DB" : "#E74C3C";
+                      var brc = r.status === "perfect" ? "#C8E6C9" : r.status === "withErrors" ? "#FFE0B2" : isHelped ? "#AED6F1" : "#FFCDD2";
+                      return <span key={j} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: 6, fontSize: "0.9rem", fontFamily: "'Suez One', serif", background: bgc, color: clr, border: "1px solid " + brc }}>{r.letter}</span>;
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )
+      ) : null}
+
+      {/* Clear data */}
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        {!confirmClear ? (
+          <button onClick={function() { setConfirmClear(true); }} style={{ background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: "0.85rem" }}>🗑️ מחק את כל הנתונים</button>
+        ) : (
+          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", alignItems: "center" }}>
+            <span style={{ color: "#E74C3C", fontSize: "0.9rem" }}>בטוח?</span>
+            <button onClick={function() { onClearData(); setConfirmClear(false); }} style={{ background: "#E74C3C", color: "white", border: "none", borderRadius: 8, padding: "0.4rem 1rem", cursor: "pointer", fontSize: "0.85rem" }}>כן, מחק</button>
+            <button onClick={function() { setConfirmClear(false); }} style={{ background: "#eee", border: "none", borderRadius: 8, padding: "0.4rem 1rem", cursor: "pointer", fontSize: "0.85rem" }}>ביטול</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/*  SETTINGS SCREEN                                                         */
+/* ══════════════════════════════════════════════════════════════════════════ */
+function SettingsScreen(props) {
+  var settings = props.settings;
+  var setSettings = props.setSettings;
+  var onBack = props.onBack;
+
+  var _sl = useState(function() { return new Set(settings.letterSet); });
+  var selectedLetters = _sl[0]; var setSelectedLetters = _sl[1];
+
+  function updateSetting(key, value) {
+    setSettings(function(prev) {
+      var next = {};
+      Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      next[key] = value;
+      return next;
+    });
+  }
+
+  function toggleLetter(letter) {
+    setSelectedLetters(function(prev) {
+      var next = new Set(prev);
+      if (next.has(letter)) {
+        if (next.size > 1) next.delete(letter);
+      } else {
+        next.add(letter);
+      }
+      return next;
+    });
+  }
+
+  function save() {
+    setSettings(function(prev) {
+      var next = {};
+      Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      next.letterSet = Array.from(selectedLetters);
+      return next;
+    });
+    onBack();
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F5F6FA", fontFamily: "'Rubik', sans-serif", direction: "rtl", padding: "1.5rem" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
+        <button onClick={onBack} style={{ background: "white", border: "none", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#2C3E50", margin: 0 }}>⚙️ הגדרות</h1>
+        <div style={{ width: 80 }} />
+      </div>
+
+      {/* Session length */}
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>אורך סשן</h3>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {[5, 10, 15].map(function(n) {
+            return <button key={n} onClick={function() { updateSetting("sessionLength", n); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "1.1rem", background: settings.sessionLength === n ? "#7C5CFC" : "#f0f0f0", color: settings.sessionLength === n ? "white" : "#666" }}>{n} שאלות</button>;
+          })}
+        </div>
+      </div>
+
+      {/* Nikud */}
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>ניקוד</h3>
+          <button onClick={function() { updateSetting("nikud", !settings.nikud); }} style={{
+            width: 52, height: 28, borderRadius: 14, border: "none", cursor: "pointer",
+            background: settings.nikud ? "#7C5CFC" : "#ddd", position: "relative", transition: "background 0.3s"
+          }}>
+            <div style={{ width: 22, height: 22, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: settings.nikud ? 3 : 27, transition: "left 0.3s", boxShadow: "0 1px 4px rgba(0,0,0,0.2)" }} />
+          </button>
+        </div>
+        {settings.nikud ? (
+          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.8rem" }}>
+            {Object.keys(NIKUD_MAP).map(function(n) {
+              return <button key={n} onClick={function() { updateSetting("nikudType", n); }} style={{ padding: "0.4rem 0.8rem", borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.85rem", background: settings.nikudType === n ? "#7C5CFC" : "#f5f5f5", color: settings.nikudType === n ? "white" : "#666" }}>{n}</button>;
+            })}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Help level */}
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>רמת עזרה</h3>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {[{ id: "beginner", label: "מתחילים (עם רמזים)" }, { id: "advanced", label: "מתקדמים (בלי רמזים)" }].map(function(h) {
+            return <button key={h.id} onClick={function() { updateSetting("helpLevel", h.id); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "0.85rem", background: settings.helpLevel === h.id ? "#7C5CFC" : "#f0f0f0", color: settings.helpLevel === h.id ? "white" : "#666" }}>{h.label}</button>;
+          })}
+        </div>
+      </div>
+
+      {/* Letter selection */}
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
+          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>בחירת אותיות ({selectedLetters.size})</h3>
+          <div style={{ display: "flex", gap: "0.3rem" }}>
+            <button onClick={function() { setSelectedLetters(new Set(HEBREW_LETTERS)); }} style={{ padding: "0.3rem 0.8rem", borderRadius: 8, border: "1px solid #ddd", background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#666" }}>הכל</button>
+            <button onClick={function() { setSelectedLetters(new Set(HEBREW_LETTERS.slice(0, 5))); }} style={{ padding: "0.3rem 0.8rem", borderRadius: 8, border: "1px solid #ddd", background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#666" }}>5 ראשונות</button>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {HEBREW_LETTERS.map(function(l) {
+            return <button key={l} onClick={function() { toggleLetter(l); }} style={{ width: 42, height: 42, borderRadius: 10, border: "none", cursor: "pointer", fontSize: "1.3rem", fontFamily: "'Suez One', serif", background: selectedLetters.has(l) ? "#7C5CFC" : "#f0f0f0", color: selectedLetters.has(l) ? "white" : "#999", transition: "all 0.2s" }}>{l}</button>;
+          })}
+        </div>
+      </div>
+
+      <button onClick={save} style={{ width: "100%", padding: "1rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "linear-gradient(135deg, #7C5CFC, #5B3FD4)", color: "white", border: "none", borderRadius: 16, cursor: "pointer", boxShadow: "0 6px 20px rgba(124,92,252,0.3)" }}>💾 שמור הגדרות</button>
+    </div>
+  );
+}
