@@ -42,6 +42,8 @@ const BACK_BUTTON_STYLE = {
   gap: "0.25rem",
 };
 
+var TOP_BAR_HEIGHT = 56;
+
 function GameTopMenu(props) {
   var user = props.user;
   var onProfiles = props.onProfiles;
@@ -57,9 +59,9 @@ function GameTopMenu(props) {
     background: "white",
     border: "1px solid rgba(0,0,0,0.08)",
     borderRadius: 999,
-    padding: "0.4rem 0.9rem",
+    padding: "0.35rem 0.85rem",
     cursor: "pointer",
-    fontSize: "0.85rem",
+    fontSize: "0.82rem",
     fontFamily: "'Secular One', sans-serif",
     color: "#111319",
     boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
@@ -68,15 +70,24 @@ function GameTopMenu(props) {
   return (
     <div style={{
       position: "fixed",
-      top: "0.8rem",
-      right: "1rem",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: TOP_BAR_HEIGHT,
       zIndex: 250,
       display: "flex",
       alignItems: "center",
-      gap: "0.6rem",
+      justifyContent: "flex-end",
+      gap: "0.5rem",
       direction: "rtl",
+      padding: "0 1.2rem",
+      background: "rgba(250,250,250,0.92)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+      borderBottom: "1px solid rgba(0,0,0,0.06)",
+      boxSizing: "border-box",
     }}>
-      <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.45rem", maxWidth: 210 }}>
+      <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.4rem", maxWidth: 200, marginLeft: "auto" }}>
         {user && user.image ? (
           <img
             src={user.image}
@@ -105,9 +116,9 @@ function GameTopMenu(props) {
         background: "#111319",
         border: "none",
         borderRadius: 999,
-        padding: "0.4rem 1.1rem",
+        padding: "0.35rem 1rem",
         cursor: "pointer",
-        fontSize: "0.85rem",
+        fontSize: "0.82rem",
         fontFamily: "'Secular One', sans-serif",
         color: "white",
         boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
@@ -885,8 +896,7 @@ export default function LetterHunter() {
   function withTopMenu(content) {
     if (!sync.isAuthenticated) return content;
     return (
-      <>
-        {content}
+      <div style={{ paddingTop: TOP_BAR_HEIGHT }}>
         <GameTopMenu
           user={sync.user}
           onProfiles={openProfiles}
@@ -895,7 +905,8 @@ export default function LetterHunter() {
           onSettings={openSettings}
           onSignOut={handleSignOut}
         />
-      </>
+        {content}
+      </div>
     );
   }
 
