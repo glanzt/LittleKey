@@ -57,7 +57,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/play");
   }
 
   return (
@@ -68,7 +68,7 @@ export default function RegisterPage() {
       <p style={shared.subtitle}>צרו חשבון כדי לשמור את ההתקדמות</p>
 
       <div style={shared.card}>
-        <button onClick={() => signIn("google", { callbackUrl: "/" })} style={shared.googleBtn}>
+        <button onClick={() => signIn("google", { callbackUrl: "/play" })} style={shared.googleBtn}>
           <GoogleIcon />
           הרשמה עם Google
         </button>

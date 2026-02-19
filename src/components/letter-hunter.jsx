@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { signOut } from "next-auth/react";
 import useProgressSync from "@/hooks/useProgressSync";
 import useProfiles from "@/hooks/useProfiles";
 import { FloatingLettersBackground, shared as sharedStyles } from "@/styles/shared";
@@ -762,7 +763,12 @@ export default function LetterHunter() {
         onSelectLevel={function(level) { startGame(level); }}
         onSettings={function() { setScreen("settings"); }}
         onDashboard={function() { setScreen("dashboard"); }}
+        onAdmin={function() { setScreen("dashboard"); }}
         onProfiles={function() { setScreen("profiles"); }}
+        onSignOut={function() {
+          setActiveProfile(null);
+          signOut({ callbackUrl: "/play" });
+        }}
         isAuthenticated={sync.isAuthenticated}
         user={sync.user}
         activeProfile={activeProfile}
@@ -839,7 +845,9 @@ function LevelSelectionScreen(props) {
   var onSelectLevel = props.onSelectLevel;
   var onSettings = props.onSettings;
   var onDashboard = props.onDashboard;
+  var onAdmin = props.onAdmin;
   var onProfiles = props.onProfiles;
+  var onSignOut = props.onSignOut;
   var isAuthenticated = props.isAuthenticated;
   var user = props.user;
   var activeProfile = props.activeProfile;
@@ -915,16 +923,28 @@ function LevelSelectionScreen(props) {
                 padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
                 fontFamily: "'Secular One', sans-serif", color: "#111319",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-              }}>הורים</button>
+              }}>דשבורד הורים</button>
+              <button onClick={onAdmin} style={{
+                background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
+                padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
+                fontFamily: "'Secular One', sans-serif", color: "#111319",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+              }} title={user?.email || ""}>אדמין</button>
               <button onClick={onSettings} style={{
                 background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
                 padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
                 fontFamily: "'Secular One', sans-serif", color: "#111319",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
               }}>הגדרות</button>
+              <button onClick={onSignOut} style={{
+                background: "#111319", border: "none", borderRadius: 999,
+                padding: "0.4rem 1.1rem", cursor: "pointer", fontSize: "0.85rem",
+                fontFamily: "'Secular One', sans-serif", color: "white",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+              }}>התנתקות</button>
             </>
           ) : (
-            <a href="/auth/signin" style={{
+            <a href="/auth/signin?callbackUrl=%2Fplay" style={{
               background: "#111319", color: "white", borderRadius: 999,
               padding: "0.4rem 1.2rem", fontSize: "0.85rem", textDecoration: "none",
               fontFamily: "'Secular One', sans-serif",
