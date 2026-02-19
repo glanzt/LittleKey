@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { signOut } from "next-auth/react";
 import useProgressSync from "@/hooks/useProgressSync";
 import useProfiles from "@/hooks/useProfiles";
-import { FloatingLettersBackground, shared as sharedStyles } from "@/styles/shared";
+import { FloatingLettersBackground } from "@/styles/shared";
 
 const PAGE_BG = {
   minHeight: "100vh",
@@ -20,6 +20,101 @@ const PAGE_BG = {
   padding: "2rem",
   boxSizing: "border-box",
 };
+const PRACTICE_SESSION_LENGTH = 5;
+const ENABLE_PROGRESS_PERSISTENCE = true;
+
+const BACK_BUTTON_STYLE = {
+  position: "absolute",
+  top: "1.5rem",
+  left: "1.5rem",
+  zIndex: 12,
+  background: "white",
+  border: "1px solid rgba(0,0,0,0.08)",
+  borderRadius: 999,
+  padding: "0.45rem 1rem",
+  cursor: "pointer",
+  fontSize: "0.95rem",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+  fontFamily: "'Secular One', sans-serif",
+  color: "#111319",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.25rem",
+};
+
+function GameTopMenu(props) {
+  var user = props.user;
+  var onProfiles = props.onProfiles;
+  var onDashboard = props.onDashboard;
+  var onAdmin = props.onAdmin;
+  var onSettings = props.onSettings;
+  var onSignOut = props.onSignOut;
+
+  var userLabel = user && (user.name || user.email) ? (user.name || user.email) : "פרופיל";
+  var userInitial = userLabel && userLabel.length > 0 ? userLabel.charAt(0).toUpperCase() : "U";
+
+  var menuBtn = {
+    background: "white",
+    border: "1px solid rgba(0,0,0,0.08)",
+    borderRadius: 999,
+    padding: "0.4rem 0.9rem",
+    cursor: "pointer",
+    fontSize: "0.85rem",
+    fontFamily: "'Secular One', sans-serif",
+    color: "#111319",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+  };
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: "0.8rem",
+      right: "1rem",
+      zIndex: 250,
+      display: "flex",
+      alignItems: "center",
+      gap: "0.6rem",
+      direction: "rtl",
+    }}>
+      <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.45rem", maxWidth: 210 }}>
+        {user && user.image ? (
+          <img
+            src={user.image}
+            alt={userLabel}
+            style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover" }}
+          />
+        ) : (
+          <div style={{
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            background: "rgba(17,19,25,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.72rem",
+          }}>{userInitial}</div>
+        )}
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userLabel}</span>
+      </button>
+
+      <button onClick={onDashboard} style={menuBtn}>דשבורד הורים</button>
+      <button onClick={onAdmin} style={menuBtn}>אדמין</button>
+      <button onClick={onSettings} style={menuBtn}>הגדרות</button>
+      <button onClick={onSignOut} style={{
+        background: "#111319",
+        border: "none",
+        borderRadius: 999,
+        padding: "0.4rem 1.1rem",
+        cursor: "pointer",
+        fontSize: "0.85rem",
+        fontFamily: "'Secular One', sans-serif",
+        color: "white",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+      }}>התנתקות</button>
+    </div>
+  );
+}
 
 const HEBREW_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
 
@@ -190,6 +285,7 @@ function storageKey(base, profileId) {
   return profileId ? base + "-" + profileId : base;
 }
 function loadData(key, fallback) {
+  if (!ENABLE_PROGRESS_PERSISTENCE) return fallback;
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -198,6 +294,7 @@ function loadData(key, fallback) {
   }
 }
 function saveData(key, val) {
+  if (!ENABLE_PROGRESS_PERSISTENCE) return;
   try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* noop */ }
 }
 
@@ -376,7 +473,7 @@ function getStarsForAccuracy(accuracy) {
 
 /* ── Settings defaults ── */
 var DEFAULT_SETTINGS = {
-  sessionLength: 10,
+  sessionLength: PRACTICE_SESSION_LENGTH,
   letterSet: HEBREW_LETTERS.slice(),
   nikud: false,
   nikudType: Object.keys(NIKUD_MAP)[0],
@@ -414,6 +511,7 @@ export default function LetterHunter() {
 
   var sync = useProgressSync(profileId);
   var hasPulledRef = useRef(false);
+  var lastSyncedUserIdRef = useRef(null);
 
   // Reload data when profile changes
   useEffect(function() {
@@ -436,6 +534,28 @@ export default function LetterHunter() {
 
   // Persist active profile selection
   useEffect(function() { saveData("lh-active-profile", activeProfile); }, [activeProfile]);
+
+  // Ensure selected profile belongs to current authenticated user
+  useEffect(function() {
+    if (!sync.isAuthenticated || !sync.user?.id) {
+      lastSyncedUserIdRef.current = null;
+      return;
+    }
+
+    var currentUserId = sync.user.id;
+    if (lastSyncedUserIdRef.current !== currentUserId) {
+      lastSyncedUserIdRef.current = currentUserId;
+      setActiveProfile(null);
+    }
+
+    profilesHook.fetchProfiles().then(function(list) {
+      if (!list || list.length === 0) return;
+      setActiveProfile(function(prev) {
+        if (prev && list.some(function(p) { return p.id === prev.id; })) return prev;
+        return list[0];
+      });
+    });
+  }, [sync.isAuthenticated, sync.user?.id, profilesHook.fetchProfiles]);
 
   // Sync settings to server when they change (debounced, skip initial load)
   var settingsInitRef = useRef(true);
@@ -523,7 +643,7 @@ export default function LetterHunter() {
     var pool = settings.letterSet.slice();
     if (pool.length === 0) pool = ["א"];
     var seq = [];
-    for (var i = 0; i < settings.sessionLength; i++) {
+    for (var i = 0; i < PRACTICE_SESSION_LENGTH; i++) {
       seq.push(pool[Math.floor(Math.random() * pool.length)]);
     }
     return seq;
@@ -739,9 +859,35 @@ export default function LetterHunter() {
     return function() { window.removeEventListener("keydown", handler); };
   }, [screen, sessionStartTime]);
 
+  function openProfiles() { setScreen("profiles"); }
+  function openDashboard() { setScreen("dashboard"); }
+  function openSettings() { setScreen("settings"); }
+  function openAdmin() { setScreen("dashboard"); }
+  function handleSignOut() {
+    setActiveProfile(null);
+    signOut({ callbackUrl: "/play" });
+  }
+
+  function withTopMenu(content) {
+    if (!sync.isAuthenticated) return content;
+    return (
+      <>
+        {content}
+        <GameTopMenu
+          user={sync.user}
+          onProfiles={openProfiles}
+          onDashboard={openDashboard}
+          onAdmin={openAdmin}
+          onSettings={openSettings}
+          onSignOut={handleSignOut}
+        />
+      </>
+    );
+  }
+
   /* ── Routing ── */
   if (screen === "profiles") {
-    return (
+    return withTopMenu((
       <ProfileSelectionScreen
         profiles={profilesHook.profiles}
         loading={profilesHook.loading}
@@ -751,32 +897,22 @@ export default function LetterHunter() {
         onFetchProfiles={profilesHook.fetchProfiles}
         user={sync.user}
       />
-    );
+    ));
   }
   if (screen === "home") {
     return <HomeScreen onStart={function() { setScreen("levels"); }} onParent={function() { setScreen("dashboard"); }} onSettings={function() { setScreen("settings"); }} onProfiles={function() { setScreen("profiles"); }} user={sync.user} isAuthenticated={sync.isAuthenticated} activeProfile={activeProfile} />;
   }
   if (screen === "levels") {
-    return (
+    return withTopMenu((
       <LevelSelectionScreen
         levelProgress={levelProgress}
         onSelectLevel={function(level) { startGame(level); }}
-        onSettings={function() { setScreen("settings"); }}
-        onDashboard={function() { setScreen("dashboard"); }}
-        onAdmin={function() { setScreen("dashboard"); }}
-        onProfiles={function() { setScreen("profiles"); }}
-        onSignOut={function() {
-          setActiveProfile(null);
-          signOut({ callbackUrl: "/play" });
-        }}
         isAuthenticated={sync.isAuthenticated}
-        user={sync.user}
-        activeProfile={activeProfile}
       />
-    );
+    ));
   }
   if (screen === "game") {
-    return (
+    return withTopMenu((
       <GameScreen
         letter={sequence[currentIdx] || "א"}
         nikud={settings.nikud ? NIKUD_MAP[settings.nikudType] : null}
@@ -791,11 +927,11 @@ export default function LetterHunter() {
         setHintFlipped={setHintFlipped}
         currentGameLevel={currentGameLevel}
       />
-    );
+    ));
   }
   if (screen === "summary") {
     var lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
-    return (
+    return withTopMenu((
       <SummaryScreen
         session={lastSession} letterResults={letterResults}
         onHome={function() { setScreen("levels"); }}
@@ -812,27 +948,26 @@ export default function LetterHunter() {
           }
         }}
         onLevels={function() { setScreen("levels"); }}
-        onDashboard={function() { setScreen("dashboard"); }}
         currentGameLevel={currentGameLevel}
       />
-    );
+    ));
   }
   if (screen === "dashboard") {
-    return (
+    return withTopMenu((
       <DashboardScreen
         sessions={sessions} letterStats={letterStats}
         onBack={function() { setScreen("levels"); }}
         onClearData={function() { setSessions([]); setLetterStats({}); setLevelProgress({ currentLevel: 1, levels: {} }); }}
       />
-    );
+    ));
   }
   if (screen === "settings") {
-    return (
+    return withTopMenu((
       <SettingsScreen
         settings={settings} setSettings={setSettings}
         onBack={function() { setScreen("levels"); }}
       />
-    );
+    ));
   }
   return null;
 }
@@ -843,252 +978,64 @@ export default function LetterHunter() {
 function LevelSelectionScreen(props) {
   var levelProgress = props.levelProgress;
   var onSelectLevel = props.onSelectLevel;
-  var onSettings = props.onSettings;
-  var onDashboard = props.onDashboard;
-  var onAdmin = props.onAdmin;
-  var onProfiles = props.onProfiles;
-  var onSignOut = props.onSignOut;
   var isAuthenticated = props.isAuthenticated;
-  var user = props.user;
-  var activeProfile = props.activeProfile;
-
-  var LEVELS_PER_PAGE = 20;
-  var TOTAL_LEVELS = 1000;
-  var TOTAL_PAGES = Math.ceil(TOTAL_LEVELS / LEVELS_PER_PAGE);
-
-  var initialPage = Math.floor((levelProgress.currentLevel - 1) / LEVELS_PER_PAGE);
-  var _pg = useState(initialPage);
-  var currentPage = _pg[0]; var setCurrentPage = _pg[1];
-
-  var startLevel = currentPage * LEVELS_PER_PAGE + 1;
-  var endLevel = Math.min(startLevel + LEVELS_PER_PAGE - 1, TOTAL_LEVELS);
-
-  var levelCards = [];
-  for (var i = startLevel; i <= endLevel; i++) {
-    levelCards.push(i);
-  }
-
-  function handleLevelClick(level) {
-    if (level <= levelProgress.currentLevel) {
-      onSelectLevel(level);
-    }
-  }
-
-  function renderStars(stars) {
-    var result = [];
-    for (var s = 0; s < 3; s++) {
-      result.push(
-        <span key={s} style={{
-          fontSize: "clamp(0.8rem, 2.2vw, 1.1rem)",
-          color: s < stars ? "#FFD700" : "rgba(255,255,255,0.35)",
-          textShadow: s < stars ? "0 0 4px rgba(255,215,0,0.5)" : "none"
-        }}>{"\u2605"}</span>
-      );
-    }
-    return result;
-  }
+  var currentLevel = levelProgress && levelProgress.currentLevel ? levelProgress.currentLevel : 1;
+  var completedCount = levelProgress && levelProgress.levels ? Object.keys(levelProgress.levels).length : 0;
 
   return (
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", fontFamily: "'Secular One', 'Rubik', sans-serif", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      {/* Top nav */}
+      {/* Top row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1.2rem", zIndex: 2 }}>
         <a href="/" style={{
           fontFamily: "'Suez One', serif", fontSize: "1.2rem", color: "#111319",
           textDecoration: "none", letterSpacing: "-0.02em",
         }}>ציידת האותיות</a>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-          {isAuthenticated ? (
-            <>
-              {activeProfile ? (
-                <button onClick={onProfiles} style={{
-                  background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
-                  padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
-                  fontFamily: "'Secular One', sans-serif", color: "#111319",
-                  display: "flex", alignItems: "center", gap: "0.35rem",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                }}>{activeProfile.avatar} {activeProfile.name}</button>
-              ) : (
-                <button onClick={onProfiles} style={{
-                  background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
-                  padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
-                  fontFamily: "'Secular One', sans-serif", color: "rgba(17,19,25,0.5)",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                }}>בחרי פרופיל</button>
-              )}
-              <button onClick={onDashboard} style={{
-                background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
-                padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
-                fontFamily: "'Secular One', sans-serif", color: "#111319",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-              }}>דשבורד הורים</button>
-              <button onClick={onAdmin} style={{
-                background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
-                padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
-                fontFamily: "'Secular One', sans-serif", color: "#111319",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-              }} title={user?.email || ""}>אדמין</button>
-              <button onClick={onSettings} style={{
-                background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
-                padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
-                fontFamily: "'Secular One', sans-serif", color: "#111319",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-              }}>הגדרות</button>
-              <button onClick={onSignOut} style={{
-                background: "#111319", border: "none", borderRadius: 999,
-                padding: "0.4rem 1.1rem", cursor: "pointer", fontSize: "0.85rem",
-                fontFamily: "'Secular One', sans-serif", color: "white",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-              }}>התנתקות</button>
-            </>
-          ) : (
+        {!isAuthenticated ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <a href="/auth/register?callbackUrl=%2Fplay" style={{
+              background: "white", color: "#111319", borderRadius: 999,
+              padding: "0.4rem 1.2rem", fontSize: "0.85rem", textDecoration: "none",
+              fontFamily: "'Secular One', sans-serif", border: "1px solid rgba(0,0,0,0.1)",
+            }}>הרשמה</a>
             <a href="/auth/signin?callbackUrl=%2Fplay" style={{
               background: "#111319", color: "white", borderRadius: 999,
               padding: "0.4rem 1.2rem", fontSize: "0.85rem", textDecoration: "none",
               fontFamily: "'Secular One', sans-serif",
             }}>התחברות</a>
-          )}
-        </div>
+          </div>
+        ) : <div />}
       </div>
 
-      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 5vw, 2.6rem)", color: "#111319", margin: "0 0 0.3rem", zIndex: 2 }}>
-        שלבים
-      </h1>
-
-      {/* Page indicator */}
-      <div style={{ fontSize: "1.5rem", color: "#888", marginBottom: "1.2rem", fontFamily: "'Rubik', sans-serif", zIndex: 2 }}>
-        עמוד {currentPage + 1} מתוך {TOTAL_PAGES}
-      </div>
-
-      {/* Level grid: 2 rows of 10 */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(10, 1fr)",
-        gap: "clamp(0.4rem, 1.2vw, 0.8rem)",
-        maxWidth: 1050,
-        width: "100%",
-        marginBottom: "2rem",
-        zIndex: 2,
-      }}>
-        {levelCards.map(function(level) {
-          var levelData = levelProgress.levels[level];
-          var isCompleted = levelData && levelData.completed;
-          var isCurrent = level === levelProgress.currentLevel;
-          var isLocked = level > levelProgress.currentLevel;
-          var stars = levelData ? levelData.stars : 0;
-          var accuracy = levelData ? levelData.accuracy : null;
-
-          var cardBg, cardColor, cardBorder, cardShadow, cardCursor;
-          if (isLocked) {
-            cardBg = "rgba(0,0,0,0.06)";
-            cardColor = "#ccc";
-            cardBorder = "2px solid transparent";
-            cardShadow = "none";
-            cardCursor = "not-allowed";
-          } else if (isCurrent) {
-            cardBg = "linear-gradient(135deg, #E74C3C, #C0392B)";
-            cardColor = "white";
-            cardBorder = "3px solid #E74C3C";
-            cardShadow = "0 4px 16px rgba(231,76,60,0.4)";
-            cardCursor = "pointer";
-          } else if (isCompleted) {
-            cardBg = stars === 3 ? "linear-gradient(135deg, #27AE60, #2ECC71)" :
-                     stars === 2 ? "linear-gradient(135deg, #F39C12, #E67E22)" :
-                     "linear-gradient(135deg, #E67E22, #D35400)";
-            cardColor = "white";
-            cardBorder = "2px solid transparent";
-            cardShadow = "0 2px 10px rgba(0,0,0,0.12)";
-            cardCursor = "pointer";
-          }
-
-          return (
-            <div
-              key={level}
-              onClick={function() { handleLevelClick(level); }}
-              style={{
-                aspectRatio: "1",
-                borderRadius: "clamp(8px, 2vw, 14px)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                background: cardBg,
-                color: cardColor,
-                border: cardBorder,
-                boxShadow: cardShadow,
-                cursor: cardCursor,
-                transition: "all 0.2s ease",
-                position: "relative",
-                animation: isCurrent ? "levelPulse 2s ease-in-out infinite" : "none"
-              }}
-            >
-              {isLocked ? (
-                <span style={{ fontSize: "clamp(1.3rem, 3.5vw, 2rem)", opacity: 0.4 }}>🔒</span>
-              ) : (
-                <>
-                  <span style={{ fontSize: "clamp(1.2rem, 3.3vw, 1.8rem)", fontWeight: "bold", lineHeight: 1.2 }}>{level}</span>
-                  {isCompleted && accuracy !== null ? (
-                    <span style={{ fontSize: "clamp(0.65rem, 1.8vw, 1rem)", opacity: 0.9, lineHeight: 1 }}>{accuracy}%</span>
-                  ) : null}
-                  {isCompleted ? (
-                    <div style={{ display: "flex", gap: 1, marginTop: 2 }}>
-                      {renderStars(stars)}
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Pagination controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", zIndex: 2 }}>
-        <button
-          onClick={function() { if (currentPage > 0) setCurrentPage(currentPage - 1); }}
-          disabled={currentPage === 0}
-          style={{
-            width: 60, height: 60, borderRadius: "50%",
-            border: "1px solid rgba(0,0,0,0.08)", cursor: currentPage === 0 ? "not-allowed" : "pointer",
-            background: currentPage === 0 ? "rgba(0,0,0,0.03)" : "white",
-            fontSize: "1.8rem", color: currentPage === 0 ? "#ccc" : "#111319",
-            boxShadow: currentPage === 0 ? "none" : "0 2px 10px rgba(0,0,0,0.06)",
-            display: "flex", alignItems: "center", justifyContent: "center"
-          }}
-        >→</button>
-
-        <span style={{ fontSize: "1.5rem", color: "#555", fontWeight: "600", fontFamily: "'Rubik', sans-serif" }}>
-          {currentPage + 1} / {TOTAL_PAGES}
-        </span>
-
-        <button
-          onClick={function() { if (currentPage < TOTAL_PAGES - 1) setCurrentPage(currentPage + 1); }}
-          disabled={currentPage >= TOTAL_PAGES - 1}
-          style={{
-            width: 60, height: 60, borderRadius: "50%",
-            border: "1px solid rgba(0,0,0,0.08)", cursor: currentPage >= TOTAL_PAGES - 1 ? "not-allowed" : "pointer",
-            background: currentPage >= TOTAL_PAGES - 1 ? "rgba(0,0,0,0.03)" : "white",
-            fontSize: "1.8rem", color: currentPage >= TOTAL_PAGES - 1 ? "#ccc" : "#111319",
-            boxShadow: currentPage >= TOTAL_PAGES - 1 ? "none" : "0 2px 10px rgba(0,0,0,0.06)",
-            display: "flex", alignItems: "center", justifyContent: "center"
-          }}
-        >←</button>
+      <div style={{ width: "100%", maxWidth: 760, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", marginTop: "4rem" }}>
+        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 5vw, 3rem)", color: "#111319", margin: "0 0 0.6rem", textAlign: "center" }}>
+          שלב {currentLevel}
+        </h1>
+        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "1.05rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.4rem", textAlign: "center" }}>
+          בכל שלב תקבלו {PRACTICE_SESSION_LENGTH} אותיות רנדומליות.
+          <br />
+          ההתקדמות נשמרת לפי הפרופיל המחובר.
+        </p>
+        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.92rem", color: "rgba(17,19,25,0.45)", margin: "0 0 1rem", textAlign: "center" }}>
+          שלבים שהושלמו: {completedCount}
+        </p>
+        {!isAuthenticated ? (
+          <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.92rem", color: "rgba(17,19,25,0.45)", margin: "0 0 1rem", textAlign: "center" }}>
+            רוצים חווית משתמש מלאה? התחברו עם Google למעלה.
+          </p>
+        ) : null}
       </div>
 
       {/* Play now button */}
-      <button onClick={function() { onSelectLevel(levelProgress.currentLevel); }} style={{
+      <button onClick={function() { onSelectLevel(currentLevel); }} style={{
         padding: "0.85rem 3rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
         background: "#111319", color: "white",
         border: "none", borderRadius: "999px", cursor: "pointer",
         boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
         marginTop: "1.5rem", width: "100%", maxWidth: 420, zIndex: 2,
-      }}>שחקי עכשיו!</button>
-
-      <style>{
-        "@keyframes levelPulse { 0%,100%{ box-shadow: 0 4px 16px rgba(231,76,60,0.4) } 50%{ box-shadow: 0 4px 24px rgba(231,76,60,0.7), 0 0 40px rgba(231,76,60,0.2) } }"
-      }</style>
+      }}>התחילו שלב {currentLevel}</button>
     </div>
   );
 }
@@ -1439,11 +1386,7 @@ function GameScreen(props) {
 
       <Confetti active={showSuccess} />
 
-      <button onClick={onBack} style={{
-        position: "absolute", top: "1.5rem", left: "1.5rem",
-        background: "rgba(0,0,0,0.05)", border: "none", borderRadius: "50%",
-        width: 40, height: 40, fontSize: "1.2rem", cursor: "pointer", color: "#999"
-      }}>✕</button>
+      <button onClick={onBack} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
       {currentGameLevel != null ? (
         <div style={{
@@ -1573,7 +1516,6 @@ function SummaryScreen(props) {
   var onHome = props.onHome;
   var onPlayAgain = props.onPlayAgain;
   var onLevels = props.onLevels;
-  var onDashboard = props.onDashboard;
   var currentGameLevel = props.currentGameLevel;
 
   if (!session) return null;
@@ -1673,7 +1615,6 @@ function SummaryScreen(props) {
         {currentGameLevel != null ? (
           <button onClick={onLevels} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
         ) : null}
-        <button onClick={onDashboard} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>דשבורד</button>
         <button onClick={onHome} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
       </div>
 
@@ -1727,10 +1668,10 @@ function DashboardScreen(props) {
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
-        <button onClick={onBack} style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
+      <button onClick={onBack} style={BACK_BUTTON_STYLE}>← חזרה</button>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
         <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>דשבורד הורים</h1>
-        <div style={{ width: 80 }} />
       </div>
 
       <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404", zIndex: 2, width: "100%", maxWidth: 900, boxSizing: "border-box" }}>
@@ -1946,10 +1887,10 @@ function SettingsScreen(props) {
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", width: "100%", maxWidth: 600, zIndex: 2 }}>
-        <button onClick={onBack} style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
+      <button onClick={onBack} style={BACK_BUTTON_STYLE}>← חזרה</button>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "2rem", width: "100%", maxWidth: 600, zIndex: 2 }}>
         <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>הגדרות</h1>
-        <div style={{ width: 80 }} />
       </div>
 
       {/* Session length */}

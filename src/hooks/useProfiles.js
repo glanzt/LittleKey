@@ -10,11 +10,14 @@ export default function useProfiles() {
     setLoading(true);
     try {
       const res = await fetch("/api/profiles");
-      if (!res.ok) return;
+      if (!res.ok) return [];
       const data = await res.json();
-      setProfiles(data.profiles || []);
+      const list = data.profiles || [];
+      setProfiles(list);
+      return list;
     } catch {
       // Silent fail
+      return [];
     } finally {
       setLoading(false);
     }
