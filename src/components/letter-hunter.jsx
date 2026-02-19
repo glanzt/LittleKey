@@ -386,7 +386,7 @@ var DEFAULT_SETTINGS = {
 /*  MAIN APP                                                                */
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LetterHunter() {
-  var _s = useState("home");       var screen = _s[0]; var setScreen = _s[1];
+  var _s = useState("levels");     var screen = _s[0]; var setScreen = _s[1];
 
   // Active profile state (null = guest mode)
   var _ap = useState(function() { return loadData("lh-active-profile", null); });
@@ -425,7 +425,7 @@ export default function LetterHunter() {
     setLetterStats(loadData(sl, {}));
     setLevelProgress(loadData(sp, { currentLevel: 1, levels: {} }));
     hasPulledRef.current = false;
-    setScreen("home");
+    setScreen("levels");
   }, [profileId]);
 
   useEffect(function() { saveData(storageKey("lh-settings", profileId), settings); }, [settings, profileId]);
@@ -744,7 +744,7 @@ export default function LetterHunter() {
       <ProfileSelectionScreen
         profiles={profilesHook.profiles}
         loading={profilesHook.loading}
-        onSelect={function(profile) { setActiveProfile(profile); setScreen("home"); }}
+        onSelect={function(profile) { setActiveProfile(profile); setScreen("levels"); }}
         onCreateProfile={profilesHook.createProfile}
         onDeleteProfile={profilesHook.deleteProfile}
         onFetchProfiles={profilesHook.fetchProfiles}
@@ -760,7 +760,12 @@ export default function LetterHunter() {
       <LevelSelectionScreen
         levelProgress={levelProgress}
         onSelectLevel={function(level) { startGame(level); }}
-        onBack={function() { setScreen("home"); }}
+        onSettings={function() { setScreen("settings"); }}
+        onDashboard={function() { setScreen("dashboard"); }}
+        onProfiles={function() { setScreen("profiles"); }}
+        isAuthenticated={sync.isAuthenticated}
+        user={sync.user}
+        activeProfile={activeProfile}
       />
     );
   }
@@ -787,7 +792,7 @@ export default function LetterHunter() {
     return (
       <SummaryScreen
         session={lastSession} letterResults={letterResults}
-        onHome={function() { setScreen("home"); }}
+        onHome={function() { setScreen("levels"); }}
         onPlayAgain={function() {
           if (currentGameLevel != null) {
             var nextLevel = currentGameLevel + 1;
@@ -810,7 +815,7 @@ export default function LetterHunter() {
     return (
       <DashboardScreen
         sessions={sessions} letterStats={letterStats}
-        onBack={function() { setScreen("home"); }}
+        onBack={function() { setScreen("levels"); }}
         onClearData={function() { setSessions([]); setLetterStats({}); setLevelProgress({ currentLevel: 1, levels: {} }); }}
       />
     );
@@ -819,7 +824,7 @@ export default function LetterHunter() {
     return (
       <SettingsScreen
         settings={settings} setSettings={setSettings}
-        onBack={function() { setScreen("home"); }}
+        onBack={function() { setScreen("levels"); }}
       />
     );
   }
@@ -832,7 +837,12 @@ export default function LetterHunter() {
 function LevelSelectionScreen(props) {
   var levelProgress = props.levelProgress;
   var onSelectLevel = props.onSelectLevel;
-  var onBack = props.onBack;
+  var onSettings = props.onSettings;
+  var onDashboard = props.onDashboard;
+  var onProfiles = props.onProfiles;
+  var isAuthenticated = props.isAuthenticated;
+  var user = props.user;
+  var activeProfile = props.activeProfile;
 
   var LEVELS_PER_PAGE = 20;
   var TOTAL_LEVELS = 1000;
@@ -874,18 +884,58 @@ function LevelSelectionScreen(props) {
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", fontFamily: "'Secular One', 'Rubik', sans-serif", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1rem", zIndex: 2 }}>
-        <button onClick={onBack} style={{
-          background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 18,
-          padding: "0.9rem 1.8rem", cursor: "pointer", fontSize: "1.5rem",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)", fontFamily: "'Secular One', sans-serif"
-        }}>→ חזרה</button>
-        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2.25rem, 6vw, 3.3rem)", color: "#111319", margin: 0 }}>
-          שלבים
-        </h1>
-        <div style={{ width: 80 }} />
+      {/* Top nav */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1.2rem", zIndex: 2 }}>
+        <a href="/" style={{
+          fontFamily: "'Suez One', serif", fontSize: "1.2rem", color: "#111319",
+          textDecoration: "none", letterSpacing: "-0.02em",
+        }}>ציידת האותיות</a>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          {isAuthenticated ? (
+            <>
+              {activeProfile ? (
+                <button onClick={onProfiles} style={{
+                  background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
+                  padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
+                  fontFamily: "'Secular One', sans-serif", color: "#111319",
+                  display: "flex", alignItems: "center", gap: "0.35rem",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                }}>{activeProfile.avatar} {activeProfile.name}</button>
+              ) : (
+                <button onClick={onProfiles} style={{
+                  background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
+                  padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
+                  fontFamily: "'Secular One', sans-serif", color: "rgba(17,19,25,0.5)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                }}>בחרי פרופיל</button>
+              )}
+              <button onClick={onDashboard} style={{
+                background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
+                padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
+                fontFamily: "'Secular One', sans-serif", color: "#111319",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+              }}>הורים</button>
+              <button onClick={onSettings} style={{
+                background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
+                padding: "0.4rem 0.9rem", cursor: "pointer", fontSize: "0.85rem",
+                fontFamily: "'Secular One', sans-serif", color: "#111319",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+              }}>הגדרות</button>
+            </>
+          ) : (
+            <a href="/auth/signin" style={{
+              background: "#111319", color: "white", borderRadius: 999,
+              padding: "0.4rem 1.2rem", fontSize: "0.85rem", textDecoration: "none",
+              fontFamily: "'Secular One', sans-serif",
+            }}>התחברות</a>
+          )}
+        </div>
       </div>
+
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 5vw, 2.6rem)", color: "#111319", margin: "0 0 0.3rem", zIndex: 2 }}>
+        שלבים
+      </h1>
 
       {/* Page indicator */}
       <div style={{ fontSize: "1.5rem", color: "#888", marginBottom: "1.2rem", fontFamily: "'Rubik', sans-serif", zIndex: 2 }}>
@@ -1604,7 +1654,7 @@ function SummaryScreen(props) {
           <button onClick={onLevels} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
         ) : null}
         <button onClick={onDashboard} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>דשבורד</button>
-        <button onClick={onHome} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>דף הבית</button>
+        <button onClick={onHome} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
       </div>
 
       <style>{
