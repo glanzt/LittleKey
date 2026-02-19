@@ -532,9 +532,9 @@ export default function LetterHunter() {
 
   useEffect(function() { saveData(storageKey("lh-settings", profileId), settings); }, [settings, profileId]);
   useEffect(function() { _voiceGender = settings.voiceGender || "male"; }, [settings.voiceGender]);
-  useEffect(function() { saveData(storageKey("lh-sessions", profileId), sessions); }, [sessions, profileId]);
-  useEffect(function() { saveData(storageKey("lh-letter-stats", profileId), letterStats); }, [letterStats, profileId]);
-  useEffect(function() { saveData(storageKey("lh-level-progress", profileId), levelProgress); }, [levelProgress, profileId]);
+  useEffect(function() { if (profileId) saveData(storageKey("lh-sessions", profileId), sessions); }, [sessions, profileId]);
+  useEffect(function() { if (profileId) saveData(storageKey("lh-letter-stats", profileId), letterStats); }, [letterStats, profileId]);
+  useEffect(function() { if (profileId) saveData(storageKey("lh-level-progress", profileId), levelProgress); }, [levelProgress, profileId]);
 
   // Persist active profile selection
   useEffect(function() { saveData("lh-active-profile", activeProfile); }, [activeProfile]);
@@ -556,7 +556,7 @@ export default function LetterHunter() {
       if (!list || list.length === 0) return;
       setActiveProfile(function(prev) {
         if (prev && list.some(function(p) { return p.id === prev.id; })) return prev;
-        return list[0];
+        return null;
       });
     });
   }, [sync.isAuthenticated, sync.user?.id, profilesHook.fetchProfiles]);
@@ -635,28 +635,34 @@ export default function LetterHunter() {
   var _uh = useState(false); var usedHelp = _uh[0]; var setUsedHelp = _uh[1];
   var _hf = useState(false); var hintFlipped = _hf[0]; var setHintFlipped = _hf[1];
 
+  var guestGameRef = useRef(false);
+  var lastGameSessionRef = useRef(null);
+
   // Refs for event handler closure
   var stateRef = useRef({});
   stateRef.current = {
     showSuccess: showSuccess, currentIdx: currentIdx, sequence: sequence,
     currentErrors: currentErrors, letterShownAt: letterShownAt, attempts: attempts,
-    usedHelp: usedHelp, hintFlipped: hintFlipped, currentGameLevel: currentGameLevel
+    usedHelp: usedHelp, hintFlipped: hintFlipped, currentGameLevel: currentGameLevel,
+    isGuestGame: guestGameRef.current
   };
 
-  function generateSequence() {
-    var pool = settings.letterSet.slice();
+  function generateSequence(guest) {
+    var pool = guest ? HEBREW_LETTERS.slice() : settings.letterSet.slice();
     if (pool.length === 0) pool = ["א"];
+    var count = guest ? PRACTICE_SESSION_LENGTH : (settings.sessionLength || PRACTICE_SESSION_LENGTH);
     var seq = [];
-    for (var i = 0; i < PRACTICE_SESSION_LENGTH; i++) {
+    for (var i = 0; i < count; i++) {
       seq.push(pool[Math.floor(Math.random() * pool.length)]);
     }
     return seq;
   }
 
-  function startGame(level) {
+  function startGame(level, guest) {
     var ctx = getAudioCtx();
     if (ctx) ctx.resume();
-    var seq = generateSequence();
+    guestGameRef.current = !!guest;
+    var seq = generateSequence(!!guest);
     setSequence(seq);
     setCurrentIdx(0);
     setAttempts([]);
@@ -675,7 +681,6 @@ export default function LetterHunter() {
 
   function finishSession(fa, seq, startTime, lr, gameLevel) {
     var correct = fa.filter(function(a) { return a.isCorrect; });
-    // Exclude helped-letter attempts from accuracy/avgTtc
     var independentAttempts = fa.filter(function(a) { return !a.helped; });
     var independentCorrect = independentAttempts.filter(function(a) { return a.isCorrect; });
     var accuracy = independentAttempts.length > 0 ? Math.round((independentCorrect.length / independentAttempts.length) * 100) : 0;
@@ -693,9 +698,15 @@ export default function LetterHunter() {
       letterResults: lr.slice(),
       level: gameLevel != null ? gameLevel : null
     };
+    lastGameSessionRef.current = sd;
+
+    if (guestGameRef.current) {
+      setScreen("summary");
+      return;
+    }
+
     setSessions(function(prev) { return prev.concat([sd]); });
 
-    // Update level progress
     var newLevelProgressForSync = null;
     if (gameLevel != null) {
       setLevelProgress(function(prev) {
@@ -716,7 +727,6 @@ export default function LetterHunter() {
       });
     }
 
-    // Sync to server
     sync.pushSession({
       date: sd.date, mode: sd.mode, totalQuestions: sd.totalQuestions,
       completed: sd.completed, accuracy: sd.accuracy, avgTtc: sd.avgTtc,
@@ -890,6 +900,21 @@ export default function LetterHunter() {
   }
 
   /* ── Routing ── */
+
+  // Authenticated without profile → force profile selection (except during game/summary)
+  if (sync.isAuthenticated && !activeProfile && screen !== "game" && screen !== "summary" && screen !== "profiles") {
+    return withTopMenu((
+      <ProfileSelectionScreen
+        profiles={profilesHook.profiles}
+        loading={profilesHook.loading}
+        onSelect={function(profile) { setActiveProfile(profile); setScreen("levels"); }}
+        onCreateProfile={profilesHook.createProfile}
+        onDeleteProfile={profilesHook.deleteProfile}
+        onFetchProfiles={profilesHook.fetchProfiles}
+        user={sync.user}
+      />
+    ));
+  }
   if (screen === "profiles") {
     return withTopMenu((
       <ProfileSelectionScreen
@@ -903,20 +928,25 @@ export default function LetterHunter() {
       />
     ));
   }
-  if (screen === "home") {
-    return <HomeScreen onStart={function() { setScreen("levels"); }} onParent={function() { setScreen("dashboard"); }} onSettings={function() { setScreen("settings"); }} onProfiles={function() { setScreen("profiles"); }} user={sync.user} isAuthenticated={sync.isAuthenticated} activeProfile={activeProfile} />;
+
+  // Guest → show home landing (not levels)
+  if (!sync.isAuthenticated && (screen === "levels" || screen === "home")) {
+    return <HomeScreen onPlay={function() { startGame(null, true); }} onSettings={function() { setScreen("settings"); }} />;
   }
+
   if (screen === "levels") {
     return withTopMenu((
       <LevelSelectionScreen
         levelProgress={levelProgress}
         onSelectLevel={function(level) { startGame(level); }}
-        isAuthenticated={sync.isAuthenticated}
+        sessionLength={settings.sessionLength || PRACTICE_SESSION_LENGTH}
       />
     ));
   }
   if (screen === "game") {
-    return withTopMenu((
+    var gameBackScreen = guestGameRef.current ? "home" : "levels";
+    var gameWrapper = guestGameRef.current ? function(c) { return c; } : withTopMenu;
+    return gameWrapper((
       <GameScreen
         letter={sequence[currentIdx] || "א"}
         nikud={settings.nikud ? NIKUD_MAP[settings.nikudType] : null}
@@ -924,7 +954,7 @@ export default function LetterHunter() {
         errorMsg={errorMsg} helpLevel={settings.helpLevel}
         currentErrors={currentErrors} letterResults={letterResults}
         lastPressedKey={lastPressedKey}
-        onBack={function() { setScreen("levels"); }}
+        onBack={function() { setScreen(gameBackScreen); }}
         onSpeakLetter={function() { setUsedHelp(true); speakLetter(sequence[currentIdx] || "א"); }}
         onUseHelp={function() { setUsedHelp(true); }}
         hintFlipped={hintFlipped}
@@ -934,7 +964,18 @@ export default function LetterHunter() {
     ));
   }
   if (screen === "summary") {
-    var lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+    var isGuest = guestGameRef.current;
+    var lastSession = isGuest ? lastGameSessionRef.current : (sessions.length > 0 ? sessions[sessions.length - 1] : null);
+    if (isGuest) {
+      return (
+        <SummaryScreen
+          session={lastSession} letterResults={letterResults}
+          onHome={function() { setScreen("home"); }}
+          onPlayAgain={function() { startGame(null, true); }}
+          isGuestGame={true}
+        />
+      );
+    }
     return withTopMenu((
       <SummaryScreen
         session={lastSession} letterResults={letterResults}
@@ -982,7 +1023,7 @@ export default function LetterHunter() {
 function LevelSelectionScreen(props) {
   var levelProgress = props.levelProgress;
   var onSelectLevel = props.onSelectLevel;
-  var isAuthenticated = props.isAuthenticated;
+  var sessionLength = props.sessionLength;
   var currentLevel = levelProgress && levelProgress.currentLevel ? levelProgress.currentLevel : 1;
   var completedCount = levelProgress && levelProgress.levels ? Object.keys(levelProgress.levels).length : 0;
 
@@ -990,27 +1031,12 @@ function LevelSelectionScreen(props) {
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", fontFamily: "'Secular One', 'Rubik', sans-serif", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      {/* Top row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1.2rem", zIndex: 2 }}>
         <a href="/" style={{
           fontFamily: "'Suez One', serif", fontSize: "1.2rem", color: "#111319",
           textDecoration: "none", letterSpacing: "-0.02em",
         }}>ציידת האותיות</a>
-
-        {!isAuthenticated ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <a href="/auth/register?callbackUrl=%2Fplay" style={{
-              background: "white", color: "#111319", borderRadius: 999,
-              padding: "0.4rem 1.2rem", fontSize: "0.85rem", textDecoration: "none",
-              fontFamily: "'Secular One', sans-serif", border: "1px solid rgba(0,0,0,0.1)",
-            }}>הרשמה</a>
-            <a href="/auth/signin?callbackUrl=%2Fplay" style={{
-              background: "#111319", color: "white", borderRadius: 999,
-              padding: "0.4rem 1.2rem", fontSize: "0.85rem", textDecoration: "none",
-              fontFamily: "'Secular One', sans-serif",
-            }}>התחברות</a>
-          </div>
-        ) : <div />}
+        <div />
       </div>
 
       <div style={{ width: "100%", maxWidth: 760, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", marginTop: "4rem" }}>
@@ -1018,21 +1044,15 @@ function LevelSelectionScreen(props) {
           שלב {currentLevel}
         </h1>
         <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "1.05rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.4rem", textAlign: "center" }}>
-          בכל שלב תקבלו {PRACTICE_SESSION_LENGTH} אותיות רנדומליות.
+          בכל שלב תקבלו {sessionLength} אותיות רנדומליות.
           <br />
           ההתקדמות נשמרת לפי הפרופיל המחובר.
         </p>
         <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.92rem", color: "rgba(17,19,25,0.45)", margin: "0 0 1rem", textAlign: "center" }}>
           שלבים שהושלמו: {completedCount}
         </p>
-        {!isAuthenticated ? (
-          <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.92rem", color: "rgba(17,19,25,0.45)", margin: "0 0 1rem", textAlign: "center" }}>
-            רוצים חווית משתמש מלאה? התחברו עם Google למעלה.
-          </p>
-        ) : null}
       </div>
 
-      {/* Play now button */}
       <button onClick={function() { onSelectLevel(currentLevel); }} style={{
         padding: "0.85rem 3rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
         background: "#111319", color: "white",
@@ -1251,87 +1271,37 @@ function ProfileSelectionScreen(props) {
 /*  HOME SCREEN                                                             */
 /* ══════════════════════════════════════════════════════════════════════════ */
 function HomeScreen(props) {
-  var onStart = props.onStart;
-  var onParent = props.onParent;
+  var onPlay = props.onPlay;
   var onSettings = props.onSettings;
-  var onProfiles = props.onProfiles;
-  var user = props.user;
-  var isAuthenticated = props.isAuthenticated;
-  var activeProfile = props.activeProfile;
-  var _hp = useState(0); var holdProgress = _hp[0]; var setHoldProgress = _hp[1];
-  var holdRef = useRef(null);
-
-  function startHold() {
-    var start = Date.now();
-    holdRef.current = setInterval(function() {
-      var elapsed = Date.now() - start;
-      setHoldProgress(Math.min(elapsed / 2000, 1));
-      if (elapsed >= 2000) {
-        clearInterval(holdRef.current);
-        setHoldProgress(0);
-        onParent();
-      }
-    }, 50);
-  }
-  function endHold() { clearInterval(holdRef.current); setHoldProgress(0); }
 
   return (
     <div style={{ ...PAGE_BG, fontFamily: "'Secular One', 'Rubik', sans-serif" }}>
       <FloatingLettersBackground />
 
-      {/* Auth & Profile indicator */}
-      <div style={{ position: "absolute", top: "1.2rem", left: "1.2rem", zIndex: 10, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {isAuthenticated ? (
-          <>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.85)", borderRadius: 20, padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #27AE60, #2ECC71)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "0.75rem", fontWeight: "bold" }}>
-                {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
-              </div>
-              <span style={{ fontSize: "0.8rem", color: "#555", fontFamily: "'Rubik', sans-serif", maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name || user?.email}</span>
-            </div>
-            <button onClick={onProfiles} style={{
-              display: "flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,255,255,0.85)", borderRadius: 20,
-              padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "none", cursor: "pointer",
-              fontSize: "0.85rem", color: "#7C5CFC", fontFamily: "'Secular One', sans-serif", fontWeight: 600,
-            }}>
-              {activeProfile ? activeProfile.avatar + " " + activeProfile.name : "👶 בחרי פרופיל"}
-            </button>
-          </>
-        ) : (
-          <a href="/auth/signin" style={{
-            display: "flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,255,255,0.85)", borderRadius: 20,
-            padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", textDecoration: "none",
-            fontSize: "0.85rem", color: "#7C5CFC", fontFamily: "'Secular One', sans-serif", fontWeight: 600,
-          }}>
-            🔑 התחברי
-          </a>
-        )}
-      </div>
-
       <h1 style={{ fontSize: "clamp(2.6rem, 5.8vw, 4.5rem)", fontFamily: "'Suez One', serif", color: "#111319", margin: "0 0 0.5rem", textAlign: "center", zIndex: 2, letterSpacing: "-0.04em" }}>ציידת האותיות</h1>
-      <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.3rem)", color: "rgba(20,23,32,0.45)", fontFamily: "'Rubik', sans-serif", marginBottom: "2.5rem", zIndex: 2 }}>ללמוד את המקלדת דרך משחק קולי</p>
+      <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.3rem)", color: "rgba(20,23,32,0.45)", fontFamily: "'Rubik', sans-serif", marginBottom: "2.5rem", zIndex: 2, textAlign: "center" }}>ללמוד את המקלדת דרך משחק קולי</p>
 
-      <button onClick={onStart} style={{
-        padding: "0.85rem 2.8rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
-        background: "#111319", color: "white",
-        border: "none", borderRadius: "999px", cursor: "pointer",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
-        zIndex: 2, transition: "transform 0.2s, box-shadow 0.2s",
-      }}>בואי נשחק!</button>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "center", zIndex: 2, width: "100%", maxWidth: 380 }}>
+        <button onClick={onPlay} style={{
+          padding: "0.85rem 2.8rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
+          background: "#111319", color: "white",
+          border: "none", borderRadius: "999px", cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+          width: "100%", transition: "transform 0.2s, box-shadow 0.2s",
+        }}>שחקי עכשיו!</button>
 
-      <div style={{ position: "absolute", bottom: "2rem", left: "2rem", zIndex: 2 }}>
-        <button
-          onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold}
-          onTouchStart={startHold} onTouchEnd={endHold}
-          style={{
-            width: 48, height: 48, borderRadius: "50%", border: "1px solid rgba(0,0,0,0.08)",
-            background: "conic-gradient(#111319 " + (holdProgress * 360) + "deg, white 0deg)",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-          }}
-          title="לחיצה ארוכה 2 שניות למסך הורים"
-        >👤</button>
-        <div style={{ fontSize: "0.6rem", color: "rgba(20,23,32,0.35)", textAlign: "center", marginTop: 4 }}>הורים</div>
+        <a href="/auth/signin?callbackUrl=%2Fplay" style={{
+          padding: "0.75rem 2.8rem", fontSize: "clamp(0.95rem, 3vw, 1.15rem)", fontFamily: "'Secular One', sans-serif",
+          background: "white", color: "#111319",
+          border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer",
+          textDecoration: "none", textAlign: "center",
+          width: "100%", boxSizing: "border-box",
+        }}>התחברות</a>
+
+        <a href="/auth/register?callbackUrl=%2Fplay" style={{
+          fontSize: "0.9rem", color: "rgba(17,19,25,0.5)", fontFamily: "'Rubik', sans-serif",
+          textDecoration: "underline", cursor: "pointer",
+        }}>אין לך חשבון? הרשמה</a>
       </div>
 
       <button onClick={onSettings} style={{
@@ -1521,6 +1491,7 @@ function SummaryScreen(props) {
   var onPlayAgain = props.onPlayAgain;
   var onLevels = props.onLevels;
   var currentGameLevel = props.currentGameLevel;
+  var isGuestGame = props.isGuestGame;
 
   if (!session) return null;
 
@@ -1614,12 +1585,14 @@ function SummaryScreen(props) {
 
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", marginTop: "1rem", zIndex: 2 }}>
         <button onClick={onPlayAgain} style={{ padding: "0.85rem 2.5rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "#111319", color: "white", border: "none", borderRadius: "999px", cursor: "pointer", boxShadow: "0 4px 20px rgba(0,0,0,0.18)" }}>
-          {currentGameLevel != null ? "שלב " + (currentGameLevel + 1) + " ▶" : "שחקי שוב!"}
+          {isGuestGame ? "שחקי שוב!" : currentGameLevel != null ? "שלב " + (currentGameLevel + 1) + " ▶" : "שחקי שוב!"}
         </button>
-        {currentGameLevel != null ? (
+        {!isGuestGame && currentGameLevel != null ? (
           <button onClick={onLevels} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
         ) : null}
-        <button onClick={onHome} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
+        <button onClick={onHome} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>
+          {isGuestGame ? "מסך ראשי" : "שלבים"}
+        </button>
       </div>
 
       <style>{
