@@ -232,13 +232,15 @@ const S = {
   },
 };
 
-export default function Home() {
+export default function LandingMockupPage() {
   return (
     <main style={S.page}>
       <div style={S.bgGrid} aria-hidden="true" />
 
       <nav style={S.nav}>
-        <span style={S.navLogo}>ציידת האותיות</span>
+        <Link href="/" style={S.navLogo}>
+          ציידת האותיות
+        </Link>
         <Link href="/auth/register" style={S.navCta}>הרשמה</Link>
       </nav>
 
@@ -256,7 +258,7 @@ export default function Home() {
         </p>
 
         <div style={S.actions}>
-          <Link href="/play" style={{ ...S.btnBase, ...S.btnPrimary }}>
+          <Link href="/" style={{ ...S.btnBase, ...S.btnPrimary }}>
             בואו נשחק
           </Link>
           <Link href="/auth/signin" style={{ ...S.btnBase, ...S.btnSecondary }}>
@@ -271,6 +273,7 @@ export default function Home() {
           <div style={S.centerPanel} />
           <div style={S.lettersMark}>אבג</div>
         </div>
+
       </div>
 
       {FLOATING_LETTERS.map((fl, i) => (

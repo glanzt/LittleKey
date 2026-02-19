@@ -8,12 +8,20 @@ export async function POST(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = authSession.user.id;
   const body = await request.json();
+  const profileId = body.profileId;
+  if (!profileId) {
+    return NextResponse.json({ error: "profileId required" }, { status: 400 });
+  }
+
+  const profile = await prisma.childProfile.findUnique({ where: { id: profileId } });
+  if (!profile || profile.userId !== authSession.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const gameSession = await prisma.userGameSession.create({
     data: {
-      userId,
+      profileId,
       date: body.date ? new Date(body.date) : new Date(),
       mode: body.mode ?? null,
       total: body.totalQuestions ?? 0,
@@ -33,9 +41,9 @@ export async function POST(request) {
   if (body.letterStats) {
     const letterOps = Object.entries(body.letterStats).map(([letter, data]) =>
       prisma.userLetterStats.upsert({
-        where: { userId_letter: { userId, letter } },
+        where: { profileId_letter: { profileId, letter } },
         create: {
-          userId, letter,
+          profileId, letter,
           attempts: data.attempts ?? 0,
           correct: data.correct ?? 0,
           totalTtc: data.totalTtc ?? 0,
@@ -58,8 +66,8 @@ export async function POST(request) {
     const levelOps = Object.entries(body.levelProgress.levels).map(([levelStr, data]) => {
       const level = parseInt(levelStr, 10);
       return prisma.userLevelProgress.upsert({
-        where: { userId_level: { userId, level } },
-        create: { userId, level, completed: data.completed ?? false, accuracy: data.accuracy ?? null, stars: data.stars ?? 0 },
+        where: { profileId_level: { profileId, level } },
+        create: { profileId, level, completed: data.completed ?? false, accuracy: data.accuracy ?? null, stars: data.stars ?? 0 },
         update: { completed: data.completed ?? false, accuracy: data.accuracy ?? null, stars: data.stars ?? 0 },
       });
     });

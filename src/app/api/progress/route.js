@@ -2,19 +2,32 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+async function verifyProfileOwnership(userId, profileId) {
+  const profile = await prisma.childProfile.findUnique({ where: { id: profileId } });
+  return profile && profile.userId === userId;
+}
+
+export async function GET(request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const { searchParams } = new URL(request.url);
+  const profileId = searchParams.get("profileId");
+  if (!profileId) {
+    return NextResponse.json({ error: "profileId required" }, { status: 400 });
+  }
+
+  if (!(await verifyProfileOwnership(session.user.id, profileId))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const [settings, levelProgress, letterStats, gameSessions] = await Promise.all([
-    prisma.userSettings.findUnique({ where: { userId } }),
-    prisma.userLevelProgress.findMany({ where: { userId }, orderBy: { level: "asc" } }),
-    prisma.userLetterStats.findMany({ where: { userId } }),
-    prisma.userGameSession.findMany({ where: { userId }, orderBy: { date: "desc" }, take: 100 }),
+    prisma.userSettings.findUnique({ where: { profileId } }),
+    prisma.userLevelProgress.findMany({ where: { profileId }, orderBy: { level: "asc" } }),
+    prisma.userLetterStats.findMany({ where: { profileId } }),
+    prisma.userGameSession.findMany({ where: { profileId }, orderBy: { date: "desc" }, take: 100 }),
   ]);
 
   const levels = {};
@@ -63,16 +76,23 @@ export async function POST(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = session.user.id;
   const body = await request.json();
+  const profileId = body.profileId;
+  if (!profileId) {
+    return NextResponse.json({ error: "profileId required" }, { status: 400 });
+  }
+
+  if (!(await verifyProfileOwnership(session.user.id, profileId))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const ops = [];
 
   if (body.settings) {
     ops.push(
       prisma.userSettings.upsert({
-        where: { userId },
-        create: { userId, data: body.settings },
+        where: { profileId },
+        create: { profileId, data: body.settings },
         update: { data: body.settings },
       })
     );
@@ -84,8 +104,8 @@ export async function POST(request) {
       if (isNaN(level)) continue;
       ops.push(
         prisma.userLevelProgress.upsert({
-          where: { userId_level: { userId, level } },
-          create: { userId, level, completed: data.completed ?? false, accuracy: data.accuracy ?? null, stars: data.stars ?? 0 },
+          where: { profileId_level: { profileId, level } },
+          create: { profileId, level, completed: data.completed ?? false, accuracy: data.accuracy ?? null, stars: data.stars ?? 0 },
           update: { completed: data.completed ?? false, accuracy: data.accuracy ?? null, stars: data.stars ?? 0 },
         })
       );
@@ -96,9 +116,9 @@ export async function POST(request) {
     for (const [letter, data] of Object.entries(body.letterStats)) {
       ops.push(
         prisma.userLetterStats.upsert({
-          where: { userId_letter: { userId, letter } },
+          where: { profileId_letter: { profileId, letter } },
           create: {
-            userId, letter,
+            profileId, letter,
             attempts: data.attempts ?? 0,
             correct: data.correct ?? 0,
             totalTtc: data.totalTtc ?? 0,

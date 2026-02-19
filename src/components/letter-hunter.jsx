@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import useProgressSync from "@/hooks/useProgressSync";
+import useProfiles from "@/hooks/useProfiles";
 
 const HEBREW_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
 
@@ -168,6 +169,9 @@ function speakLetter(letter) {
 }
 
 /* ── Persistence ── */
+function storageKey(base, profileId) {
+  return profileId ? base + "-" + profileId : base;
+}
 function loadData(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -367,38 +371,69 @@ var DEFAULT_SETTINGS = {
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LetterHunter() {
   var _s = useState("home");       var screen = _s[0]; var setScreen = _s[1];
-  var _se = useState(function() { return loadData("lh-settings", DEFAULT_SETTINGS); });
+
+  // Active profile state (null = guest mode)
+  var _ap = useState(function() { return loadData("lh-active-profile", null); });
+  var activeProfile = _ap[0]; var setActiveProfile = _ap[1];
+  var profileId = activeProfile ? activeProfile.id : null;
+
+  var profilesHook = useProfiles();
+
+  // Profile-scoped storage keys
+  var skSettings = storageKey("lh-settings", profileId);
+  var skSessions = storageKey("lh-sessions", profileId);
+  var skLetterStats = storageKey("lh-letter-stats", profileId);
+  var skLevelProgress = storageKey("lh-level-progress", profileId);
+
+  var _se = useState(function() { return loadData(skSettings, DEFAULT_SETTINGS); });
   var settings = _se[0]; var setSettings = _se[1];
-  var _ss = useState(function() { return loadData("lh-sessions", []); });
+  var _ss = useState(function() { return loadData(skSessions, []); });
   var sessions = _ss[0]; var setSessions = _ss[1];
-  var _ls = useState(function() { return loadData("lh-letter-stats", {}); });
+  var _ls = useState(function() { return loadData(skLetterStats, {}); });
   var letterStats = _ls[0]; var setLetterStats = _ls[1];
-  var _lp = useState(function() { return loadData("lh-level-progress", { currentLevel: 1, levels: {} }); });
+  var _lp = useState(function() { return loadData(skLevelProgress, { currentLevel: 1, levels: {} }); });
   var levelProgress = _lp[0]; var setLevelProgress = _lp[1];
   var _cgl = useState(null); var currentGameLevel = _cgl[0]; var setCurrentGameLevel = _cgl[1];
 
-  var sync = useProgressSync();
+  var sync = useProgressSync(profileId);
   var hasPulledRef = useRef(false);
 
-  useEffect(function() { saveData("lh-settings", settings); }, [settings]);
-  useEffect(function() { saveData("lh-sessions", sessions); }, [sessions]);
-  useEffect(function() { saveData("lh-letter-stats", letterStats); }, [letterStats]);
-  useEffect(function() { saveData("lh-level-progress", levelProgress); }, [levelProgress]);
+  // Reload data when profile changes
+  useEffect(function() {
+    var sk = storageKey("lh-settings", profileId);
+    var ss = storageKey("lh-sessions", profileId);
+    var sl = storageKey("lh-letter-stats", profileId);
+    var sp = storageKey("lh-level-progress", profileId);
+    setSettings(loadData(sk, DEFAULT_SETTINGS));
+    setSessions(loadData(ss, []));
+    setLetterStats(loadData(sl, {}));
+    setLevelProgress(loadData(sp, { currentLevel: 1, levels: {} }));
+    hasPulledRef.current = false;
+    setScreen("home");
+  }, [profileId]);
+
+  useEffect(function() { saveData(storageKey("lh-settings", profileId), settings); }, [settings, profileId]);
+  useEffect(function() { saveData(storageKey("lh-sessions", profileId), sessions); }, [sessions, profileId]);
+  useEffect(function() { saveData(storageKey("lh-letter-stats", profileId), letterStats); }, [letterStats, profileId]);
+  useEffect(function() { saveData(storageKey("lh-level-progress", profileId), levelProgress); }, [levelProgress, profileId]);
+
+  // Persist active profile selection
+  useEffect(function() { saveData("lh-active-profile", activeProfile); }, [activeProfile]);
 
   // Sync settings to server when they change (debounced, skip initial load)
   var settingsInitRef = useRef(true);
   useEffect(function() {
     if (settingsInitRef.current) { settingsInitRef.current = false; return; }
-    if (!sync.isAuthenticated) return;
+    if (!sync.canSync) return;
     var timer = setTimeout(function() {
       sync.pushToServer({ settings: settings });
     }, 1000);
     return function() { clearTimeout(timer); };
-  }, [settings, sync.isAuthenticated]);
+  }, [settings, sync.canSync]);
 
-  // Pull progress from server on first authenticated load
+  // Pull progress from server on first authenticated load with a profile
   useEffect(function() {
-    if (!sync.isAuthenticated || hasPulledRef.current) return;
+    if (!sync.canSync || hasPulledRef.current) return;
     hasPulledRef.current = true;
     sync.pullFromServer().then(function(serverData) {
       if (!serverData) return;
@@ -443,7 +478,7 @@ export default function LetterHunter() {
         });
       }
     });
-  }, [sync.isAuthenticated]);
+  }, [sync.canSync]);
 
   var _seq = useState([]); var sequence = _seq[0]; var setSequence = _seq[1];
   var _ci = useState(0); var currentIdx = _ci[0]; var setCurrentIdx = _ci[1];
@@ -688,8 +723,21 @@ export default function LetterHunter() {
   }, [screen, sessionStartTime]);
 
   /* ── Routing ── */
+  if (screen === "profiles") {
+    return (
+      <ProfileSelectionScreen
+        profiles={profilesHook.profiles}
+        loading={profilesHook.loading}
+        onSelect={function(profile) { setActiveProfile(profile); setScreen("home"); }}
+        onCreateProfile={profilesHook.createProfile}
+        onDeleteProfile={profilesHook.deleteProfile}
+        onFetchProfiles={profilesHook.fetchProfiles}
+        user={sync.user}
+      />
+    );
+  }
   if (screen === "home") {
-    return <HomeScreen onStart={function() { setScreen("levels"); }} onParent={function() { setScreen("dashboard"); }} onSettings={function() { setScreen("settings"); }} user={sync.user} isAuthenticated={sync.isAuthenticated} />;
+    return <HomeScreen onStart={function() { setScreen("levels"); }} onParent={function() { setScreen("dashboard"); }} onSettings={function() { setScreen("settings"); }} onProfiles={function() { setScreen("profiles"); }} user={sync.user} isAuthenticated={sync.isAuthenticated} activeProfile={activeProfile} />;
   }
   if (screen === "levels") {
     return (
@@ -965,14 +1013,226 @@ function LevelSelectionScreen(props) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
+/*  PROFILE SELECTION SCREEN                                                */
+/* ══════════════════════════════════════════════════════════════════════════ */
+var AVATAR_OPTIONS = ["🧒","👧","👦","🧒🏻","👧🏻","👦🏻","🧒🏽","👧🏽","👦🏽","🐱","🦊","🐶","🐰","🦁","🐻","🦄","🐸","🐼"];
+
+function ProfileSelectionScreen(props) {
+  var profiles = props.profiles;
+  var loading = props.loading;
+  var onSelect = props.onSelect;
+  var onCreateProfile = props.onCreateProfile;
+  var onDeleteProfile = props.onDeleteProfile;
+  var onFetchProfiles = props.onFetchProfiles;
+  var user = props.user;
+
+  var _sf = useState(false); var showForm = _sf[0]; var setShowForm = _sf[1];
+  var _nm = useState(""); var newName = _nm[0]; var setNewName = _nm[1];
+  var _av = useState("🧒"); var newAvatar = _av[0]; var setNewAvatar = _av[1];
+  var _cr = useState(false); var creating = _cr[0]; var setCreating = _cr[1];
+  var _cd = useState(null); var confirmDeleteId = _cd[0]; var setConfirmDeleteId = _cd[1];
+  var hasFetched = useRef(false);
+
+  useEffect(function() {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      onFetchProfiles();
+    }
+  }, []);
+
+  function handleCreate() {
+    if (!newName.trim() || creating) return;
+    setCreating(true);
+    onCreateProfile(newName.trim(), newAvatar).then(function(profile) {
+      setCreating(false);
+      if (profile) {
+        setShowForm(false);
+        setNewName("");
+        setNewAvatar("🧒");
+        onSelect(profile);
+      }
+    });
+  }
+
+  function handleDelete(id) {
+    onDeleteProfile(id).then(function() {
+      setConfirmDeleteId(null);
+    });
+  }
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(170deg, #FFF8E7 0%, #FFECD2 30%, #FCB69F 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Secular One', 'Rubik', sans-serif", direction: "rtl",
+      padding: "2rem", position: "relative"
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+
+      <div style={{ fontSize: "3.5rem", marginBottom: "0.5rem" }}>👶</div>
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 7vw, 3rem)", color: "#2C3E50", margin: "0 0 0.3rem", textAlign: "center" }}>
+        מי משחק?
+      </h1>
+      <p style={{ fontSize: "1rem", color: "#888", marginBottom: "2rem", fontFamily: "'Rubik', sans-serif" }}>
+        {user?.name || user?.email}
+      </p>
+
+      {loading ? (
+        <div style={{ fontSize: "1.2rem", color: "#aaa", padding: "2rem" }}>טוען...</div>
+      ) : (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1.2rem", justifyContent: "center", maxWidth: 600, marginBottom: "2rem" }}>
+          {profiles.map(function(profile) {
+            return (
+              <div key={profile.id} style={{ position: "relative" }}>
+                <button
+                  onClick={function() { onSelect(profile); }}
+                  style={{
+                    width: 130, minHeight: 140, borderRadius: 24,
+                    border: "3px solid transparent", background: "white",
+                    cursor: "pointer", display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    transition: "all 0.2s ease", padding: "1rem 0.5rem",
+                  }}
+                  onMouseEnter={function(e) { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.borderColor = "#7C5CFC"; }}
+                  onMouseLeave={function(e) { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.borderColor = "transparent"; }}
+                >
+                  <span style={{ fontSize: "3rem" }}>{profile.avatar}</span>
+                  <span style={{ fontSize: "1.1rem", color: "#2C3E50", fontFamily: "'Secular One', sans-serif", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {profile.name}
+                  </span>
+                </button>
+                {/* Delete button */}
+                {confirmDeleteId === profile.id ? (
+                  <div style={{ position: "absolute", top: -8, right: -8, display: "flex", gap: 4 }}>
+                    <button onClick={function() { handleDelete(profile.id); }} style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#E74C3C", color: "white", fontSize: "0.7rem", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>✓</button>
+                    <button onClick={function() { setConfirmDeleteId(null); }} style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#ccc", color: "white", fontSize: "0.7rem", cursor: "pointer" }}>✕</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={function(e) { e.stopPropagation(); setConfirmDeleteId(profile.id); }}
+                    style={{
+                      position: "absolute", top: -6, right: -6, width: 24, height: 24,
+                      borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.1)",
+                      color: "#999", fontSize: "0.65rem", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      opacity: 0.5, transition: "opacity 0.2s"
+                    }}
+                    onMouseEnter={function(e) { e.currentTarget.style.opacity = "1"; }}
+                    onMouseLeave={function(e) { e.currentTarget.style.opacity = "0.5"; }}
+                  >✕</button>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Add profile button */}
+          <button
+            onClick={function() { setShowForm(true); }}
+            style={{
+              width: 130, minHeight: 140, borderRadius: 24,
+              border: "3px dashed rgba(124,92,252,0.3)", background: "rgba(255,255,255,0.5)",
+              cursor: "pointer", display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: "0.5rem",
+              transition: "all 0.2s ease", padding: "1rem 0.5rem",
+            }}
+            onMouseEnter={function(e) { e.currentTarget.style.background = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "#7C5CFC"; }}
+            onMouseLeave={function(e) { e.currentTarget.style.background = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "rgba(124,92,252,0.3)"; }}
+          >
+            <span style={{ fontSize: "2.5rem", color: "#7C5CFC" }}>+</span>
+            <span style={{ fontSize: "0.95rem", color: "#7C5CFC", fontFamily: "'Secular One', sans-serif" }}>פרופיל חדש</span>
+          </button>
+        </div>
+      )}
+
+      {/* Create profile form */}
+      {showForm ? (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 200, padding: "1rem"
+        }} onClick={function(e) { if (e.target === e.currentTarget) setShowForm(false); }}>
+          <div style={{
+            background: "white", borderRadius: 28, padding: "2rem",
+            maxWidth: 420, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            animation: "popIn 0.3s ease both"
+          }}>
+            <h2 style={{ fontFamily: "'Suez One', serif", fontSize: "1.6rem", color: "#2C3E50", margin: "0 0 1.5rem", textAlign: "center" }}>
+              פרופיל חדש
+            </h2>
+
+            <div style={{ marginBottom: "1.2rem" }}>
+              <label style={{ fontSize: "0.9rem", color: "#666", marginBottom: "0.4rem", display: "block", fontFamily: "'Secular One'" }}>שם</label>
+              <input
+                value={newName}
+                onChange={function(e) { setNewName(e.target.value); }}
+                onKeyDown={function(e) { if (e.key === "Enter") handleCreate(); }}
+                placeholder="הכניסו שם..."
+                maxLength={30}
+                autoFocus
+                style={{
+                  width: "100%", padding: "0.9rem 1rem", fontSize: "1.1rem",
+                  border: "2px solid #e0e0e0", borderRadius: 14, outline: "none",
+                  fontFamily: "'Rubik', sans-serif", direction: "rtl",
+                  boxSizing: "border-box",
+                  transition: "border-color 0.2s"
+                }}
+                onFocus={function(e) { e.target.style.borderColor = "#7C5CFC"; }}
+                onBlur={function(e) { e.target.style.borderColor = "#e0e0e0"; }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "1.5rem" }}>
+              <label style={{ fontSize: "0.9rem", color: "#666", marginBottom: "0.4rem", display: "block", fontFamily: "'Secular One'" }}>אוואטר</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {AVATAR_OPTIONS.map(function(av) {
+                  return (
+                    <button key={av} onClick={function() { setNewAvatar(av); }} style={{
+                      width: 46, height: 46, borderRadius: 12, border: "none",
+                      background: newAvatar === av ? "linear-gradient(135deg, #7C5CFC, #9B7DFF)" : "#f5f5f5",
+                      fontSize: "1.5rem", cursor: "pointer", transition: "all 0.2s",
+                      transform: newAvatar === av ? "scale(1.15)" : "scale(1)",
+                      boxShadow: newAvatar === av ? "0 4px 12px rgba(124,92,252,0.3)" : "none"
+                    }}>{av}</button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "0.8rem" }}>
+              <button onClick={handleCreate} disabled={!newName.trim() || creating} style={{
+                flex: 1, padding: "0.9rem", fontSize: "1.1rem",
+                fontFamily: "'Secular One'", border: "none", borderRadius: 16,
+                cursor: newName.trim() && !creating ? "pointer" : "not-allowed",
+                background: newName.trim() && !creating ? "linear-gradient(135deg, #7C5CFC, #5B3FD4)" : "#e0e0e0",
+                color: "white", boxShadow: newName.trim() ? "0 4px 16px rgba(124,92,252,0.3)" : "none"
+              }}>{creating ? "יוצר..." : "צרי פרופיל"}</button>
+              <button onClick={function() { setShowForm(false); }} style={{
+                padding: "0.9rem 1.5rem", fontSize: "1.1rem",
+                fontFamily: "'Secular One'", border: "2px solid #e0e0e0",
+                borderRadius: 16, cursor: "pointer", background: "white", color: "#999"
+              }}>ביטול</button>
+            </div>
+          </div>
+          <style>{"@keyframes popIn { 0%{ transform: scale(0.8); opacity: 0 } 100%{ transform: scale(1); opacity: 1 } }"}</style>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
 /*  HOME SCREEN                                                             */
 /* ══════════════════════════════════════════════════════════════════════════ */
 function HomeScreen(props) {
   var onStart = props.onStart;
   var onParent = props.onParent;
   var onSettings = props.onSettings;
+  var onProfiles = props.onProfiles;
   var user = props.user;
   var isAuthenticated = props.isAuthenticated;
+  var activeProfile = props.activeProfile;
   var _hp = useState(0); var holdProgress = _hp[0]; var setHoldProgress = _hp[1];
   var holdRef = useRef(null);
 
@@ -1006,15 +1266,24 @@ function HomeScreen(props) {
         })}
       </div>
 
-      {/* Auth status indicator */}
-      <div style={{ position: "absolute", top: "1.2rem", left: "1.2rem", zIndex: 10 }}>
+      {/* Auth & Profile indicator */}
+      <div style={{ position: "absolute", top: "1.2rem", left: "1.2rem", zIndex: 10, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {isAuthenticated ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.85)", borderRadius: 20, padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #27AE60, #2ECC71)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "0.75rem", fontWeight: "bold" }}>
-              {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.85)", borderRadius: 20, padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #27AE60, #2ECC71)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "0.75rem", fontWeight: "bold" }}>
+                {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
+              </div>
+              <span style={{ fontSize: "0.8rem", color: "#555", fontFamily: "'Rubik', sans-serif", maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name || user?.email}</span>
             </div>
-            <span style={{ fontSize: "0.8rem", color: "#555", fontFamily: "'Rubik', sans-serif", maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name || user?.email}</span>
-          </div>
+            <button onClick={onProfiles} style={{
+              display: "flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,255,255,0.85)", borderRadius: 20,
+              padding: "0.4rem 0.9rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "none", cursor: "pointer",
+              fontSize: "0.85rem", color: "#7C5CFC", fontFamily: "'Secular One', sans-serif", fontWeight: 600,
+            }}>
+              {activeProfile ? activeProfile.avatar + " " + activeProfile.name : "👶 בחרי פרופיל"}
+            </button>
+          </>
         ) : (
           <a href="/auth/signin" style={{
             display: "flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,255,255,0.85)", borderRadius: 20,

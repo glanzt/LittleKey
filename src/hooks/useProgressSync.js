@@ -3,50 +3,51 @@
 import { useSession } from "next-auth/react";
 import { useCallback, useRef } from "react";
 
-export default function useProgressSync() {
+export default function useProgressSync(profileId) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && !!session?.user?.id;
+  const canSync = isAuthenticated && !!profileId;
   const syncingRef = useRef(false);
 
   const pullFromServer = useCallback(async () => {
-    if (!isAuthenticated) return null;
+    if (!canSync) return null;
     try {
-      const res = await fetch("/api/progress");
+      const res = await fetch("/api/progress?profileId=" + encodeURIComponent(profileId));
       if (!res.ok) return null;
       return await res.json();
     } catch {
       return null;
     }
-  }, [isAuthenticated]);
+  }, [canSync, profileId]);
 
   const pushToServer = useCallback(async (data) => {
-    if (!isAuthenticated || syncingRef.current) return;
+    if (!canSync || syncingRef.current) return;
     syncingRef.current = true;
     try {
       await fetch("/api/progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, profileId }),
       });
     } catch {
       // Silent fail -- localStorage is the source of truth
     } finally {
       syncingRef.current = false;
     }
-  }, [isAuthenticated]);
+  }, [canSync, profileId]);
 
   const pushSession = useCallback(async (sessionData) => {
-    if (!isAuthenticated) return;
+    if (!canSync) return;
     try {
       await fetch("/api/progress/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sessionData),
+        body: JSON.stringify({ ...sessionData, profileId }),
       });
     } catch {
       // Silent fail
     }
-  }, [isAuthenticated]);
+  }, [canSync, profileId]);
 
-  return { isAuthenticated, user: session?.user, pullFromServer, pushToServer, pushSession };
+  return { isAuthenticated, canSync, user: session?.user, pullFromServer, pushToServer, pushSession };
 }

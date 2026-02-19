@@ -19,6 +19,17 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+  childProfiles ChildProfile[]
+}
+
+model ChildProfile {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  avatar    String   @default("🧒")
+  createdAt DateTime @default(now())
+
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   settings      UserSettings?
   levelProgress UserLevelProgress[]
   letterStats   UserLetterStats[]
@@ -62,44 +73,44 @@ model VerificationToken {
 }
 
 model UserSettings {
-  id     String @id @default(cuid())
-  userId String @unique
-  data   Json
+  id        String @id @default(cuid())
+  profileId String @unique
+  data      Json
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile ChildProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 model UserLevelProgress {
   id        String  @id @default(cuid())
-  userId    String
+  profileId String
   level     Int
   completed Boolean @default(false)
   accuracy  Float?
   stars     Int     @default(0)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile ChildProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, level])
+  @@unique([profileId, level])
 }
 
 model UserLetterStats {
-  id       String    @id @default(cuid())
-  userId   String
-  letter   String
-  attempts Int       @default(0)
-  correct  Int       @default(0)
-  totalTtc Float     @default(0)
-  bestTime Float?
-  lastDate DateTime?
+  id        String    @id @default(cuid())
+  profileId String
+  letter    String
+  attempts  Int       @default(0)
+  correct   Int       @default(0)
+  totalTtc  Float     @default(0)
+  bestTime  Float?
+  lastDate  DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile ChildProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, letter])
+  @@unique([profileId, letter])
 }
 
 model UserGameSession {
   id        String   @id @default(cuid())
-  userId    String
+  profileId String
   date      DateTime @default(now())
   mode      String?
   total     Int
@@ -109,5 +120,5 @@ model UserGameSession {
   duration  Int?
   data      Json?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile ChildProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
