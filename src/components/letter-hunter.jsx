@@ -109,7 +109,7 @@ function GameTopMenu(props) {
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userLabel}</span>
       </button>
 
-      <button onClick={onDashboard} style={menuBtn}>דשבורד הורים</button>
+      <button onClick={onDashboard} style={menuBtn}>אנליטיקות</button>
       <button onClick={onAdmin} style={menuBtn}>אדמין</button>
       <button onClick={onSettings} style={menuBtn}>הגדרות</button>
       <button onClick={onSignOut} style={{
@@ -1763,7 +1763,7 @@ function DashboardScreen(props) {
       <button onClick={onBack} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
-        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>דשבורד הורים</h1>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>אנליטיקות</h1>
       </div>
 
       <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404", zIndex: 2, width: "100%", maxWidth: 900, boxSizing: "border-box" }}>
@@ -2003,26 +2003,6 @@ function SettingsScreen(props) {
             return <button key={v.id} onClick={function() { updateSetting("voiceGender", v.id); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "1rem", background: settings.voiceGender === v.id ? "#7C5CFC" : "#f0f0f0", color: settings.voiceGender === v.id ? "white" : "#666" }}>{v.label}</button>;
           })}
         </div>
-      </div>
-
-      {/* Nikud */}
-      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", zIndex: 2, width: "100%", maxWidth: 600, boxSizing: "border-box" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#111319" }}>ניקוד</h3>
-          <button onClick={function() { updateSetting("nikud", !settings.nikud); }} style={{
-            width: 52, height: 28, borderRadius: 14, border: "none", cursor: "pointer",
-            background: settings.nikud ? "#7C5CFC" : "#ddd", position: "relative", transition: "background 0.3s"
-          }}>
-            <div style={{ width: 22, height: 22, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: settings.nikud ? 3 : 27, transition: "left 0.3s", boxShadow: "0 1px 4px rgba(0,0,0,0.2)" }} />
-          </button>
-        </div>
-        {settings.nikud ? (
-          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.8rem" }}>
-            {Object.keys(NIKUD_MAP).map(function(n) {
-              return <button key={n} onClick={function() { updateSetting("nikudType", n); }} style={{ padding: "0.4rem 0.8rem", borderRadius: 8, border: "none", cursor: "pointer", fontSize: "0.85rem", background: settings.nikudType === n ? "#7C5CFC" : "#f5f5f5", color: settings.nikudType === n ? "white" : "#666" }}>{n}</button>;
-            })}
-          </div>
-        ) : null}
       </div>
 
       {/* Help level */}
