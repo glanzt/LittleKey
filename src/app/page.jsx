@@ -1,24 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
-const FLOATING_LETTERS = [
-  { char: "א", x: "5%",  y: "10%", size: "5rem",   rot: -12, opacity: 0.18 },
-  { char: "ב", x: "88%", y: "7%",  size: "4.2rem", rot: 8,   opacity: 0.15 },
-  { char: "ג", x: "12%", y: "75%", size: "5.5rem", rot: 15,  opacity: 0.14 },
-  { char: "ד", x: "91%", y: "70%", size: "4.5rem", rot: -20, opacity: 0.16 },
-  { char: "ה", x: "2%",  y: "42%", size: "3.8rem", rot: 5,   opacity: 0.13 },
-  { char: "ו", x: "94%", y: "38%", size: "4.8rem", rot: -8,  opacity: 0.14 },
-  { char: "ז", x: "20%", y: "88%", size: "3.6rem", rot: 22,  opacity: 0.12 },
-  { char: "ח", x: "76%", y: "86%", size: "5rem",   rot: -15, opacity: 0.15 },
-  { char: "ט", x: "8%",  y: "28%", size: "3.4rem", rot: -6,  opacity: 0.11 },
-  { char: "י", x: "84%", y: "22%", size: "3rem",   rot: 12,  opacity: 0.13 },
-  { char: "כ", x: "28%", y: "4%",  size: "3.6rem", rot: -18, opacity: 0.1  },
-  { char: "ל", x: "68%", y: "3%",  size: "4.2rem", rot: 10,  opacity: 0.12 },
-  { char: "מ", x: "48%", y: "90%", size: "4.5rem", rot: -5,  opacity: 0.13 },
-  { char: "ש", x: "36%", y: "93%", size: "3.4rem", rot: 18,  opacity: 0.1  },
-  { char: "ת", x: "60%", y: "91%", size: "4rem",   rot: -10, opacity: 0.12 },
-];
+import { FLOATING_LETTERS, FloatingLettersBackground } from "@/styles/shared";
 
 const S = {
   page: {
@@ -225,7 +208,6 @@ const S = {
   floatingLetter: {
     position: "absolute",
     fontFamily: '"Suez One", serif',
-    color: "rgba(17,19,25,0.06)",
     pointerEvents: "none",
     userSelect: "none",
     zIndex: 0,

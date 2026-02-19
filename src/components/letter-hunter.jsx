@@ -3,6 +3,22 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import useProgressSync from "@/hooks/useProgressSync";
 import useProfiles from "@/hooks/useProfiles";
+import { FloatingLettersBackground, shared as sharedStyles } from "@/styles/shared";
+
+const PAGE_BG = {
+  minHeight: "100vh",
+  background: "#fafafa",
+  position: "relative",
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  fontFamily: "'Rubik', sans-serif",
+  direction: "rtl",
+  padding: "2rem",
+  boxSizing: "border-box",
+};
 
 const HEBREW_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
 
@@ -855,30 +871,24 @@ function LevelSelectionScreen(props) {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(170deg, #FFF8E7 0%, #FFECD2 30%, #FCB69F 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      fontFamily: "'Secular One', 'Rubik', sans-serif", direction: "rtl",
-      padding: "1.5rem", position: "relative"
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+    <div style={{ ...PAGE_BG, justifyContent: "flex-start", fontFamily: "'Secular One', 'Rubik', sans-serif", paddingTop: "1.5rem" }}>
+      <FloatingLettersBackground />
 
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1rem" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "1rem", zIndex: 2 }}>
         <button onClick={onBack} style={{
-          background: "rgba(255,255,255,0.7)", border: "none", borderRadius: 18,
+          background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 18,
           padding: "0.9rem 1.8rem", cursor: "pointer", fontSize: "1.5rem",
           boxShadow: "0 2px 8px rgba(0,0,0,0.06)", fontFamily: "'Secular One', sans-serif"
         }}>→ חזרה</button>
-        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2.25rem, 6vw, 3.3rem)", color: "#2C3E50", margin: 0 }}>
-          שלבים 🏆
+        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2.25rem, 6vw, 3.3rem)", color: "#111319", margin: 0 }}>
+          שלבים
         </h1>
         <div style={{ width: 80 }} />
       </div>
 
       {/* Page indicator */}
-      <div style={{ fontSize: "1.5rem", color: "#888", marginBottom: "1.2rem", fontFamily: "'Rubik', sans-serif" }}>
+      <div style={{ fontSize: "1.5rem", color: "#888", marginBottom: "1.2rem", fontFamily: "'Rubik', sans-serif", zIndex: 2 }}>
         עמוד {currentPage + 1} מתוך {TOTAL_PAGES}
       </div>
 
@@ -889,7 +899,8 @@ function LevelSelectionScreen(props) {
         gap: "clamp(0.4rem, 1.2vw, 0.8rem)",
         maxWidth: 1050,
         width: "100%",
-        marginBottom: "2rem"
+        marginBottom: "2rem",
+        zIndex: 2,
       }}>
         {levelCards.map(function(level) {
           var levelData = levelProgress.levels[level];
@@ -964,21 +975,21 @@ function LevelSelectionScreen(props) {
       </div>
 
       {/* Pagination controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", zIndex: 2 }}>
         <button
           onClick={function() { if (currentPage > 0) setCurrentPage(currentPage - 1); }}
           disabled={currentPage === 0}
           style={{
-            width: 78, height: 78, borderRadius: "50%",
-            border: "none", cursor: currentPage === 0 ? "not-allowed" : "pointer",
-            background: currentPage === 0 ? "rgba(0,0,0,0.05)" : "white",
-            fontSize: "2.25rem", color: currentPage === 0 ? "#ccc" : "#2C3E50",
-            boxShadow: currentPage === 0 ? "none" : "0 2px 10px rgba(0,0,0,0.1)",
+            width: 60, height: 60, borderRadius: "50%",
+            border: "1px solid rgba(0,0,0,0.08)", cursor: currentPage === 0 ? "not-allowed" : "pointer",
+            background: currentPage === 0 ? "rgba(0,0,0,0.03)" : "white",
+            fontSize: "1.8rem", color: currentPage === 0 ? "#ccc" : "#111319",
+            boxShadow: currentPage === 0 ? "none" : "0 2px 10px rgba(0,0,0,0.06)",
             display: "flex", alignItems: "center", justifyContent: "center"
           }}
         >→</button>
 
-        <span style={{ fontSize: "1.8rem", color: "#555", fontWeight: "600", fontFamily: "'Rubik', sans-serif" }}>
+        <span style={{ fontSize: "1.5rem", color: "#555", fontWeight: "600", fontFamily: "'Rubik', sans-serif" }}>
           {currentPage + 1} / {TOTAL_PAGES}
         </span>
 
@@ -986,11 +997,11 @@ function LevelSelectionScreen(props) {
           onClick={function() { if (currentPage < TOTAL_PAGES - 1) setCurrentPage(currentPage + 1); }}
           disabled={currentPage >= TOTAL_PAGES - 1}
           style={{
-            width: 78, height: 78, borderRadius: "50%",
-            border: "none", cursor: currentPage >= TOTAL_PAGES - 1 ? "not-allowed" : "pointer",
-            background: currentPage >= TOTAL_PAGES - 1 ? "rgba(0,0,0,0.05)" : "white",
-            fontSize: "2.25rem", color: currentPage >= TOTAL_PAGES - 1 ? "#ccc" : "#2C3E50",
-            boxShadow: currentPage >= TOTAL_PAGES - 1 ? "none" : "0 2px 10px rgba(0,0,0,0.1)",
+            width: 60, height: 60, borderRadius: "50%",
+            border: "1px solid rgba(0,0,0,0.08)", cursor: currentPage >= TOTAL_PAGES - 1 ? "not-allowed" : "pointer",
+            background: currentPage >= TOTAL_PAGES - 1 ? "rgba(0,0,0,0.03)" : "white",
+            fontSize: "1.8rem", color: currentPage >= TOTAL_PAGES - 1 ? "#ccc" : "#111319",
+            boxShadow: currentPage >= TOTAL_PAGES - 1 ? "none" : "0 2px 10px rgba(0,0,0,0.06)",
             display: "flex", alignItems: "center", justifyContent: "center"
           }}
         >←</button>
@@ -998,12 +1009,12 @@ function LevelSelectionScreen(props) {
 
       {/* Play now button */}
       <button onClick={function() { onSelectLevel(levelProgress.currentLevel); }} style={{
-        padding: "1.2rem 4rem", fontSize: "clamp(1.5rem, 5vw, 2rem)", fontFamily: "'Secular One', sans-serif",
-        background: "linear-gradient(135deg, #E74C3C, #C0392B)", color: "white",
-        border: "none", borderRadius: "60px", cursor: "pointer",
-        boxShadow: "0 8px 30px rgba(231,76,60,0.4), inset 0 2px 0 rgba(255,255,255,0.2)",
-        marginTop: "1.5rem", width: "100%", maxWidth: 420
-      }}>שחקי עכשיו! 🎮</button>
+        padding: "0.85rem 3rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
+        background: "#111319", color: "white",
+        border: "none", borderRadius: "999px", cursor: "pointer",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+        marginTop: "1.5rem", width: "100%", maxWidth: 420, zIndex: 2,
+      }}>שחקי עכשיו!</button>
 
       <style>{
         "@keyframes levelPulse { 0%,100%{ box-shadow: 0 4px 16px rgba(231,76,60,0.4) } 50%{ box-shadow: 0 4px 24px rgba(231,76,60,0.7), 0 0 40px rgba(231,76,60,0.2) } }"
@@ -1061,27 +1072,20 @@ function ProfileSelectionScreen(props) {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(170deg, #FFF8E7 0%, #FFECD2 30%, #FCB69F 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Secular One', 'Rubik', sans-serif", direction: "rtl",
-      padding: "2rem", position: "relative"
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+    <div style={{ ...PAGE_BG, fontFamily: "'Secular One', 'Rubik', sans-serif" }}>
+      <FloatingLettersBackground />
 
-      <div style={{ fontSize: "3.5rem", marginBottom: "0.5rem" }}>👶</div>
-      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 7vw, 3rem)", color: "#2C3E50", margin: "0 0 0.3rem", textAlign: "center" }}>
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 7vw, 3rem)", color: "#111319", margin: "0 0 0.3rem", textAlign: "center", zIndex: 2 }}>
         מי משחק?
       </h1>
-      <p style={{ fontSize: "1rem", color: "#888", marginBottom: "2rem", fontFamily: "'Rubik', sans-serif" }}>
+      <p style={{ fontSize: "1rem", color: "rgba(20,23,32,0.45)", marginBottom: "2rem", fontFamily: "'Rubik', sans-serif", zIndex: 2 }}>
         {user?.name || user?.email}
       </p>
 
       {loading ? (
         <div style={{ fontSize: "1.2rem", color: "#aaa", padding: "2rem" }}>טוען...</div>
       ) : (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "1.2rem", justifyContent: "center", maxWidth: 600, marginBottom: "2rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1.2rem", justifyContent: "center", maxWidth: 600, marginBottom: "2rem", zIndex: 2 }}>
           {profiles.map(function(profile) {
             return (
               <div key={profile.id} style={{ position: "relative" }}>
@@ -1251,20 +1255,8 @@ function HomeScreen(props) {
   function endHold() { clearInterval(holdRef.current); setHoldProgress(0); }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(170deg, #FFF8E7 0%, #FFECD2 30%, #FCB69F 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Secular One', 'Rubik', sans-serif", direction: "rtl",
-      padding: "2rem", position: "relative", overflow: "hidden"
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
-
-      <div style={{ position: "absolute", inset: 0, overflow: "hidden", opacity: 0.06, pointerEvents: "none" }}>
-        {HEBREW_LETTERS.map(function(l, i) {
-          return <div key={i} style={{ position: "absolute", fontSize: (40 + (i * 17) % 60) + "px", fontFamily: "'Suez One', serif", left: ((i * 4.5) % 95) + "%", top: ((i * 7.3) % 90) + "%", transform: "rotate(" + (-20 + (i * 13) % 40) + "deg)", color: "#D35400" }}>{l}</div>;
-        })}
-      </div>
+    <div style={{ ...PAGE_BG, fontFamily: "'Secular One', 'Rubik', sans-serif" }}>
+      <FloatingLettersBackground />
 
       {/* Auth & Profile indicator */}
       <div style={{ position: "absolute", top: "1.2rem", left: "1.2rem", zIndex: 10, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -1295,37 +1287,37 @@ function HomeScreen(props) {
         )}
       </div>
 
-      <div style={{ fontSize: "clamp(3rem, 10vw, 6rem)", marginBottom: "0.5rem", animation: "gentleBounce 3s ease-in-out infinite" }}>🎯</div>
-      <h1 style={{ fontSize: "clamp(3rem, 10.5vw, 5.25rem)", fontFamily: "'Suez One', serif", color: "#2C3E50", margin: "0 0 0.5rem", textAlign: "center" }}>ציידת האותיות</h1>
-      <p style={{ fontSize: "clamp(1.5rem, 4.5vw, 1.95rem)", color: "#7F8C8D", fontFamily: "'Rubik', sans-serif", marginBottom: "3rem" }}>בואי נלמד את האותיות! ✨</p>
+      <h1 style={{ fontSize: "clamp(2.6rem, 5.8vw, 4.5rem)", fontFamily: "'Suez One', serif", color: "#111319", margin: "0 0 0.5rem", textAlign: "center", zIndex: 2, letterSpacing: "-0.04em" }}>ציידת האותיות</h1>
+      <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.3rem)", color: "rgba(20,23,32,0.45)", fontFamily: "'Rubik', sans-serif", marginBottom: "2.5rem", zIndex: 2 }}>ללמוד את המקלדת דרך משחק קולי</p>
 
       <button onClick={onStart} style={{
-        padding: "1.2rem 4rem", fontSize: "clamp(1.5rem, 5vw, 2rem)", fontFamily: "'Secular One', sans-serif",
-        background: "linear-gradient(135deg, #E74C3C, #C0392B)", color: "white",
-        border: "none", borderRadius: "60px", cursor: "pointer",
-        boxShadow: "0 8px 30px rgba(231,76,60,0.4), inset 0 2px 0 rgba(255,255,255,0.2)"
-      }}>בואי נשחק! 🎮</button>
+        padding: "0.85rem 2.8rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
+        background: "#111319", color: "white",
+        border: "none", borderRadius: "999px", cursor: "pointer",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+        zIndex: 2, transition: "transform 0.2s, box-shadow 0.2s",
+      }}>בואי נשחק!</button>
 
-      <div style={{ position: "absolute", bottom: "2rem", left: "2rem" }}>
+      <div style={{ position: "absolute", bottom: "2rem", left: "2rem", zIndex: 2 }}>
         <button
           onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold}
           onTouchStart={startHold} onTouchEnd={endHold}
           style={{
-            width: 56, height: 56, borderRadius: "50%", border: "2px solid rgba(0,0,0,0.1)",
-            background: "conic-gradient(#7C5CFC " + (holdProgress * 360) + "deg, rgba(0,0,0,0.05) 0deg)",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem"
+            width: 48, height: 48, borderRadius: "50%", border: "1px solid rgba(0,0,0,0.08)",
+            background: "conic-gradient(#111319 " + (holdProgress * 360) + "deg, white 0deg)",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
           title="לחיצה ארוכה 2 שניות למסך הורים"
         >👤</button>
-        <div style={{ fontSize: "0.65rem", color: "#aaa", textAlign: "center", marginTop: 4 }}>הורים</div>
+        <div style={{ fontSize: "0.6rem", color: "rgba(20,23,32,0.35)", textAlign: "center", marginTop: 4 }}>הורים</div>
       </div>
 
       <button onClick={onSettings} style={{
-        position: "absolute", bottom: "2rem", right: "2rem", width: 56, height: 56, borderRadius: "50%",
-        border: "2px solid rgba(0,0,0,0.1)", background: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: "1.3rem"
+        position: "absolute", bottom: "2rem", right: "2rem", width: 48, height: 48, borderRadius: "50%",
+        border: "1px solid rgba(0,0,0,0.08)", background: "white", cursor: "pointer", fontSize: "1.2rem",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)", zIndex: 2,
       }}>⚙️</button>
-
-      <style>{"@keyframes gentleBounce { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-12px) } }"}</style>
     </div>
   );
 }
@@ -1362,9 +1354,9 @@ function GameScreen(props) {
     return found ? rowNames[found[0]] : null;
   }, [letter, helpLevel]);
 
-  var bgColor = showSuccess ? "linear-gradient(170deg, #D5F5E3 0%, #A9DFBF 100%)"
-    : showError ? "linear-gradient(170deg, #FDEDEC 0%, #F5B7B1 100%)"
-    : "linear-gradient(170deg, #F8F9FA 0%, #E8F0FE 100%)";
+  var bgColor = showSuccess ? "#e8f8ef"
+    : showError ? "#fef2f0"
+    : "#fafafa";
 
   return (
     <div style={{
@@ -1534,27 +1526,21 @@ function SummaryScreen(props) {
   var realAvgTtc = independentCorrect.length > 0 ? Math.round(independentCorrect.reduce(function(s, a) { return s + a.ttc; }, 0) / independentCorrect.length) : 0;
 
   return (
-    <div style={{
-      minHeight: "100vh", background: "linear-gradient(170deg, #FFF8E7 0%, #E8F8F5 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Rubik', sans-serif", direction: "rtl", padding: "2rem"
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
-
-      <div style={{ fontSize: "4rem", marginBottom: "1rem", animation: "gentleBounce 2s ease-in-out infinite" }}>🏆</div>
+    <div style={PAGE_BG}>
+      <FloatingLettersBackground />
       {currentGameLevel != null ? (
         <div style={{
-          background: "linear-gradient(135deg, #7C5CFC, #9B7DFF)", borderRadius: 30, padding: "0.4rem 1.5rem",
-          marginBottom: "0.5rem", boxShadow: "0 2px 10px rgba(124,92,252,0.3)",
-          fontSize: "1.1rem", color: "white", fontWeight: "600", fontFamily: "'Secular One', sans-serif"
+          background: "#111319", borderRadius: 30, padding: "0.4rem 1.5rem",
+          marginBottom: "0.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+          fontSize: "1.1rem", color: "white", fontWeight: "600", fontFamily: "'Secular One', sans-serif", zIndex: 2,
         }}>
           שלב {currentGameLevel}
         </div>
       ) : null}
-      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 6vw, 2.8rem)", color: "#2C3E50", marginBottom: "1.5rem" }}>סיכום משחק</h1>
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 6vw, 2.8rem)", color: "#111319", marginBottom: "1.5rem", zIndex: 2 }}>סיכום משחק</h1>
 
       {/* Letter result strip */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", marginBottom: "1.5rem", maxWidth: 450 }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", marginBottom: "1.5rem", maxWidth: 450, zIndex: 2 }}>
         {res.map(function(r, i) {
           var isHelped = r.status === "helpedPerfect" || r.status === "helpedWithErrors";
           var bg = r.status === "perfect" ? "linear-gradient(135deg, #27AE60, #2ECC71)" :
@@ -1581,7 +1567,7 @@ function SummaryScreen(props) {
       </div>
 
       {/* Stats grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", maxWidth: 420, width: "100%", marginBottom: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", maxWidth: 420, width: "100%", marginBottom: "1.5rem", zIndex: 2 }}>
         {[
           { label: "מושלם!", value: perfectCount, icon: "⭐", color: "#27AE60" },
           { label: "עם טעויות", value: withErrorsCount, icon: "💪", color: "#F39C12" },
@@ -1604,25 +1590,24 @@ function SummaryScreen(props) {
       </div>
 
       {fastest ? (
-        <div style={{ background: "white", borderRadius: 16, padding: "1rem 2rem", maxWidth: 400, width: "100%", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", fontSize: "1rem" }}>
+        <div style={{ background: "white", borderRadius: 16, padding: "1rem 2rem", maxWidth: 400, width: "100%", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", fontSize: "1rem", zIndex: 2 }}>
           <span>🚀 מהירה: <strong>{fastest.letter}</strong> ({(fastest.ttc / 1000).toFixed(1)}s)</span>
           <span>🐢 איטית: <strong>{slowest.letter}</strong> ({(slowest.ttc / 1000).toFixed(1)}s)</span>
         </div>
       ) : null}
 
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", marginTop: "1rem" }}>
-        <button onClick={onPlayAgain} style={{ padding: "1rem 2.5rem", fontSize: "1.3rem", fontFamily: "'Secular One'", background: "linear-gradient(135deg, #E74C3C, #C0392B)", color: "white", border: "none", borderRadius: 50, cursor: "pointer", boxShadow: "0 6px 20px rgba(231,76,60,0.3)" }}>
-          {currentGameLevel != null ? "שלב " + (currentGameLevel + 1) + " ▶" : "שחקי שוב! 🎮"}
+      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", marginTop: "1rem", zIndex: 2 }}>
+        <button onClick={onPlayAgain} style={{ padding: "0.85rem 2.5rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "#111319", color: "white", border: "none", borderRadius: "999px", cursor: "pointer", boxShadow: "0 4px 20px rgba(0,0,0,0.18)" }}>
+          {currentGameLevel != null ? "שלב " + (currentGameLevel + 1) + " ▶" : "שחקי שוב!"}
         </button>
         {currentGameLevel != null ? (
-          <button onClick={onLevels} style={{ padding: "1rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#E74C3C", border: "2px solid #E74C3C", borderRadius: 50, cursor: "pointer" }}>שלבים 🗺️</button>
+          <button onClick={onLevels} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
         ) : null}
-        <button onClick={onDashboard} style={{ padding: "1rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#7C5CFC", border: "2px solid #7C5CFC", borderRadius: 50, cursor: "pointer" }}>דשבורד 📊</button>
-        <button onClick={onHome} style={{ padding: "1rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "2px solid #ddd", borderRadius: 50, cursor: "pointer" }}>דף הבית 🏠</button>
+        <button onClick={onDashboard} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>דשבורד</button>
+        <button onClick={onHome} style={{ padding: "0.85rem 2rem", fontSize: "1.1rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>דף הבית</button>
       </div>
 
       <style>{
-        "@keyframes gentleBounce { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-8px) } }" +
         "@keyframes popIn { 0%{ transform: scale(0.5); opacity: 0 } 100%{ transform: scale(1); opacity: 1 } }"
       }</style>
     </div>
@@ -1669,21 +1654,21 @@ function DashboardScreen(props) {
   }, [sessions]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F6FA", fontFamily: "'Rubik', sans-serif", direction: "rtl", padding: "1.5rem" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem" }}>
+      <FloatingLettersBackground />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-        <button onClick={onBack} style={{ background: "white", border: "none", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
-        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#2C3E50", margin: 0 }}>📊 דשבורד הורים</h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
+        <button onClick={onBack} style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>דשבורד הורים</h1>
         <div style={{ width: 80 }} />
       </div>
 
-      <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404" }}>
+      <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404", zIndex: 2, width: "100%", maxWidth: 900, boxSizing: "border-box" }}>
         ⚠️ ודאו שהמקלדת מוגדרת על עברית
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", zIndex: 2 }}>
         {["overview", "letters", "sessions"].map(function(id) {
           var labels = { overview: "סקירה", letters: "אותיות", sessions: "סשנים" };
           return (
@@ -1700,12 +1685,12 @@ function DashboardScreen(props) {
       {/* OVERVIEW TAB */}
       {tab === "overview" ? (
         sessions.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#999", background: "white", borderRadius: 20 }}>
+          <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#999", background: "white", borderRadius: 20, zIndex: 2, width: "100%", maxWidth: 900 }}>
             <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🎮</div>
             <p style={{ fontSize: "1.2rem" }}>עדיין אין נתונים. שחקו משחק ראשון!</p>
           </div>
         ) : (
-          <div>
+          <div style={{ zIndex: 2, width: "100%", maxWidth: 900 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", marginBottom: "1.5rem" }}>
               {[
                 { label: "סשנים", value: sessions.length, color: "#7C5CFC" },
@@ -1762,7 +1747,7 @@ function DashboardScreen(props) {
 
       {/* LETTERS TAB */}
       {tab === "letters" ? (
-        <div style={{ background: "white", borderRadius: 20, padding: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", overflowX: "auto" }}>
+        <div style={{ background: "white", borderRadius: 20, padding: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", overflowX: "auto", zIndex: 2, width: "100%", maxWidth: 900, boxSizing: "border-box" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
             <thead>
               <tr style={{ borderBottom: "2px solid #f0f0f0" }}>
@@ -1795,9 +1780,9 @@ function DashboardScreen(props) {
       {/* SESSIONS TAB */}
       {tab === "sessions" ? (
         recentSessions.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "3rem", color: "#ccc", background: "white", borderRadius: 20 }}>אין סשנים עדיין</div>
+          <div style={{ textAlign: "center", padding: "3rem", color: "#ccc", background: "white", borderRadius: 20, zIndex: 2, width: "100%", maxWidth: 900 }}>אין סשנים עדיין</div>
         ) : (
-          <div>
+          <div style={{ zIndex: 2, width: "100%", maxWidth: 900 }}>
             {recentSessions.map(function(s, i) {
               var sResults = s.letterResults || s.sequence.map(function(l) { return { letter: l, status: "perfect" }; });
               return (
@@ -1830,7 +1815,7 @@ function DashboardScreen(props) {
       ) : null}
 
       {/* Clear data */}
-      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+      <div style={{ textAlign: "center", marginTop: "2rem", zIndex: 2 }}>
         {!confirmClear ? (
           <button onClick={function() { setConfirmClear(true); }} style={{ background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: "0.85rem" }}>🗑️ מחק את כל הנתונים</button>
         ) : (
@@ -1888,18 +1873,18 @@ function SettingsScreen(props) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F6FA", fontFamily: "'Rubik', sans-serif", direction: "rtl", padding: "1.5rem" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
+    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem" }}>
+      <FloatingLettersBackground />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
-        <button onClick={onBack} style={{ background: "white", border: "none", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
-        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#2C3E50", margin: 0 }}>⚙️ הגדרות</h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", width: "100%", maxWidth: 600, zIndex: 2 }}>
+        <button onClick={onBack} style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "0.6rem 1.2rem", cursor: "pointer", fontSize: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>← חזרה</button>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>הגדרות</h1>
         <div style={{ width: 80 }} />
       </div>
 
       {/* Session length */}
-      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>אורך סשן</h3>
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", zIndex: 2, width: "100%", maxWidth: 600, boxSizing: "border-box" }}>
+        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#111319" }}>אורך סשן</h3>
         <div style={{ display: "flex", gap: "0.5rem" }}>
           {[5, 10, 15].map(function(n) {
             return <button key={n} onClick={function() { updateSetting("sessionLength", n); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "1.1rem", background: settings.sessionLength === n ? "#7C5CFC" : "#f0f0f0", color: settings.sessionLength === n ? "white" : "#666" }}>{n} שאלות</button>;
@@ -1908,9 +1893,9 @@ function SettingsScreen(props) {
       </div>
 
       {/* Nikud */}
-      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", zIndex: 2, width: "100%", maxWidth: 600, boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>ניקוד</h3>
+          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#111319" }}>ניקוד</h3>
           <button onClick={function() { updateSetting("nikud", !settings.nikud); }} style={{
             width: 52, height: 28, borderRadius: 14, border: "none", cursor: "pointer",
             background: settings.nikud ? "#7C5CFC" : "#ddd", position: "relative", transition: "background 0.3s"
@@ -1928,8 +1913,8 @@ function SettingsScreen(props) {
       </div>
 
       {/* Help level */}
-      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>רמת עזרה</h3>
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", zIndex: 2, width: "100%", maxWidth: 600, boxSizing: "border-box" }}>
+        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#111319" }}>רמת עזרה</h3>
         <div style={{ display: "flex", gap: "0.5rem" }}>
           {[{ id: "beginner", label: "מתחילים (עם רמזים)" }, { id: "advanced", label: "מתקדמים (בלי רמזים)" }].map(function(h) {
             return <button key={h.id} onClick={function() { updateSetting("helpLevel", h.id); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "0.85rem", background: settings.helpLevel === h.id ? "#7C5CFC" : "#f0f0f0", color: settings.helpLevel === h.id ? "white" : "#666" }}>{h.label}</button>;
@@ -1938,9 +1923,9 @@ function SettingsScreen(props) {
       </div>
 
       {/* Letter selection */}
-      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", zIndex: 2, width: "100%", maxWidth: 600, boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
-          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#2C3E50" }}>בחירת אותיות ({selectedLetters.size})</h3>
+          <h3 style={{ margin: 0, fontFamily: "'Secular One'", fontSize: "1rem", color: "#111319" }}>בחירת אותיות ({selectedLetters.size})</h3>
           <div style={{ display: "flex", gap: "0.3rem" }}>
             <button onClick={function() { setSelectedLetters(new Set(HEBREW_LETTERS)); }} style={{ padding: "0.3rem 0.8rem", borderRadius: 8, border: "1px solid #ddd", background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#666" }}>הכל</button>
             <button onClick={function() { setSelectedLetters(new Set(HEBREW_LETTERS.slice(0, 5))); }} style={{ padding: "0.3rem 0.8rem", borderRadius: 8, border: "1px solid #ddd", background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#666" }}>5 ראשונות</button>
@@ -1953,7 +1938,7 @@ function SettingsScreen(props) {
         </div>
       </div>
 
-      <button onClick={save} style={{ width: "100%", padding: "1rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "linear-gradient(135deg, #7C5CFC, #5B3FD4)", color: "white", border: "none", borderRadius: 16, cursor: "pointer", boxShadow: "0 6px 20px rgba(124,92,252,0.3)" }}>💾 שמור הגדרות</button>
+      <button onClick={save} style={{ width: "100%", maxWidth: 600, padding: "0.85rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "#111319", color: "white", border: "none", borderRadius: "999px", cursor: "pointer", boxShadow: "0 4px 20px rgba(0,0,0,0.18)", zIndex: 2 }}>שמור הגדרות</button>
     </div>
   );
 }
