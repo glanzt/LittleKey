@@ -235,6 +235,7 @@ function playClap() {
 var _playbackId = 0;
 var _currentAudio = null;
 var CLIP_OVERLAP_MS = 550;
+var _voiceGender = "male";
 
 function stopPlayback() {
   _playbackId++;
@@ -244,7 +245,8 @@ function stopPlayback() {
 function playRecording(name, pid) {
   return new Promise(function(resolve) {
     if (pid !== _playbackId) { resolve(); return; }
-    var src = "/recordings/" + encodeURIComponent(name) + ".m4a";
+    var folder = _voiceGender === "female" ? "/recordings-female/" : "/recordings/";
+    var src = folder + encodeURIComponent(name) + ".m4a";
     var audio = new Audio(src);
     _currentAudio = audio;
     var resolved = false;
@@ -477,7 +479,8 @@ var DEFAULT_SETTINGS = {
   letterSet: HEBREW_LETTERS.slice(),
   nikud: false,
   nikudType: Object.keys(NIKUD_MAP)[0],
-  helpLevel: "beginner"
+  helpLevel: "beginner",
+  voiceGender: "male"
 };
 
 /* ══════════════════════════════════════════════════════════════════════════ */
@@ -528,6 +531,7 @@ export default function LetterHunter() {
   }, [profileId]);
 
   useEffect(function() { saveData(storageKey("lh-settings", profileId), settings); }, [settings, profileId]);
+  useEffect(function() { _voiceGender = settings.voiceGender || "male"; }, [settings.voiceGender]);
   useEffect(function() { saveData(storageKey("lh-sessions", profileId), sessions); }, [sessions, profileId]);
   useEffect(function() { saveData(storageKey("lh-letter-stats", profileId), letterStats); }, [letterStats, profileId]);
   useEffect(function() { saveData(storageKey("lh-level-progress", profileId), levelProgress); }, [levelProgress, profileId]);
@@ -1899,6 +1903,16 @@ function SettingsScreen(props) {
         <div style={{ display: "flex", gap: "0.5rem" }}>
           {[5, 10, 15].map(function(n) {
             return <button key={n} onClick={function() { updateSetting("sessionLength", n); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "1.1rem", background: settings.sessionLength === n ? "#7C5CFC" : "#f0f0f0", color: settings.sessionLength === n ? "white" : "#666" }}>{n} שאלות</button>;
+          })}
+        </div>
+      </div>
+
+      {/* Voice gender */}
+      <div style={{ background: "white", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", zIndex: 2, width: "100%", maxWidth: 600, boxSizing: "border-box" }}>
+        <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", fontSize: "1rem", color: "#111319" }}>קול</h3>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {[{ id: "male", label: "👦 קול גבר" }, { id: "female", label: "👧 קול אישה" }].map(function(v) {
+            return <button key={v.id} onClick={function() { updateSetting("voiceGender", v.id); }} style={{ flex: 1, padding: "0.7rem", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: "'Secular One'", fontSize: "1rem", background: settings.voiceGender === v.id ? "#7C5CFC" : "#f0f0f0", color: settings.voiceGender === v.id ? "white" : "#666" }}>{v.label}</button>;
           })}
         </div>
       </div>
