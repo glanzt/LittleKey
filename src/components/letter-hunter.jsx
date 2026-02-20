@@ -1900,17 +1900,28 @@ function DashboardScreen(props) {
 
             {accuracyOverTime.length > 1 ? (function() {
               var chartW = 300;
-              var chartH = 120;
-              var padL = 20;
-              var padR = 20;
-              var padT = 18;
-              var padB = 22;
+              var chartH = 100;
+              var padL = 28;
+              var padR = 14;
+              var padT = 16;
+              var padB = 20;
               var n = accuracyOverTime.length;
               var innerW = chartW - padL - padR;
               var innerH = chartH - padT - padB;
+
+              var minAcc = accuracyOverTime.reduce(function(m, d) { return Math.min(m, d.accuracy); }, 100);
+              var maxAcc = accuracyOverTime.reduce(function(m, d) { return Math.max(m, d.accuracy); }, 0);
+              var yMin = Math.max(0, Math.floor((minAcc - 10) / 10) * 10);
+              var yMax = Math.min(100, Math.ceil((maxAcc + 5) / 10) * 10);
+              if (yMax - yMin < 20) { yMin = Math.max(0, yMax - 20); }
+              var yRange = yMax - yMin;
+
+              var gridLines = [];
+              for (var g = yMin; g <= yMax; g += 10) gridLines.push(g);
+
               var points = accuracyOverTime.map(function(d, i) {
                 var x = padL + (n > 1 ? (i / (n - 1)) * innerW : innerW / 2);
-                var y = padT + innerH - (d.accuracy / 100) * innerH;
+                var y = padT + innerH - ((d.accuracy - yMin) / yRange) * innerH;
                 return { x: x, y: y, accuracy: d.accuracy, date: d.date };
               });
               var polyline = points.map(function(p) { return p.x + "," + p.y; }).join(" ");
@@ -1919,22 +1930,31 @@ function DashboardScreen(props) {
                 + " L" + points[points.length - 1].x + "," + (padT + innerH) + " Z";
               return (
                 <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                  <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>דיוק לאורך זמן</h3>
-                  <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", maxHeight: 180, overflow: "visible" }}>
+                  <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>דיוק לאורך זמן</h3>
+                  <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", overflow: "visible" }} preserveAspectRatio="xMidYMid meet">
                     <defs>
                       <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#7C5CFC" stopOpacity="0.25" />
+                        <stop offset="0%" stopColor="#7C5CFC" stopOpacity="0.18" />
                         <stop offset="100%" stopColor="#7C5CFC" stopOpacity="0.02" />
                       </linearGradient>
                     </defs>
+                    {gridLines.map(function(val) {
+                      var gy = padT + innerH - ((val - yMin) / yRange) * innerH;
+                      return (
+                        <g key={val}>
+                          <line x1={padL} y1={gy} x2={chartW - padR} y2={gy} stroke="#eee" strokeWidth="0.5" />
+                          <text x={padL - 4} y={gy + 3} textAnchor="end" fontSize="6" fill="#bbb" fontFamily="'Rubik', sans-serif">{val}%</text>
+                        </g>
+                      );
+                    })}
                     <path d={areaPath} fill="url(#lineGrad)" />
-                    <polyline points={polyline} fill="none" stroke="#7C5CFC" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+                    <polyline points={polyline} fill="none" stroke="#7C5CFC" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
                     {points.map(function(p, i) {
                       return (
                         <g key={i}>
-                          <circle cx={p.x} cy={p.y} r="4" fill="#7C5CFC" stroke="white" strokeWidth="2" />
-                          <text x={p.x} y={p.y - 8} textAnchor="middle" fontSize="8" fill="#666" fontFamily="'Secular One', sans-serif">{p.accuracy}%</text>
-                          <text x={p.x} y={padT + innerH + 12} textAnchor="middle" fontSize="7" fill="#bbb" fontFamily="'Rubik', sans-serif">{p.date}</text>
+                          <circle cx={p.x} cy={p.y} r="3.5" fill="#7C5CFC" stroke="white" strokeWidth="1.5" />
+                          <text x={p.x} y={p.y - 6} textAnchor="middle" fontSize="6.5" fill="#555" fontWeight="600" fontFamily="'Secular One', sans-serif">{p.accuracy}%</text>
+                          <text x={p.x} y={padT + innerH + 10} textAnchor="middle" fontSize="6" fill="#bbb" fontFamily="'Rubik', sans-serif">{p.date}</text>
                         </g>
                       );
                     })}
