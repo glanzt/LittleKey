@@ -1584,23 +1584,19 @@ function GameScreen(props) {
           {displayLetter}
         </div>
 
-        {/* Speaker button — visible only after initial playback ends */}
-        {speakDone && !showSuccess && !showError ? (
-          <button onClick={onSpeakLetter} style={{
-            position: "absolute", left: "-4.5rem", top: "50%", transform: "translateY(-50%)",
-            width: 60, height: 60, borderRadius: "50%", border: "none", cursor: "pointer",
-            fontSize: "1.8rem", background: "white",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "transform 0.2s, box-shadow 0.2s, opacity 0.3s",
-            opacity: 1,
-          }} title="הקראת האות">🔊</button>
-        ) : null}
-
-        {/* Keyboard hint card */}
+        {/* Keyboard hint card + speaker button below it */}
         {!showSuccess && !showError ? (
-          <div style={{ position: "absolute", right: "clamp(-15rem, -32vw, -8rem)", top: "50%", transform: "translateY(-50%)" }}>
+          <div style={{ position: "absolute", right: "clamp(-15rem, -32vw, -8rem)", top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.8rem" }}>
             <FlippingHintCard letter={letter} onUseHelp={onUseHelp} flipped={hintFlipped} setFlipped={setHintFlipped} />
+            {speakDone ? (
+              <button onClick={onSpeakLetter} style={{
+                width: 52, height: 52, borderRadius: "50%", border: "none", cursor: "pointer",
+                fontSize: "1.6rem", background: "white",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "transform 0.2s, box-shadow 0.2s, opacity 0.3s",
+              }} title="הקראת האות">🔊</button>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -1904,10 +1900,10 @@ function DashboardScreen(props) {
             </div>
 
             {accuracyOverTime.length > 1 ? (function() {
-              var chartW = 100;
+              var chartW = 300;
               var chartH = 120;
-              var padL = 0;
-              var padR = 0;
+              var padL = 20;
+              var padR = 20;
               var padT = 18;
               var padB = 22;
               var n = accuracyOverTime.length;
@@ -1925,7 +1921,7 @@ function DashboardScreen(props) {
               return (
                 <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
                   <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>דיוק לאורך זמן</h3>
-                  <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", height: "auto", overflow: "visible" }}>
+                  <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", maxHeight: 180, overflow: "visible" }}>
                     <defs>
                       <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#7C5CFC" stopOpacity="0.25" />
@@ -1933,13 +1929,13 @@ function DashboardScreen(props) {
                       </linearGradient>
                     </defs>
                     <path d={areaPath} fill="url(#lineGrad)" />
-                    <polyline points={polyline} fill="none" stroke="#7C5CFC" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    <polyline points={polyline} fill="none" stroke="#7C5CFC" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
                     {points.map(function(p, i) {
                       return (
                         <g key={i}>
-                          <circle cx={p.x} cy={p.y} r="3" fill="#7C5CFC" stroke="white" strokeWidth="1.5" />
-                          <text x={p.x} y={p.y - 6} textAnchor="middle" fontSize="5" fill="#999">{p.accuracy}%</text>
-                          <text x={p.x} y={padT + innerH + 10} textAnchor="middle" fontSize="4.5" fill="#bbb">{p.date}</text>
+                          <circle cx={p.x} cy={p.y} r="4" fill="#7C5CFC" stroke="white" strokeWidth="2" />
+                          <text x={p.x} y={p.y - 8} textAnchor="middle" fontSize="8" fill="#666" fontFamily="'Secular One', sans-serif">{p.accuracy}%</text>
+                          <text x={p.x} y={padT + innerH + 12} textAnchor="middle" fontSize="7" fill="#bbb" fontFamily="'Rubik', sans-serif">{p.date}</text>
                         </g>
                       );
                     })}
