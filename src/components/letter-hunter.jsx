@@ -1153,19 +1153,6 @@ function LevelSelectionScreen(props) {
       {/* Pagination */}
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", zIndex: 2 }}>
         <button
-          onClick={function() { setPage(function(p) { return Math.max(1, p - 1); }); }}
-          disabled={page <= 1}
-          style={{
-            width: 44, height: 44, borderRadius: "50%", border: "1px solid rgba(0,0,0,0.08)",
-            background: "white", cursor: page <= 1 ? "default" : "pointer",
-            fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center",
-            opacity: page <= 1 ? 0.3 : 1, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-          }}
-        >→</button>
-        <span style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", color: "#111319", minWidth: 60, textAlign: "center" }}>
-          {totalPages} / {page}
-        </span>
-        <button
           onClick={function() { setPage(function(p) { return Math.min(totalPages, p + 1); }); }}
           disabled={page >= totalPages}
           style={{
@@ -1173,6 +1160,19 @@ function LevelSelectionScreen(props) {
             background: "white", cursor: page >= totalPages ? "default" : "pointer",
             fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center",
             opacity: page >= totalPages ? 0.3 : 1, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          }}
+        >→</button>
+        <span style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", color: "#111319", minWidth: 60, textAlign: "center" }}>
+          {totalPages} / {page}
+        </span>
+        <button
+          onClick={function() { setPage(function(p) { return Math.max(1, p - 1); }); }}
+          disabled={page <= 1}
+          style={{
+            width: 44, height: 44, borderRadius: "50%", border: "1px solid rgba(0,0,0,0.08)",
+            background: "white", cursor: page <= 1 ? "default" : "pointer",
+            fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center",
+            opacity: page <= 1 ? 0.3 : 1, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
         >←</button>
       </div>
