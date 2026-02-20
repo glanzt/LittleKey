@@ -47,8 +47,9 @@ var TOP_BAR_HEIGHT = 56;
 function GameTopMenu(props) {
   var user = props.user;
   var onProfiles = props.onProfiles;
+  var onHome = props.onHome;
+  var onLevels = props.onLevels;
   var onDashboard = props.onDashboard;
-  var onAdmin = props.onAdmin;
   var onSettings = props.onSettings;
   var onSignOut = props.onSignOut;
 
@@ -77,8 +78,6 @@ function GameTopMenu(props) {
       zIndex: 250,
       display: "flex",
       alignItems: "center",
-      justifyContent: "flex-end",
-      gap: "0.5rem",
       direction: "rtl",
       padding: "0 1.2rem",
       background: "rgba(250,250,250,0.92)",
@@ -87,31 +86,36 @@ function GameTopMenu(props) {
       borderBottom: "1px solid rgba(0,0,0,0.06)",
       boxSizing: "border-box",
     }}>
-      <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.4rem", maxWidth: 200, marginLeft: "auto" }}>
-        {user && user.image ? (
-          <img
-            src={user.image}
-            alt={userLabel}
-            style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover" }}
-          />
-        ) : (
-          <div style={{
-            width: 22,
-            height: 22,
-            borderRadius: "50%",
-            background: "rgba(17,19,25,0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "0.72rem",
-          }}>{userInitial}</div>
-        )}
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userLabel}</span>
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.4rem", maxWidth: 200 }}>
+          {user && user.image ? (
+            <img
+              src={user.image}
+              alt={userLabel}
+              style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover" }}
+            />
+          ) : (
+            <div style={{
+              width: 22,
+              height: 22,
+              borderRadius: "50%",
+              background: "rgba(17,19,25,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.72rem",
+            }}>{userInitial}</div>
+          )}
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userLabel}</span>
+        </button>
+        <button onClick={onHome} style={menuBtn}>בית</button>
+        <button onClick={onLevels} style={menuBtn}>שלבים</button>
+        <button onClick={onDashboard} style={menuBtn}>התקדמות</button>
+        <button onClick={onSettings} style={menuBtn}>הגדרות</button>
+      </div>
 
-      <button onClick={onDashboard} style={menuBtn}>אנליטיקות</button>
-      <button onClick={onAdmin} style={menuBtn}>אדמין</button>
-      <button onClick={onSettings} style={menuBtn}>הגדרות</button>
+      <div style={{ flex: 1 }} />
+
       <button onClick={onSignOut} style={{
         background: "#111319",
         border: "none",
@@ -645,6 +649,8 @@ export default function LetterHunter() {
   var _lpk = useState(null); var lastPressedKey = _lpk[0]; var setLastPressedKey = _lpk[1];
   var _uh = useState(false); var usedHelp = _uh[0]; var setUsedHelp = _uh[1];
   var _hf = useState(false); var hintFlipped = _hf[0]; var setHintFlipped = _hf[1];
+  var _sd = useState(false); var speakDone = _sd[0]; var setSpeakDone = _sd[1];
+  var _lw = useState(false); var showLangWarning = _lw[0]; var setShowLangWarning = _lw[1];
 
   var guestGameRef = useRef(false);
   var lastGameSessionRef = useRef(null);
@@ -754,7 +760,10 @@ export default function LetterHunter() {
     if (screen !== "game") return;
     var currentLetter = sequence[currentIdx];
     if (!currentLetter) return;
-    playRecordingSeq(["לחצי על האות", currentLetter]);
+    setSpeakDone(false);
+    playRecordingSeq(["לחצי על האות", currentLetter]).then(function() {
+      setSpeakDone(true);
+    });
   }, [screen, currentIdx, sequence]);
 
   // Keyboard handler via ref to avoid stale closures
@@ -783,11 +792,17 @@ export default function LetterHunter() {
       setLastPressedKey(pressedKey);
 
       if (!baseLetter) {
+        if (/^[a-zA-Z]$/.test(pressedKey)) {
+          setShowLangWarning(true);
+          return;
+        }
         setErrorMsg("\u05D1\u05D5\u05D0\u05D9 \u05E0\u05D7\u05E4\u05E9 \u05D0\u05D5\u05EA! \uD83D\uDD0D");
         setShowError(true);
         setTimeout(function() { setShowError(false); }, 1200);
         return;
       }
+
+      setShowLangWarning(false);
 
       var isCorrect = (baseLetter === target || pressedKey === target);
       var ttc = Date.now() - st.letterShownAt;
@@ -885,9 +900,10 @@ export default function LetterHunter() {
   }, [screen, sessionStartTime]);
 
   function openProfiles() { setScreen("profiles"); }
+  function openHome() { setScreen("home"); }
+  function openLevels() { setScreen("levels"); }
   function openDashboard() { setScreen("dashboard"); }
   function openSettings() { setScreen("settings"); }
-  function openAdmin() { setScreen("dashboard"); }
   function handleSignOut() {
     setActiveProfile(null);
     signOut({ callbackUrl: "/play" });
@@ -900,8 +916,9 @@ export default function LetterHunter() {
         <GameTopMenu
           user={sync.user}
           onProfiles={openProfiles}
+          onHome={openHome}
+          onLevels={openLevels}
           onDashboard={openDashboard}
-          onAdmin={openAdmin}
           onSettings={openSettings}
           onSignOut={handleSignOut}
         />
@@ -945,7 +962,7 @@ export default function LetterHunter() {
     return <HomeScreen onPlay={function() { startGame(null, true); }} onSettings={function() { setScreen("settings"); }} />;
   }
 
-  if (screen === "levels") {
+  if (screen === "levels" || screen === "home") {
     return withTopMenu((
       <LevelSelectionScreen
         levelProgress={levelProgress}
@@ -971,6 +988,9 @@ export default function LetterHunter() {
         hintFlipped={hintFlipped}
         setHintFlipped={setHintFlipped}
         currentGameLevel={currentGameLevel}
+        speakDone={speakDone}
+        showLangWarning={showLangWarning}
+        onDismissLangWarning={function() { setShowLangWarning(false); }}
       />
     ));
   }
@@ -1388,6 +1408,7 @@ function ProfileSelectionScreen(props) {
 function HomeScreen(props) {
   var onPlay = props.onPlay;
   var onSettings = props.onSettings;
+  var _sp = useState(false); var showPlayPrompt = _sp[0]; var setShowPlayPrompt = _sp[1];
 
   return (
     <div style={{ ...PAGE_BG, fontFamily: "'Secular One', 'Rubik', sans-serif" }}>
@@ -1397,7 +1418,7 @@ function HomeScreen(props) {
       <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.3rem)", color: "rgba(20,23,32,0.45)", fontFamily: "'Rubik', sans-serif", marginBottom: "2.5rem", zIndex: 2, textAlign: "center" }}>ללמוד את המקלדת דרך משחק קולי</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "center", zIndex: 2, width: "100%", maxWidth: 380 }}>
-        <button onClick={onPlay} style={{
+        <button onClick={function() { setShowPlayPrompt(true); }} style={{
           padding: "0.85rem 2.8rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
           background: "#111319", color: "white",
           border: "none", borderRadius: "999px", cursor: "pointer",
@@ -1424,6 +1445,52 @@ function HomeScreen(props) {
         border: "1px solid rgba(0,0,0,0.08)", background: "white", cursor: "pointer", fontSize: "1.2rem",
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)", zIndex: 2,
       }}>⚙️</button>
+
+      {showPlayPrompt ? (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+        }} onClick={function() { setShowPlayPrompt(false); }}>
+          <div style={{
+            position: "absolute", top: "50%", left: "50%",
+            transform: "translate(-50%,-50%)",
+            background: "white", borderRadius: 24, padding: "2.2rem 2rem",
+            textAlign: "center", direction: "rtl",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.2)",
+            maxWidth: 380, width: "90%",
+            animation: "playPromptPop 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+          }} onClick={function(e) { e.stopPropagation(); }}>
+            <div style={{ fontSize: "2.8rem", marginBottom: "0.6rem" }}>💾</div>
+            <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.25rem", color: "#111319", margin: "0 0 0.5rem" }}>רוצה לשמור את ההתקדמות?</h2>
+            <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.9rem", color: "#888", margin: "0 0 1.5rem", lineHeight: 1.6 }}>
+              התחברו כדי לשמור את הציונים, לעקוב אחרי ההתקדמות ולהמשיך מאיפה שעצרתם
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+              <a href="/auth/signin?callbackUrl=%2Fplay" style={{
+                padding: "0.75rem", fontSize: "1.05rem", fontFamily: "'Secular One', sans-serif",
+                background: "#111319", color: "white", border: "none", borderRadius: 999,
+                cursor: "pointer", textDecoration: "none", textAlign: "center",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              }}>התחברות</a>
+              <a href="/auth/register?callbackUrl=%2Fplay" style={{
+                padding: "0.75rem", fontSize: "1.05rem", fontFamily: "'Secular One', sans-serif",
+                background: "#7C5CFC", color: "white", border: "none", borderRadius: 999,
+                cursor: "pointer", textDecoration: "none", textAlign: "center",
+                boxShadow: "0 4px 12px rgba(124,92,252,0.3)",
+              }}>הרשמה</a>
+              <button onClick={function() { setShowPlayPrompt(false); onPlay(); }} style={{
+                padding: "0.6rem", fontSize: "0.9rem", fontFamily: "'Rubik', sans-serif",
+                background: "none", color: "#999", border: "none",
+                cursor: "pointer", textDecoration: "underline",
+              }}>רק לשחק בלי לשמור</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <style>{
+        "@keyframes playPromptPop { 0%{ transform: translate(-50%,-50%) scale(0.8); opacity: 0 } 100%{ transform: translate(-50%,-50%) scale(1); opacity: 1 } }"
+      }</style>
     </div>
   );
 }
@@ -1447,18 +1514,16 @@ function GameScreen(props) {
   var hintFlipped = props.hintFlipped;
   var setHintFlipped = props.setHintFlipped;
   var currentGameLevel = props.currentGameLevel;
+  var speakDone = props.speakDone;
+  var showLangWarning = props.showLangWarning;
+  var onDismissLangWarning = props.onDismissLangWarning;
 
   var displayLetter = nikud ? letter + nikud : letter;
   var successMsg = useMemo(function() {
     return SUCCESS_MSGS[Math.floor(Math.random() * SUCCESS_MSGS.length)];
   }, [showSuccess, letter]);
 
-  var rowHint = useMemo(function() {
-    if (helpLevel !== "beginner") return null;
-    var rowNames = { top: "שורה עליונה ☝️", middle: "שורה אמצעית ✌️", bottom: "שורה תחתונה 👇" };
-    var found = Object.entries(KEYBOARD_ROWS).find(function(entry) { return entry[1].indexOf(letter) >= 0; });
-    return found ? rowNames[found[0]] : null;
-  }, [letter, helpLevel]);
+
 
   var bgColor = showSuccess ? "#e8f8ef"
     : showError ? "#fef2f0"
@@ -1519,15 +1584,16 @@ function GameScreen(props) {
           {displayLetter}
         </div>
 
-        {/* Speaker button */}
-        {!showSuccess && !showError ? (
+        {/* Speaker button — visible only after initial playback ends */}
+        {speakDone && !showSuccess && !showError ? (
           <button onClick={onSpeakLetter} style={{
-            position: "absolute", left: "-3.5rem", top: "50%", transform: "translateY(-50%)",
-            width: 48, height: 48, borderRadius: "50%", border: "none", cursor: "pointer",
-            fontSize: "1.4rem", background: "white",
+            position: "absolute", left: "-4.5rem", top: "50%", transform: "translateY(-50%)",
+            width: 60, height: 60, borderRadius: "50%", border: "none", cursor: "pointer",
+            fontSize: "1.8rem", background: "white",
             boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "transform 0.2s, box-shadow 0.2s"
+            transition: "transform 0.2s, box-shadow 0.2s, opacity 0.3s",
+            opacity: 1,
           }} title="הקראת האות">🔊</button>
         ) : null}
 
@@ -1546,7 +1612,6 @@ function GameScreen(props) {
         </p>
       ) : null}
 
-      {rowHint && !showSuccess ? <p style={{ fontSize: "1rem", color: "#aaa", marginTop: "0.3rem" }}>{rowHint}</p> : null}
 
       {/* Error counter dots */}
       {currentErrors > 0 && !showSuccess ? (
@@ -1590,8 +1655,37 @@ function GameScreen(props) {
         "@keyframes errorSlideIn { 0%{ transform: translateY(20px) scale(0.9); opacity: 0 } 100%{ transform: translateY(0) scale(1); opacity: 1 } }" +
         "@keyframes glowPulse { 0%,100%{ opacity: 0.5; transform: scale(1) } 50%{ opacity: 1; transform: scale(1.1) } }" +
         "@keyframes errorFlash { 0%{ opacity: 1; transform: scale(0.8) } 100%{ opacity: 0; transform: scale(1.5) } }" +
-        "@keyframes wrongKeyFloat { 0%{ transform: translateY(0) scale(1); opacity: 0.8 } 100%{ transform: translateY(-80px) scale(0.4); opacity: 0 } }"
+        "@keyframes wrongKeyFloat { 0%{ transform: translateY(0) scale(1); opacity: 0.8 } 100%{ transform: translateY(-80px) scale(0.4); opacity: 0 } }" +
+        "@keyframes langWarnPop { 0%{ transform: translate(-50%,-50%) scale(0.8); opacity: 0 } 100%{ transform: translate(-50%,-50%) scale(1); opacity: 1 } }"
       }</style>
+
+      {showLangWarning ? (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+        }}>
+          <div style={{
+            position: "absolute", top: "50%", left: "50%",
+            transform: "translate(-50%,-50%)",
+            background: "white", borderRadius: 24, padding: "2rem 2.5rem",
+            textAlign: "center", direction: "rtl",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.2)",
+            maxWidth: 340, width: "90%",
+            animation: "langWarnPop 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+          }}>
+            <div style={{ fontSize: "3rem", marginBottom: "0.8rem" }}>⌨️</div>
+            <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.3rem", color: "#111319", margin: "0 0 0.6rem" }}>המקלדת על אנגלית!</h2>
+            <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "#666", margin: "0 0 1.5rem", lineHeight: 1.5 }}>
+              שנו את שפת המקלדת לעברית ונסו שוב
+            </p>
+            <button onClick={onDismissLangWarning} style={{
+              padding: "0.7rem 2.5rem", fontSize: "1rem", fontFamily: "'Secular One', sans-serif",
+              background: "#111319", color: "white", border: "none", borderRadius: 999,
+              cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            }}>הבנתי</button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1763,7 +1857,7 @@ function DashboardScreen(props) {
       <button onClick={onBack} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
-        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>אנליטיקות</h1>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>התקדמות</h1>
       </div>
 
       <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404", zIndex: 2, width: "100%", maxWidth: 900, boxSizing: "border-box" }}>
@@ -1809,22 +1903,50 @@ function DashboardScreen(props) {
               })}
             </div>
 
-            {accuracyOverTime.length > 1 ? (
-              <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>דיוק לאורך זמן</h3>
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 100 }}>
-                  {accuracyOverTime.map(function(d, i) {
-                    return (
-                      <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <div style={{ fontSize: "0.6rem", color: "#999", marginBottom: 2 }}>{d.accuracy}%</div>
-                        <div style={{ width: "100%", maxWidth: 30, height: d.accuracy * 0.8, background: "linear-gradient(180deg, #7C5CFC, #9B7DFF)", borderRadius: "4px 4px 0 0", minHeight: 4 }} />
-                        <div style={{ fontSize: "0.55rem", color: "#bbb", marginTop: 2 }}>{d.date}</div>
-                      </div>
-                    );
-                  })}
+            {accuracyOverTime.length > 1 ? (function() {
+              var chartW = 100;
+              var chartH = 120;
+              var padL = 0;
+              var padR = 0;
+              var padT = 18;
+              var padB = 22;
+              var n = accuracyOverTime.length;
+              var innerW = chartW - padL - padR;
+              var innerH = chartH - padT - padB;
+              var points = accuracyOverTime.map(function(d, i) {
+                var x = padL + (n > 1 ? (i / (n - 1)) * innerW : innerW / 2);
+                var y = padT + innerH - (d.accuracy / 100) * innerH;
+                return { x: x, y: y, accuracy: d.accuracy, date: d.date };
+              });
+              var polyline = points.map(function(p) { return p.x + "," + p.y; }).join(" ");
+              var areaPath = "M" + points[0].x + "," + (padT + innerH)
+                + " " + points.map(function(p) { return "L" + p.x + "," + p.y; }).join(" ")
+                + " L" + points[points.length - 1].x + "," + (padT + innerH) + " Z";
+              return (
+                <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                  <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>דיוק לאורך זמן</h3>
+                  <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", height: "auto", overflow: "visible" }}>
+                    <defs>
+                      <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#7C5CFC" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#7C5CFC" stopOpacity="0.02" />
+                      </linearGradient>
+                    </defs>
+                    <path d={areaPath} fill="url(#lineGrad)" />
+                    <polyline points={polyline} fill="none" stroke="#7C5CFC" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    {points.map(function(p, i) {
+                      return (
+                        <g key={i}>
+                          <circle cx={p.x} cy={p.y} r="3" fill="#7C5CFC" stroke="white" strokeWidth="1.5" />
+                          <text x={p.x} y={p.y - 6} textAnchor="middle" fontSize="5" fill="#999">{p.accuracy}%</text>
+                          <text x={p.x} y={padT + innerH + 10} textAnchor="middle" fontSize="4.5" fill="#bbb">{p.date}</text>
+                        </g>
+                      );
+                    })}
+                  </svg>
                 </div>
-              </div>
-            ) : null}
+              );
+            })() : null}
 
             {hardestLetters.length > 0 ? (
               <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
