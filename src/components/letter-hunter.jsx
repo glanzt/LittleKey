@@ -1078,10 +1078,10 @@ function LevelSelectionScreen(props) {
     var bg = isCurrent ? "#E74C3C" : isCompleted ? "#27AE60" : "rgba(0,0,0,0.05)";
     var color = (isCurrent || isCompleted) ? "white" : "rgba(0,0,0,0.25)";
     return {
-      width: 52, height: 52, borderRadius: 14,
+      width: 104, height: 104, borderRadius: 20,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       background: bg, color: color,
-      fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", fontWeight: 700,
+      fontFamily: "'Secular One', sans-serif", fontSize: "2rem", fontWeight: 700,
       cursor: isLocked ? "default" : "pointer",
       boxShadow: isCurrent ? "0 4px 16px rgba(231,76,60,0.35)" : isCompleted ? "0 2px 8px rgba(39,174,96,0.2)" : "none",
       transition: "transform 0.15s",
@@ -1119,10 +1119,10 @@ function LevelSelectionScreen(props) {
       {/* Levels grid */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, 52px)",
-        gap: 10,
+        gridTemplateColumns: "repeat(auto-fill, 104px)",
+        gap: 14,
         justifyContent: "center",
-        width: "100%", maxWidth: 500,
+        width: "100%", maxWidth: 900,
         marginBottom: "1.2rem", zIndex: 2,
         direction: "ltr",
       }}>
@@ -1139,11 +1139,11 @@ function LevelSelectionScreen(props) {
               style={tileStyle(lvl)}
             >
               {isLocked ? (
-                <span style={{ fontSize: "1.2rem", opacity: 0.5 }}>🔒</span>
+                <span style={{ fontSize: "2rem", opacity: 0.5 }}>🔒</span>
               ) : (
                 <>
                   <span>{lvl}</span>
-                  {stars ? <span style={{ fontSize: "0.45rem", marginTop: -2, letterSpacing: -1 }}>{stars}</span> : null}
+                  {stars ? <span style={{ fontSize: "0.8rem", marginTop: -2, letterSpacing: -1 }}>{stars}</span> : null}
                 </>
               )}
             </button>
@@ -1162,7 +1162,7 @@ function LevelSelectionScreen(props) {
             fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center",
             opacity: page <= 1 ? 0.3 : 1, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
-        >←</button>
+        >→</button>
         <span style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", color: "#111319", minWidth: 60, textAlign: "center" }}>
           {totalPages} / {page}
         </span>
@@ -1175,7 +1175,7 @@ function LevelSelectionScreen(props) {
             fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center",
             opacity: page >= totalPages ? 0.3 : 1, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
-        >→</button>
+        >←</button>
       </div>
 
       {/* Info + play button */}
