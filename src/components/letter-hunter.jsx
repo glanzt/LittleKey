@@ -109,7 +109,6 @@ function GameTopMenu(props) {
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userLabel}</span>
         </button>
         <button onClick={onHome} style={menuBtn}>בית</button>
-        <button onClick={onLevels} style={menuBtn}>שלבים</button>
         <button onClick={onDashboard} style={menuBtn}>התקדמות</button>
         <button onClick={onSettings} style={menuBtn}>הגדרות</button>
       </div>
