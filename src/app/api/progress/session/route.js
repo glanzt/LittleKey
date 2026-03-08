@@ -34,6 +34,8 @@ export async function POST(request) {
         sequence: body.sequence,
         letterResults: body.letterResults,
         level: body.level,
+        moves: body.moves,
+        round: body.round,
       },
     },
   });

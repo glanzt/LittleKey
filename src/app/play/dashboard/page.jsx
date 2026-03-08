@@ -11,6 +11,12 @@ export default function DashboardPage() {
   var router = useRouter();
   var sessions = game.sessions;
   var letterStats = game.letterStats;
+  var keyboardSessions = useMemo(function() {
+    return sessions.filter(function(s) { return s.mode !== "match"; });
+  }, [sessions]);
+  var matchSessions = useMemo(function() {
+    return sessions.filter(function(s) { return s.mode === "match" && s.duration > 0; });
+  }, [sessions]);
 
   var _t = useState("overview"); var tab = _t[0]; var setTab = _t[1];
   var _cc = useState(false); var confirmClear = _cc[0]; var setConfirmClear = _cc[1];
@@ -37,16 +43,39 @@ export default function DashboardPage() {
   }, [letterStats]);
 
   var accuracyOverTime = useMemo(function() {
-    return sessions.slice(-15).map(function(s, i) {
+    return keyboardSessions.slice(-15).map(function(s, i) {
       return { idx: i + 1, accuracy: s.accuracy, date: new Date(s.date).toLocaleDateString("he-IL", { day: "numeric", month: "numeric" }) };
     });
-  }, [sessions]);
+  }, [keyboardSessions]);
+
+  var matchDurationOverTime = useMemo(function() {
+    return matchSessions.slice(-15).map(function(s, i) {
+      return {
+        idx: i + 1,
+        duration: s.duration,
+        date: new Date(s.date).toLocaleDateString("he-IL", { day: "numeric", month: "numeric" })
+      };
+    });
+  }, [matchSessions]);
+
+  var matchTimingStats = useMemo(function() {
+    if (matchSessions.length === 0) return null;
+    var latest = matchSessions[matchSessions.length - 1];
+    var best = matchSessions.reduce(function(min, s) { return Math.min(min, s.duration); }, Infinity);
+    var avg = Math.round(matchSessions.reduce(function(sum, s) { return sum + s.duration; }, 0) / matchSessions.length);
+    return { latest: latest.duration, best: best, avg: avg };
+  }, [matchSessions]);
+
+  function formatDuration(ms) {
+    if (!ms || ms <= 0) return "-";
+    return (ms / 1000).toFixed(1) + "s";
+  }
 
   return (
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      <button onClick={function() { router.push("/play/levels"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
+      <button onClick={function() { router.push("/play"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
         <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>התקדמות</h1>
@@ -78,20 +107,27 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div style={{ zIndex: 2, width: "100%", maxWidth: 900 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", marginBottom: "1.5rem" }}>
-              {[
-                { label: "סשנים", value: sessions.length, color: "#7C5CFC" },
-                { label: "דיוק ממוצע", value: Math.round(sessions.reduce(function(s, x) { return s + x.accuracy; }, 0) / sessions.length) + "%", color: "#27AE60" },
-                { label: "זמן ממוצע", value: (sessions.reduce(function(s, x) { return s + x.avgTtc; }, 0) / sessions.length / 1000).toFixed(1) + "s", color: "#E74C3C" }
-              ].map(function(s, i) {
-                return (
-                  <div key={i} style={{ background: "white", borderRadius: 16, padding: "1rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                    <div style={{ fontSize: "1.6rem", fontWeight: "700", color: s.color }}>{s.value}</div>
-                    <div style={{ fontSize: "0.8rem", color: "#999" }}>{s.label}</div>
+            {keyboardSessions.length > 0 ? (
+              <>
+                <div style={{ background: "white", borderRadius: 20, padding: "1.2rem 1.5rem", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                  <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>⌨️ משחק המקלדת</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem" }}>
+                    {[
+                      { label: "סשנים", value: keyboardSessions.length, color: "#7C5CFC" },
+                      { label: "דיוק ממוצע", value: Math.round(keyboardSessions.reduce(function(s, x) { return s + x.accuracy; }, 0) / keyboardSessions.length) + "%", color: "#27AE60" },
+                      { label: "זמן ממוצע", value: (keyboardSessions.reduce(function(s, x) { return s + x.avgTtc; }, 0) / keyboardSessions.length / 1000).toFixed(1) + "s", color: "#E74C3C" }
+                    ].map(function(s, i) {
+                      return (
+                        <div key={i} style={{ background: "rgba(250,250,250,0.9)", borderRadius: 16, padding: "1rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.03)" }}>
+                          <div style={{ fontSize: "1.6rem", fontWeight: "700", color: s.color }}>{s.value}</div>
+                          <div style={{ fontSize: "0.8rem", color: "#999" }}>{s.label}</div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              </>
+            ) : null}
 
             {accuracyOverTime.length > 1 ? (function() {
               var chartW = 300;
@@ -176,6 +212,94 @@ export default function DashboardPage() {
                 </div>
               </div>
             ) : null}
+
+            {matchTimingStats ? (
+              <>
+                <div style={{ background: "white", borderRadius: 20, padding: "1.2rem 1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                  <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>🃏 התאמת קלפים</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem" }}>
+                    {[
+                      { label: "זמן אחרון", value: formatDuration(matchTimingStats.latest), color: "#7C5CFC" },
+                      { label: "זמן ממוצע", value: formatDuration(matchTimingStats.avg), color: "#E67E22" },
+                      { label: "זמן הכי מהיר", value: formatDuration(matchTimingStats.best), color: "#27AE60" }
+                    ].map(function(s, i) {
+                      return (
+                        <div key={i} style={{ background: "rgba(250,250,250,0.9)", borderRadius: 16, padding: "1rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.03)" }}>
+                          <div style={{ fontSize: "1.6rem", fontWeight: "700", color: s.color }}>{s.value}</div>
+                          <div style={{ fontSize: "0.8rem", color: "#999" }}>{s.label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {matchDurationOverTime.length > 1 ? (function() {
+                  var chartW = 300;
+                  var chartH = 100;
+                  var padL = 28;
+                  var padR = 14;
+                  var padT = 16;
+                  var padB = 20;
+                  var n = matchDurationOverTime.length;
+                  var innerW = chartW - padL - padR;
+                  var innerH = chartH - padT - padB;
+
+                  var minMs = matchDurationOverTime.reduce(function(m, d) { return Math.min(m, d.duration); }, Infinity);
+                  var maxMs = matchDurationOverTime.reduce(function(m, d) { return Math.max(m, d.duration); }, 0);
+                  var yMin = Math.max(0, Math.floor((minMs - 2000) / 1000) * 1000);
+                  var yMax = Math.ceil((maxMs + 1000) / 1000) * 1000;
+                  if (yMax - yMin < 3000) yMax = yMin + 3000;
+                  var yRange = yMax - yMin;
+
+                  var gridLines = [];
+                  for (var g = yMin; g <= yMax; g += 1000) gridLines.push(g);
+
+                  var points = matchDurationOverTime.map(function(d, i) {
+                    var x = padL + (n > 1 ? (i / (n - 1)) * innerW : innerW / 2);
+                    var y = padT + innerH - ((d.duration - yMin) / yRange) * innerH;
+                    return { x: x, y: y, duration: d.duration, date: d.date };
+                  });
+                  var polyline = points.map(function(p) { return p.x + "," + p.y; }).join(" ");
+                  var areaPath = "M" + points[0].x + "," + (padT + innerH)
+                    + " " + points.map(function(p) { return "L" + p.x + "," + p.y; }).join(" ")
+                    + " L" + points[points.length - 1].x + "," + (padT + innerH) + " Z";
+
+                  return (
+                    <div style={{ background: "white", borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                      <h3 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>זמן סיום לאורך זמן</h3>
+                      <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", overflow: "visible" }} preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                          <linearGradient id="matchLineGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#E67E22" stopOpacity="0.18" />
+                            <stop offset="100%" stopColor="#E67E22" stopOpacity="0.02" />
+                          </linearGradient>
+                        </defs>
+                        {gridLines.map(function(val) {
+                          var gy = padT + innerH - ((val - yMin) / yRange) * innerH;
+                          return (
+                            <g key={val}>
+                              <line x1={padL} y1={gy} x2={chartW - padR} y2={gy} stroke="#eee" strokeWidth="0.5" />
+                              <text x={padL - 4} y={gy + 3} textAnchor="end" fontSize="6" fill="#bbb" fontFamily="'Rubik', sans-serif">{(val / 1000).toFixed(0)}s</text>
+                            </g>
+                          );
+                        })}
+                        <path d={areaPath} fill="url(#matchLineGrad)" />
+                        <polyline points={polyline} fill="none" stroke="#E67E22" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                        {points.map(function(p, i) {
+                          return (
+                            <g key={i}>
+                              <circle cx={p.x} cy={p.y} r="3.5" fill="#E67E22" stroke="white" strokeWidth="1.5" />
+                              <text x={p.x} y={p.y - 6} textAnchor="middle" fontSize="6.5" fill="#555" fontWeight="600" fontFamily="'Secular One', sans-serif">{formatDuration(p.duration)}</text>
+                              <text x={p.x} y={padT + innerH + 10} textAnchor="middle" fontSize="6" fill="#bbb" fontFamily="'Rubik', sans-serif">{p.date}</text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    </div>
+                  );
+                })() : null}
+              </>
+            ) : null}
           </div>
         )
       ) : null}
@@ -217,7 +341,23 @@ export default function DashboardPage() {
         ) : (
           <div style={{ zIndex: 2, width: "100%", maxWidth: 900 }}>
             {recentSessions.map(function(s, i) {
-              var sResults = s.letterResults || s.sequence.map(function(l) { return { letter: l, status: "perfect" }; });
+              if (s.mode === "match") {
+                return (
+                  <div key={i} style={{ background: "white", borderRadius: 16, padding: "1rem 1.5rem", marginBottom: "0.8rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.85rem", color: "#999" }}>
+                        {new Date(s.date).toLocaleDateString("he-IL")} {new Date(s.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <span style={{ fontSize: "0.8rem", color: "#bbb" }}>התאמת קלפים</span>
+                    </div>
+                    <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.6rem", alignItems: "center" }}>
+                      <span style={{ fontWeight: "600", color: "#E67E22" }}>⏱️ {formatDuration(s.duration)}</span>
+                    </div>
+                  </div>
+                );
+              }
+
+              var sResults = s.letterResults || (s.sequence || []).map(function(l) { return { letter: l, status: "perfect" }; });
               return (
                 <div key={i} style={{ background: "white", borderRadius: 16, padding: "1rem 1.5rem", marginBottom: "0.8rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

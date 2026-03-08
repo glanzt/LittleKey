@@ -29,7 +29,7 @@ export default function ProfilesPage() {
 
   function handleSelect(profile) {
     game.setActiveProfile(profile);
-    router.push("/play/levels");
+    router.push("/play");
   }
 
   function handleCreate() {

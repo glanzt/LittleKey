@@ -305,136 +305,174 @@ export function GameProvider(props) {
     });
   }, [pathname, currentIdx, sequence]);
 
+  function processGameKeyPress(pressedKey) {
+    var st = stateRef.current;
+    if (st.showSuccess || st.currentIdx >= st.sequence.length) return;
+
+    if (pressedKey === " ") {
+      setHintFlipped(function(prev) {
+        if (!prev) setUsedHelp(true);
+        return !prev;
+      });
+      return;
+    }
+
+    var target = st.sequence[st.currentIdx];
+    var baseLetter = KEY_TO_LETTER[pressedKey];
+
+    setLastPressedKey(pressedKey);
+
+    if (!baseLetter) {
+      if (/^[a-zA-Z]$/.test(pressedKey)) {
+        setShowLangWarning(true);
+        return;
+      }
+      setErrorMsg("\u05D1\u05D5\u05D0\u05D9 \u05E0\u05D7\u05E4\u05E9 \u05D0\u05D5\u05EA! \uD83D\uDD0D");
+      setShowError(true);
+      setTimeout(function() { setShowError(false); }, 1200);
+      return;
+    }
+
+    setShowLangWarning(false);
+
+    var isCorrect = (baseLetter === target || pressedKey === target);
+    var ttc = Date.now() - st.letterShownAt;
+    var attempt = {
+      letter: target, keyPressed: pressedKey, isCorrect: isCorrect,
+      timestamp: Date.now(), ttc: ttc, helped: st.usedHelp
+    };
+
+    setAttempts(function(prev) { return prev.concat([attempt]); });
+
+    if (isCorrect) {
+      var isPerfect = st.currentErrors === 0;
+      var wasHelped = st.usedHelp;
+      if (isPerfect) playPerfect(); else playSuccess();
+      playClap();
+      setShowSuccess(true);
+
+      var resultStatus;
+      if (wasHelped) {
+        resultStatus = isPerfect ? "helpedPerfect" : "helpedWithErrors";
+      } else {
+        resultStatus = isPerfect ? "perfect" : "withErrors";
+      }
+
+      setLetterResults(function(prev) {
+        return prev.map(function(r, i) {
+          if (i === st.currentIdx) return { letter: r.letter, status: resultStatus };
+          if (i === st.currentIdx + 1) return { letter: r.letter, status: "current" };
+          return r;
+        });
+      });
+
+      if (!wasHelped) {
+        setLetterStats(function(prev) {
+          var s = prev[target] || { attempts: 0, correct: 0, totalTtc: 0, bestTtc: Infinity, lastPracticed: null };
+          var updated = {};
+          Object.keys(prev).forEach(function(k) { updated[k] = prev[k]; });
+          var validTtc = ttc < TTC_OUTLIER_MS;
+          updated[target] = {
+            attempts: s.attempts + 1 + st.currentErrors,
+            correct: s.correct + 1,
+            totalTtc: validTtc ? s.totalTtc + ttc : s.totalTtc,
+            bestTtc: validTtc ? Math.min(s.bestTtc, ttc) : s.bestTtc,
+            lastPracticed: new Date().toISOString()
+          };
+          return updated;
+        });
+      }
+
+      var nextIdx = st.currentIdx + 1;
+      var isLast = nextIdx >= st.sequence.length;
+
+      setTimeout(function() {
+        setShowSuccess(false);
+        setCurrentErrors(0);
+        setLastPressedKey(null);
+        setUsedHelp(false);
+        setHintFlipped(false);
+        if (isLast) {
+          setAttempts(function(latestAttempts) {
+            setLetterResults(function(latestLR) {
+              finishSession(latestAttempts, st.sequence, sessionStartTime, latestLR, st.currentGameLevel);
+              return latestLR;
+            });
+            return latestAttempts;
+          });
+        } else {
+          setCurrentIdx(nextIdx);
+          setLetterShownAt(Date.now());
+        }
+      }, 1500);
+    } else {
+      playError();
+      var wrongBase = KEY_TO_LETTER[pressedKey];
+      playRecordingSeq(["בחרת ב", wrongBase]);
+      var newErrors = st.currentErrors + 1;
+      setCurrentErrors(newErrors);
+
+      if (newErrors >= 3) {
+        var rowEntry = Object.entries(KEYBOARD_ROWS).find(function(entry) { return entry[1].indexOf(target) >= 0; });
+        var rowNames = { top: "\u05D4\u05E2\u05DC\u05D9\u05D5\u05E0\u05D4", middle: "\u05D4\u05D0\u05DE\u05E6\u05E2\u05D9\u05EA", bottom: "\u05D4\u05EA\u05D7\u05EA\u05D5\u05E0\u05D4" };
+        var rn = rowEntry ? rowNames[rowEntry[0]] : "";
+        setErrorMsg("\u05E8\u05DE\u05D6: \u05D7\u05E4\u05E9\u05D9 \u05D1\u05E9\u05D5\u05E8\u05D4 " + rn + "! \uD83D\uDCA1");
+      } else {
+        setErrorMsg(ERROR_MSGS[Math.floor(Math.random() * ERROR_MSGS.length)]);
+      }
+      setShowError(true);
+      setTimeout(function() { setShowError(false); setLastPressedKey(null); }, 1200);
+    }
+  }
+
   // Keyboard handler (only on game page)
   useEffect(function() {
     if (pathname !== "/play/game") return;
 
     function handler(e) {
       e.preventDefault();
-      var st = stateRef.current;
-      if (st.showSuccess || st.currentIdx >= st.sequence.length) return;
-
-      var pressedKey = e.key;
-
-      if (pressedKey === " ") {
-        setHintFlipped(function(prev) {
-          if (!prev) setUsedHelp(true);
-          return !prev;
-        });
-        return;
-      }
-
-      var target = st.sequence[st.currentIdx];
-      var baseLetter = KEY_TO_LETTER[pressedKey];
-
-      setLastPressedKey(pressedKey);
-
-      if (!baseLetter) {
-        if (/^[a-zA-Z]$/.test(pressedKey)) {
-          setShowLangWarning(true);
-          return;
-        }
-        setErrorMsg("\u05D1\u05D5\u05D0\u05D9 \u05E0\u05D7\u05E4\u05E9 \u05D0\u05D5\u05EA! \uD83D\uDD0D");
-        setShowError(true);
-        setTimeout(function() { setShowError(false); }, 1200);
-        return;
-      }
-
-      setShowLangWarning(false);
-
-      var isCorrect = (baseLetter === target || pressedKey === target);
-      var ttc = Date.now() - st.letterShownAt;
-      var attempt = {
-        letter: target, keyPressed: pressedKey, isCorrect: isCorrect,
-        timestamp: Date.now(), ttc: ttc, helped: st.usedHelp
-      };
-
-      setAttempts(function(prev) { return prev.concat([attempt]); });
-
-      if (isCorrect) {
-        var isPerfect = st.currentErrors === 0;
-        var wasHelped = st.usedHelp;
-        if (isPerfect) playPerfect(); else playSuccess();
-        playClap();
-        setShowSuccess(true);
-
-        var resultStatus;
-        if (wasHelped) {
-          resultStatus = isPerfect ? "helpedPerfect" : "helpedWithErrors";
-        } else {
-          resultStatus = isPerfect ? "perfect" : "withErrors";
-        }
-
-        setLetterResults(function(prev) {
-          return prev.map(function(r, i) {
-            if (i === st.currentIdx) return { letter: r.letter, status: resultStatus };
-            if (i === st.currentIdx + 1) return { letter: r.letter, status: "current" };
-            return r;
-          });
-        });
-
-        if (!wasHelped) {
-          setLetterStats(function(prev) {
-            var s = prev[target] || { attempts: 0, correct: 0, totalTtc: 0, bestTtc: Infinity, lastPracticed: null };
-            var updated = {};
-            Object.keys(prev).forEach(function(k) { updated[k] = prev[k]; });
-            var validTtc = ttc < TTC_OUTLIER_MS;
-            updated[target] = {
-              attempts: s.attempts + 1 + st.currentErrors,
-              correct: s.correct + 1,
-              totalTtc: validTtc ? s.totalTtc + ttc : s.totalTtc,
-              bestTtc: validTtc ? Math.min(s.bestTtc, ttc) : s.bestTtc,
-              lastPracticed: new Date().toISOString()
-            };
-            return updated;
-          });
-        }
-
-        var nextIdx = st.currentIdx + 1;
-        var isLast = nextIdx >= st.sequence.length;
-
-        setTimeout(function() {
-          setShowSuccess(false);
-          setCurrentErrors(0);
-          setLastPressedKey(null);
-          setUsedHelp(false);
-          setHintFlipped(false);
-          if (isLast) {
-            setAttempts(function(latestAttempts) {
-              setLetterResults(function(latestLR) {
-                finishSession(latestAttempts, st.sequence, sessionStartTime, latestLR, st.currentGameLevel);
-                return latestLR;
-              });
-              return latestAttempts;
-            });
-          } else {
-            setCurrentIdx(nextIdx);
-            setLetterShownAt(Date.now());
-          }
-        }, 1500);
-      } else {
-        playError();
-        var wrongBase = KEY_TO_LETTER[pressedKey];
-        playRecordingSeq(["בחרת ב", wrongBase]);
-        var newErrors = st.currentErrors + 1;
-        setCurrentErrors(newErrors);
-
-        if (newErrors >= 3) {
-          var rowEntry = Object.entries(KEYBOARD_ROWS).find(function(entry) { return entry[1].indexOf(target) >= 0; });
-          var rowNames = { top: "\u05D4\u05E2\u05DC\u05D9\u05D5\u05E0\u05D4", middle: "\u05D4\u05D0\u05DE\u05E6\u05E2\u05D9\u05EA", bottom: "\u05D4\u05EA\u05D7\u05EA\u05D5\u05E0\u05D4" };
-          var rn = rowEntry ? rowNames[rowEntry[0]] : "";
-          setErrorMsg("\u05E8\u05DE\u05D6: \u05D7\u05E4\u05E9\u05D9 \u05D1\u05E9\u05D5\u05E8\u05D4 " + rn + "! \uD83D\uDCA1");
-        } else {
-          setErrorMsg(ERROR_MSGS[Math.floor(Math.random() * ERROR_MSGS.length)]);
-        }
-        setShowError(true);
-        setTimeout(function() { setShowError(false); setLastPressedKey(null); }, 1200);
-      }
+      processGameKeyPress(e.key);
     }
 
     window.addEventListener("keydown", handler);
     return function() { window.removeEventListener("keydown", handler); };
   }, [pathname, sessionStartTime]);
+
+  function recordMatchSession(durationMs, details) {
+    var info = details || {};
+    var sd = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      mode: "match",
+      totalQuestions: info.totalQuestions != null ? info.totalQuestions : 0,
+      completed: info.completed != null ? info.completed : 0,
+      accuracy: 0,
+      avgTtc: 0,
+      duration: durationMs,
+      attempts: [],
+      sequence: [],
+      letterResults: [],
+      moves: info.moves != null ? info.moves : null,
+      round: info.round != null ? info.round : null,
+    };
+
+    setSessions(function(prev) { return prev.concat([sd]); });
+
+    sync.pushSession({
+      date: sd.date,
+      mode: sd.mode,
+      totalQuestions: sd.totalQuestions,
+      completed: sd.completed,
+      accuracy: sd.accuracy,
+      avgTtc: sd.avgTtc,
+      duration: sd.duration,
+      attempts: sd.attempts,
+      sequence: sd.sequence,
+      letterResults: sd.letterResults,
+      moves: sd.moves,
+      round: sd.round,
+    });
+  }
 
   function handleSignOut() {
     setActiveProfile(null);
@@ -487,6 +525,8 @@ export function GameProvider(props) {
 
     // Actions
     startGame: startGame,
+    recordMatchSession: recordMatchSession,
+    processGameKeyPress: processGameKeyPress,
     speakCurrentLetter: function() { setUsedHelp(true); speakLetter(sequence[currentIdx] || "א"); },
 
     // Navigation

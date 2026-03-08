@@ -42,14 +42,14 @@ export default function SettingsPage() {
       next.letterSet = Array.from(selectedLetters);
       return next;
     });
-    router.push(game.sync.isAuthenticated ? "/play/levels" : "/play");
+    router.push("/play");
   }
 
   return (
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem" }}>
       <FloatingLettersBackground />
 
-      <button onClick={function() { router.push(game.sync.isAuthenticated ? "/play/levels" : "/play"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
+      <button onClick={function() { router.push("/play"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "2rem", width: "100%", maxWidth: 600, zIndex: 2 }}>
         <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>הגדרות</h1>

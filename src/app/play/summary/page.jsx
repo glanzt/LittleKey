@@ -149,7 +149,7 @@ export default function SummaryPage() {
         {!isGuest && currentGameLevel != null ? (
           <button onClick={function() { router.push("/play/levels"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
         ) : null}
-        <button onClick={function() { router.push(isGuest ? "/play" : "/play/levels"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>
+        <button onClick={function() { router.push("/play"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>
           {isGuest ? "מסך ראשי" : "בית"}
         </button>
       </div>

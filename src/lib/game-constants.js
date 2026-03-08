@@ -130,6 +130,33 @@ export function playTone(notes, vol, gap, dur) {
 
 export function playSuccess() { playTone([523.25, 659.25, 783.99, 1046.5], 0.18, 0.1, 0.35); }
 export function playPerfect() { playTone([523.25, 659.25, 783.99, 1046.5, 1318.51], 0.12, 0.08, 0.4); }
+export function playCardFlip() {
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+  ctx.resume();
+
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  var filter = ctx.createBiquadFilter();
+
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(520, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(760, ctx.currentTime + 0.045);
+
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(1900, ctx.currentTime);
+
+  gain.gain.setValueAtTime(0.001, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.11);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.12);
+}
 
 export function playError() {
   var ctx = getAudioCtx();

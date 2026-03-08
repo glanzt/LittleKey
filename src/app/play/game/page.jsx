@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
 import { BACK_BUTTON_STYLE, NIKUD_MAP, KEY_TO_LETTER, SUCCESS_MSGS, speakLetter } from "@/lib/game-constants";
@@ -9,6 +9,8 @@ import { Confetti, ProgressTracker, FlippingHintCard } from "@/components/game-u
 export default function GamePage() {
   var game = useGame();
   var router = useRouter();
+  var inputRef = useRef(null);
+  var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
 
   // Guard: if no active game, redirect
   useEffect(function() {
@@ -19,9 +21,20 @@ export default function GamePage() {
 
   if (game.sequence.length === 0) return null;
 
+  useEffect(function() {
+    function handleResize() {
+      setViewportWidth(window.innerWidth);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return function() { window.removeEventListener("resize", handleResize); };
+  }, []);
+
   var letter = game.sequence[game.currentIdx] || "א";
   var nikud = game.settings.nikud ? NIKUD_MAP[game.settings.nikudType] : null;
   var displayLetter = nikud ? letter + nikud : letter;
+  var isCompact = viewportWidth <= 900;
+  var isPhone = viewportWidth <= 700;
 
   var successMsg = useMemo(function() {
     return SUCCESS_MSGS[Math.floor(Math.random() * SUCCESS_MSGS.length)];
@@ -33,12 +46,63 @@ export default function GamePage() {
 
   var backPath = game.isGuestGame ? "/play" : "/play/levels";
 
+  useEffect(function() {
+    if (!isPhone || !inputRef.current) return;
+    if (game.showSuccess || game.showError) return;
+    var timer = setTimeout(function() {
+      try { inputRef.current.focus(); } catch (e) { /* noop */ }
+    }, 50);
+    return function() { clearTimeout(timer); };
+  }, [isPhone, game.currentIdx, game.showSuccess, game.showError]);
+
+  function handlePhoneInput(e) {
+    var raw = e.target.value || "";
+    var pressedKey = raw.slice(-1);
+    e.target.value = "";
+    if (!pressedKey) return;
+    game.processGameKeyPress(pressedKey);
+    setTimeout(function() {
+      if (inputRef.current) {
+        try { inputRef.current.focus(); } catch (err) { /* noop */ }
+      }
+    }, 20);
+  }
+
+  var helpControls = !game.showSuccess && !game.showError ? (
+    <div style={{
+      position: isCompact ? "static" : "absolute",
+      right: isCompact ? "auto" : "clamp(-15rem, -32vw, -8rem)",
+      top: isCompact ? "auto" : "50%",
+      transform: isCompact ? "none" : "translateY(-50%)",
+      display: "flex",
+      flexDirection: isCompact ? "row" : "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "0.8rem",
+      marginTop: isCompact ? "1.2rem" : 0,
+    }}>
+      <FlippingHintCard letter={letter} onUseHelp={function() { game.setUsedHelp(true); }} flipped={game.hintFlipped} setFlipped={game.setHintFlipped} />
+      {game.speakDone ? (
+        <button onClick={game.speakCurrentLetter} style={{
+          width: 52, height: 52, borderRadius: "50%", border: "none", cursor: "pointer",
+          fontSize: "1.6rem", background: "white",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "transform 0.2s, box-shadow 0.2s, opacity 0.3s",
+          flexShrink: 0,
+        }} title="הקראת האות">🔊</button>
+      ) : null}
+    </div>
+  ) : null;
+
   return (
     <div style={{
       minHeight: "100vh", background: bgColor,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       fontFamily: "'Rubik', sans-serif", direction: "rtl", position: "relative",
-      transition: "background 0.5s ease", overflow: "hidden"
+      transition: "background 0.5s ease", overflow: "hidden",
+      padding: isPhone ? "5.5rem 1rem 8.5rem" : undefined,
+      boxSizing: "border-box",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
 
@@ -57,7 +121,7 @@ export default function GamePage() {
         </div>
       ) : null}
 
-      <div style={{ position: "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center" }}>
+      <div style={{ position: isCompact ? "static" : "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center", marginBottom: isCompact ? "1rem" : 0 }}>
         <ProgressTracker letterResults={game.letterResults} />
       </div>
 
@@ -73,7 +137,7 @@ export default function GamePage() {
 
       {/* Main letter */}
       <div style={{
-        position: "relative", marginTop: "2rem",
+        position: "relative", marginTop: isCompact ? "0.5rem" : "2rem",
         animation: game.showSuccess ? "successBounce 0.6s cubic-bezier(0.34,1.56,0.64,1)" : (game.showError ? "shakeAnim 0.5s ease" : "letterAppear 0.5s cubic-bezier(0.34,1.56,0.64,1)")
       }}>
         {game.showSuccess ? <div style={{ position: "absolute", inset: -40, borderRadius: "50%", background: "radial-gradient(circle, rgba(39,174,96,0.2) 0%, transparent 70%)", animation: "glowPulse 0.8s ease-in-out infinite" }} /> : null}
@@ -87,25 +151,12 @@ export default function GamePage() {
         }}>
           {displayLetter}
         </div>
-
-        {!game.showSuccess && !game.showError ? (
-          <div style={{ position: "absolute", right: "clamp(-15rem, -32vw, -8rem)", top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.8rem" }}>
-            <FlippingHintCard letter={letter} onUseHelp={function() { game.setUsedHelp(true); }} flipped={game.hintFlipped} setFlipped={game.setHintFlipped} />
-            {game.speakDone ? (
-              <button onClick={game.speakCurrentLetter} style={{
-                width: 52, height: 52, borderRadius: "50%", border: "none", cursor: "pointer",
-                fontSize: "1.6rem", background: "white",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "transform 0.2s, box-shadow 0.2s, opacity 0.3s",
-              }} title="הקראת האות">🔊</button>
-            ) : null}
-          </div>
-        ) : null}
       </div>
 
+      {helpControls}
+
       {!game.showSuccess && !game.showError ? (
-        <p style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.5rem)", color: "#888", marginTop: "1.5rem", fontFamily: "'Secular One', sans-serif" }}>
+        <p style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.5rem)", color: "#888", marginTop: "1.2rem", fontFamily: "'Secular One', sans-serif", textAlign: "center" }}>
           לחצי על האות: <strong style={{ color: "#E74C3C", fontSize: "130%" }}>{letter}</strong>
         </p>
       ) : null}
@@ -178,6 +229,38 @@ export default function GamePage() {
               cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             }}>הבנתי</button>
           </div>
+        </div>
+      ) : null}
+
+      {isPhone ? (
+        <div style={{
+          position: "fixed", left: "50%", bottom: "1rem", transform: "translateX(-50%)",
+          width: "min(92vw, 430px)", zIndex: 110,
+          background: "rgba(255,255,255,0.96)", border: "1px solid rgba(17,19,25,0.08)",
+          borderRadius: 24, boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
+          padding: "0.85rem", boxSizing: "border-box",
+        }}>
+          <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: "0.95rem", color: "#111319", marginBottom: "0.45rem", textAlign: "center" }}>
+            הקישי כאן כדי לפתוח את המקלדת בטלפון
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="text"
+            enterKeyHint="done"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            dir="rtl"
+            onInput={handlePhoneInput}
+            placeholder="הקלידי את האות כאן"
+            style={{
+              width: "100%", height: 52, borderRadius: 16, border: "2px solid rgba(124,92,252,0.24)",
+              padding: "0 1rem", boxSizing: "border-box", fontSize: 18, textAlign: "center",
+              fontFamily: "'Secular One', sans-serif", outline: "none", background: "#fff",
+            }}
+          />
         </div>
       ) : null}
     </div>

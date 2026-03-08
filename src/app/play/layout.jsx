@@ -27,7 +27,7 @@ function PlayShell(props) {
         <GameTopMenu
           user={game.sync.user}
           onProfiles={function() { router.push("/play/profiles"); }}
-          onHome={function() { router.push("/play/levels"); }}
+          onHome={function() { router.push("/play"); }}
           onDashboard={function() { router.push("/play/dashboard"); }}
           onSettings={function() { router.push("/play/settings"); }}
           onSignOut={game.handleSignOut}
