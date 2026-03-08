@@ -45,6 +45,7 @@ export function GameProvider(props) {
   var sync = useProgressSync(profileId);
   var hasPulledRef = useRef(false);
   var lastSyncedUserIdRef = useRef(null);
+  var letterStatsRef = useRef(letterStats);
 
   // Reload data when profile changes
   useEffect(function() {
@@ -62,7 +63,7 @@ export function GameProvider(props) {
   useEffect(function() { saveData(storageKey("lh-settings", profileId), settings); }, [settings, profileId]);
   useEffect(function() { setVoiceGender(settings.voiceGender || "male"); }, [settings.voiceGender]);
   useEffect(function() { if (profileId) saveData(storageKey("lh-sessions", profileId), sessions); }, [sessions, profileId]);
-  useEffect(function() { if (profileId) saveData(storageKey("lh-letter-stats", profileId), letterStats); }, [letterStats, profileId]);
+  useEffect(function() { if (profileId) saveData(storageKey("lh-letter-stats", profileId), letterStats); letterStatsRef.current = letterStats; }, [letterStats, profileId]);
   useEffect(function() { if (profileId) saveData(storageKey("lh-level-progress", profileId), levelProgress); }, [levelProgress, profileId]);
   useEffect(function() { saveData("lh-active-profile", activeProfile); }, [activeProfile]);
 
@@ -96,6 +97,28 @@ export function GameProvider(props) {
     }, 1000);
     return function() { clearTimeout(timer); };
   }, [settings, sync.canSync]);
+
+  // Sync letter stats to server (debounced, skip initial load)
+  var letterStatsInitRef = useRef(true);
+  useEffect(function() {
+    if (letterStatsInitRef.current) { letterStatsInitRef.current = false; return; }
+    if (!sync.canSync) return;
+    var timer = setTimeout(function() {
+      sync.pushToServer({ letterStats: letterStats });
+    }, 2000);
+    return function() { clearTimeout(timer); };
+  }, [letterStats, sync.canSync]);
+
+  // Sync level progress to server (debounced, skip initial load)
+  var levelProgressInitRef = useRef(true);
+  useEffect(function() {
+    if (levelProgressInitRef.current) { levelProgressInitRef.current = false; return; }
+    if (!sync.canSync) return;
+    var timer = setTimeout(function() {
+      sync.pushToServer({ levelProgress: levelProgress });
+    }, 2000);
+    return function() { clearTimeout(timer); };
+  }, [levelProgress, sync.canSync]);
 
   // Pull progress from server on first authenticated load with a profile
   useEffect(function() {
@@ -147,7 +170,7 @@ export function GameProvider(props) {
         });
       }
     });
-  }, [sync.canSync]);
+  }, [sync.canSync, profileId]);
 
   /* ── Game State ── */
   var _seq = useState([]); var sequence = _seq[0]; var setSequence = _seq[1];
@@ -265,7 +288,7 @@ export function GameProvider(props) {
       completed: sd.completed, accuracy: sd.accuracy, avgTtc: sd.avgTtc,
       duration: sd.duration, attempts: sd.attempts, sequence: sd.sequence,
       letterResults: sd.letterResults, level: sd.level,
-      letterStats: letterStats, levelProgress: newLevelProgressForSync,
+      letterStats: letterStatsRef.current, levelProgress: newLevelProgressForSync,
     });
 
     router.push("/play/summary");

@@ -1,51 +1,57 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 
 export default function useProgressSync(profileId) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && !!session?.user?.id;
   const canSync = isAuthenticated && !!profileId;
-  const syncingRef = useRef(false);
 
   const pullFromServer = useCallback(async () => {
     if (!canSync) return null;
     try {
       const res = await fetch("/api/progress?profileId=" + encodeURIComponent(profileId));
-      if (!res.ok) return null;
+      if (!res.ok) {
+        console.warn("[sync] pull failed:", res.status, await res.text().catch(() => ""));
+        return null;
+      }
       return await res.json();
-    } catch {
+    } catch (err) {
+      console.warn("[sync] pull error:", err);
       return null;
     }
   }, [canSync, profileId]);
 
   const pushToServer = useCallback(async (data) => {
-    if (!canSync || syncingRef.current) return;
-    syncingRef.current = true;
+    if (!canSync) return;
     try {
-      await fetch("/api/progress", {
+      const res = await fetch("/api/progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, profileId }),
       });
-    } catch {
-      // Silent fail -- localStorage is the source of truth
-    } finally {
-      syncingRef.current = false;
+      if (!res.ok) {
+        console.warn("[sync] push failed:", res.status, await res.text().catch(() => ""));
+      }
+    } catch (err) {
+      console.warn("[sync] push error:", err);
     }
   }, [canSync, profileId]);
 
   const pushSession = useCallback(async (sessionData) => {
     if (!canSync) return;
     try {
-      await fetch("/api/progress/session", {
+      const res = await fetch("/api/progress/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...sessionData, profileId }),
       });
-    } catch {
-      // Silent fail
+      if (!res.ok) {
+        console.warn("[sync] session push failed:", res.status, await res.text().catch(() => ""));
+      }
+    } catch (err) {
+      console.warn("[sync] session push error:", err);
     }
   }, [canSync, profileId]);
 
