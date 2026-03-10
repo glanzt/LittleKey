@@ -25,19 +25,17 @@ export default function RootLayout({ children }) {
       <body style={{ margin: 0, padding: 0, boxSizing: "border-box", overflowX: "hidden" }}>
         <div style={{
           position: "fixed",
-          top: "0.75rem",
-          left: "0.9rem",
-          zIndex: 1200,
+          top: "calc(env(safe-area-inset-top, 0px) + 0.28rem)",
+          left: "0.45rem",
+          zIndex: 1,
           pointerEvents: "none",
           fontFamily: "'Rubik', sans-serif",
-          fontSize: "0.78rem",
-          color: "rgba(17,19,25,0.32)",
-          background: "rgba(255,255,255,0.22)",
-          border: "1px solid rgba(17,19,25,0.05)",
-          borderRadius: 999,
-          padding: "0.18rem 0.55rem",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
+          fontSize: "0.64rem",
+          lineHeight: 1,
+          color: "rgba(17,19,25,0.18)",
+          padding: "0.08rem 0.18rem",
+          textShadow: "0 1px 0 rgba(255,255,255,0.7)",
+          mixBlendMode: "multiply",
         }}>
           {appVersion}
         </div>

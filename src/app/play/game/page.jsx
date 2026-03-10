@@ -121,8 +121,8 @@ export default function GamePage() {
         </div>
       ) : null}
 
-      <div style={{ position: isCompact ? "static" : "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center", marginBottom: isCompact ? "1rem" : 0 }}>
-        <ProgressTracker letterResults={game.letterResults} />
+      <div style={{ position: isCompact ? "static" : "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center", marginBottom: isCompact ? "0.75rem" : 0 }}>
+        <ProgressTracker letterResults={game.letterResults} compact={isPhone} />
       </div>
 
       {/* Wrong key floating indicator */}

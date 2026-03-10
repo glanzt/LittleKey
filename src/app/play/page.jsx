@@ -50,9 +50,6 @@ export default function PlayPage() {
         <h1 style={{ fontSize: "clamp(2.6rem, 5.8vw, 4.5rem)", fontFamily: "'Suez One', serif", color: "#111319", margin: "0 0 0.5rem", textAlign: "center", letterSpacing: "-0.04em" }}>
           ציידת האותיות
         </h1>
-        <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.2rem)", color: "rgba(20,23,32,0.48)", fontFamily: "'Rubik', sans-serif", margin: "0 0 0.8rem", textAlign: "center", maxWidth: 700 }}>
-          בחרי את המשחק שמתאים עכשיו: תרגול מקלדת קולי או משחק התאמת קלפים עם אותיות בעברית.
-        </p>
 
         {game.sync.isAuthenticated && game.activeProfile ? (
           <div style={{

@@ -10,6 +10,7 @@ import { MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match
 export default function MatchGamePage() {
   var game = useGame();
   var router = useRouter();
+  var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
   var availableLetters = game.settings.letterSet && game.settings.letterSet.length > 0
     ? game.settings.letterSet
     : HEBREW_LETTERS;
@@ -28,6 +29,15 @@ export default function MatchGamePage() {
   useEffect(function() {
     resetRound(1);
   }, [availableLetters.join("|")]);
+
+  useEffect(function() {
+    function handleResize() {
+      setViewportWidth(window.innerWidth);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return function() { window.removeEventListener("resize", handleResize); };
+  }, []);
 
   useEffect(function() {
     var timer = setInterval(function() {
@@ -142,32 +152,49 @@ export default function MatchGamePage() {
     }, 850);
   }
 
+  var displayDuration = completedRoundDuration != null ? completedRoundDuration : (nowTick - roundStartedAtRef.current);
+  var isPhone = viewportWidth <= 700;
+  var boardGap = isPhone ? 8 : 14;
+  var rowLayout = isPhone ? [4, 4, 4, 4] : MATCH_ROW_LAYOUT;
   var rows = useMemo(function() {
     var slices = [];
     var start = 0;
-    MATCH_ROW_LAYOUT.forEach(function(count) {
+    rowLayout.forEach(function(count) {
       slices.push(cards.slice(start, start + count));
       start += count;
     });
     return slices;
-  }, [cards]);
-  var displayDuration = completedRoundDuration != null ? completedRoundDuration : (nowTick - roundStartedAtRef.current);
+  }, [cards, rowLayout]);
+
+  function getCardSize(rowLength) {
+    if (!isPhone) {
+      return {
+        width: "clamp(5rem, 12vw, 8.5rem)",
+        height: "clamp(6.2rem, 15vw, 10rem)",
+      };
+    }
+
+    return {
+      width: "calc((100% - " + ((rowLength - 1) * boardGap) + "px) / " + rowLength + ")",
+      height: rowLength === 4 ? "6.2rem" : "5.8rem",
+    };
+  }
 
   return (
-    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "1.5rem", paddingBottom: "2rem" }}>
+    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: isPhone ? "1rem" : "1.5rem", paddingBottom: "2rem", paddingLeft: isPhone ? "0.6rem" : PAGE_BG.padding, paddingRight: isPhone ? "0.6rem" : PAGE_BG.padding }}>
       <FloatingLettersBackground />
 
       <button onClick={function() { router.push("/play"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
-      <div style={{ width: "100%", maxWidth: 1080, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#111319", margin: "0 0 0.5rem", textAlign: "center" }}>
+      <div style={{ width: "100%", maxWidth: isPhone ? "100%" : 1080, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(2rem, 5vw, 3.2rem)", color: "#111319", margin: "0 0 0.4rem", textAlign: "center", lineHeight: 1.05 }}>
           משחק התאמת קלפים
         </h1>
-        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "1rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.2rem", textAlign: "center", maxWidth: 560 }}>
+        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.88rem" : "1rem", color: "rgba(17,19,25,0.55)", margin: "0 0 0.9rem", textAlign: "center", maxWidth: 560, lineHeight: 1.35, padding: isPhone ? "0 0.5rem" : 0 }}>
           הפכי שני קלפים ומצאי את שתי האותיות הזהות. כשמוצאים את כל הזוגות, הלוח מתערבב לסיבוב חדש.
         </p>
 
-        <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "1.4rem" }}>
+        <div style={{ display: "flex", gap: isPhone ? "0.45rem" : "0.8rem", flexWrap: "nowrap", justifyContent: "center", marginBottom: isPhone ? "0.8rem" : "1.4rem", width: "100%", maxWidth: isPhone ? "100%" : "none" }}>
           {[
             { label: "זמן", value: formatStopwatch(displayDuration), color: "#7C5CFC" },
             { label: "זוגות שנמצאו", value: matches + " / " + MATCH_PAIR_COUNT, color: "#27AE60" },
@@ -175,40 +202,41 @@ export default function MatchGamePage() {
           ].map(function(stat) {
             return (
               <div key={stat.label} style={{
-                minWidth: 140, padding: "0.85rem 1rem", borderRadius: 18,
+                minWidth: 0, flex: 1, padding: isPhone ? "0.45rem 0.4rem" : "0.85rem 1rem", borderRadius: isPhone ? 14 : 18,
                 background: "white", boxShadow: "0 6px 24px rgba(17,19,25,0.08)",
                 textAlign: "center", border: "1px solid rgba(17,19,25,0.06)",
               }}>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.8rem", color: "rgba(17,19,25,0.45)" }}>{stat.label}</div>
-                <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.5rem", color: stat.color }}>{stat.value}</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.68rem" : "0.8rem", color: "rgba(17,19,25,0.45)", whiteSpace: isPhone ? "nowrap" : "normal" }}>{stat.label}</div>
+                <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: isPhone ? "1.12rem" : "1.5rem", color: stat.color, whiteSpace: "nowrap" }}>{stat.value}</div>
               </div>
             );
           })}
         </div>
 
         <div style={{
-          width: "100%", maxWidth: 980, padding: "1.4rem 1rem 1.2rem",
-          borderRadius: 32, background: "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(250,246,240,0.92))",
+          width: "100%", maxWidth: isPhone ? "100%" : 980, padding: isPhone ? "0.75rem 0.35rem 0.6rem" : "1.4rem 1rem 1.2rem",
+          borderRadius: isPhone ? 26 : 32, background: "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(250,246,240,0.92))",
           boxShadow: "0 16px 50px rgba(17,19,25,0.08)", border: "1px solid rgba(17,19,25,0.06)",
         }}>
           {rows.map(function(rowCards, rowIndex) {
             return (
               <div key={rowIndex} style={{
-                display: "flex", justifyContent: "center", gap: "clamp(0.5rem, 1.8vw, 1rem)",
-                marginBottom: rowIndex === rows.length - 1 ? 0 : "clamp(0.6rem, 1.8vw, 1rem)",
-                flexWrap: "nowrap",
+                display: "flex", justifyContent: "center", gap: boardGap,
+                marginBottom: rowIndex === rows.length - 1 ? 0 : (isPhone ? boardGap : "clamp(0.6rem, 1.8vw, 1rem)"),
+                flexWrap: "nowrap", width: "100%",
               }}>
                 {rowCards.map(function(card, index) {
-                  var cardNumber = MATCH_ROW_LAYOUT.slice(0, rowIndex).reduce(function(sum, count) { return sum + count; }, 0) + index + 1;
+                  var cardNumber = rowLayout.slice(0, rowIndex).reduce(function(sum, count) { return sum + count; }, 0) + index + 1;
                   var isFaceUp = card.revealed || card.matched;
-                  var rotation = ((cardNumber % 5) - 2) * 1.3;
+                  var rotation = isPhone ? 0 : ((cardNumber % 5) - 2) * 1.3;
+                  var cardSize = getCardSize(rowCards.length);
 
                   return (
                     <div
                       key={card.id}
                       style={{
-                        width: "clamp(5rem, 12vw, 8.5rem)",
-                        height: "clamp(6.2rem, 15vw, 10rem)",
+                        width: cardSize.width,
+                        height: cardSize.height,
                         perspective: 1200,
                         transform: "rotate(" + rotation + "deg)" + (isFaceUp ? " translateY(-4px)" : ""),
                         transition: "transform 0.28s ease",
@@ -220,7 +248,7 @@ export default function MatchGamePage() {
                         style={{
                           width: "100%",
                           height: "100%",
-                          borderRadius: 22,
+                          borderRadius: isPhone ? 18 : 22,
                           border: "none",
                           padding: 0,
                           background: "transparent",
@@ -242,8 +270,8 @@ export default function MatchGamePage() {
                           <div style={{
                             position: "absolute",
                             inset: 0,
-                            borderRadius: 22,
-                            border: "4px solid #30224D",
+                            borderRadius: isPhone ? 18 : 22,
+                            border: isPhone ? "3px solid #30224D" : "4px solid #30224D",
                             background: "linear-gradient(180deg, #FCFAF7 0%, #E9E0D9 100%)",
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
@@ -254,14 +282,14 @@ export default function MatchGamePage() {
                           }}>
                             <span style={{
                               fontFamily: "'Secular One', sans-serif",
-                              fontSize: "clamp(1.4rem, 2.4vw, 1.9rem)",
+                              fontSize: isPhone ? "1.45rem" : "clamp(1.4rem, 2.4vw, 1.9rem)",
                               color: "rgba(48,34,77,0.9)",
                             }}>
                               ?
                             </span>
                             <span style={{
-                              position: "absolute", bottom: 10, left: 14,
-                              fontFamily: "'Rubik', sans-serif", fontSize: "0.9rem", color: "rgba(48,34,77,0.28)",
+                              position: "absolute", bottom: isPhone ? 6 : 10, left: isPhone ? 10 : 14,
+                              fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.72rem" : "0.9rem", color: "rgba(48,34,77,0.28)",
                             }}>
                               {cardNumber}
                             </span>
@@ -275,8 +303,10 @@ export default function MatchGamePage() {
                           <div style={{
                             position: "absolute",
                             inset: 0,
-                            borderRadius: 22,
-                            border: "4px solid #30224D",
+                            borderRadius: isPhone ? 18 : 22,
+                            border: card.matched
+                              ? (isPhone ? "3px solid #D4A62A" : "4px solid #D4A62A")
+                              : (isPhone ? "3px solid #E2B53B" : "4px solid #E2B53B"),
                             background: card.matched
                               ? "linear-gradient(180deg, #DFF7E5 0%, #BCECC9 100%)"
                               : "linear-gradient(180deg, #FFF9F0 0%, #F8EFE2 100%)",
@@ -290,18 +320,42 @@ export default function MatchGamePage() {
                           }}>
                             <span style={{
                               fontFamily: "'Suez One', serif",
-                              fontSize: "clamp(2.3rem, 5vw, 3.6rem)",
+                              fontSize: isPhone ? (rowCards.length === 6 ? "2rem" : "2.35rem") : "clamp(2.3rem, 5vw, 3.6rem)",
                               color: card.matched ? "#1E8E52" : "#111319",
                               lineHeight: 1,
+                              position: "relative",
+                              zIndex: 2,
                             }}>
                               {card.letter}
                             </span>
+                            <div style={{
+                              position: "absolute",
+                              inset: isPhone ? 2 : 3,
+                              borderRadius: isPhone ? 14 : 18,
+                              border: card.matched
+                                ? (isPhone ? "2px solid rgba(255,242,179,0.95)" : "3px solid rgba(255,242,179,0.95)")
+                                : (isPhone ? "2px solid rgba(255,239,168,0.92)" : "3px solid rgba(255,239,168,0.92)"),
+                              boxShadow: card.matched
+                                ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 18px rgba(212,166,42,0.32)"
+                                : "inset 0 0 0 1px rgba(255,255,255,0.7), 0 0 16px rgba(226,181,59,0.22)",
+                              pointerEvents: "none",
+                            }} />
                             <div style={{
                               position: "absolute",
                               inset: 0,
                               background: card.matched
                                 ? "radial-gradient(circle at top, rgba(255,255,255,0.55), transparent 58%)"
                                 : "radial-gradient(circle at top, rgba(255,255,255,0.4), transparent 58%)",
+                            }} />
+                            <div style={{
+                              position: "absolute",
+                              top: isPhone ? 4 : 6,
+                              left: isPhone ? 8 : 10,
+                              right: isPhone ? 8 : 10,
+                              height: "26%",
+                              borderRadius: 999,
+                              background: "linear-gradient(180deg, rgba(255,255,255,0.52), rgba(255,255,255,0))",
+                              pointerEvents: "none",
                             }} />
                           </div>
                         </div>
@@ -314,7 +368,7 @@ export default function MatchGamePage() {
           })}
         </div>
 
-        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.92rem", color: "rgba(17,19,25,0.45)", margin: "1rem 0 0", textAlign: "center", maxWidth: 520 }}>
+        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.78rem" : "0.92rem", color: "rgba(17,19,25,0.45)", margin: "0.8rem 0 0", textAlign: "center", maxWidth: 520, padding: isPhone ? "0 0.5rem" : 0 }}>
           האותיות נבחרות מתוך ההגדרות שלכן כשיש בחירה מותאמת, ובכל סיבוב מתקבל ערבוב חדש.
         </p>
       </div>

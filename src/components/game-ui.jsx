@@ -58,8 +58,17 @@ export function Confetti(props) {
 /* ── Progress Tracker ── */
 export function ProgressTracker(props) {
   var letterResults = props.letterResults;
+  var compact = !!props.compact;
+  var tileSize = compact ? 64 : 100;
+  var tileRadius = compact ? 16 : 24;
+  var tileGap = compact ? 6 : 10;
+  var pendingFontSize = compact ? "2rem" : "3rem";
+  var doneFontSize = compact ? "1.8rem" : "2.5rem";
+  var currentScale = compact ? "scale(1.06)" : "scale(1.15)";
+  var currentBorder = compact ? "2px solid #E74C3C" : "3px solid #E74C3C";
+  var currentShadow = compact ? "0 0 10px rgba(231,76,60,0.24)" : "0 0 12px rgba(231,76,60,0.3)";
   return (
-    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center", padding: "0.5rem", maxWidth: "100%" }}>
+    <div style={{ display: "flex", gap: tileGap, flexWrap: "wrap", justifyContent: "center", padding: compact ? "0.25rem" : "0.5rem", maxWidth: "100%" }}>
       {letterResults.map(function(r, i) {
         var cur = r.status === "current";
         var perf = r.status === "perfect";
@@ -75,8 +84,8 @@ export function ProgressTracker(props) {
         var icon = r.letter;
 
         if (cur) {
-          bg = "white"; col = "#E74C3C"; bor = "3px solid #E74C3C";
-          shd = "0 0 12px rgba(231,76,60,0.3)"; sc = "scale(1.15)";
+          bg = "white"; col = "#E74C3C"; bor = currentBorder;
+          shd = currentShadow; sc = currentScale;
         } else if (perf) {
           bg = "linear-gradient(135deg,#27AE60,#2ECC71)"; col = "white";
           icon = "\u2713"; shd = "0 2px 8px rgba(39,174,96,0.3)";
@@ -90,9 +99,9 @@ export function ProgressTracker(props) {
 
         return (
           <div key={i} style={{
-            width: 100, height: 100, borderRadius: 24,
+            width: tileSize, height: tileSize, borderRadius: tileRadius,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: done ? "2.5rem" : "3rem",
+            fontSize: done ? doneFontSize : pendingFontSize,
             fontFamily: done ? "inherit" : "'Suez One', serif",
             fontWeight: cur ? "bold" : "normal",
             background: bg, color: col, border: bor, boxShadow: shd,
