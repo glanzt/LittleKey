@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
-import { PAGE_BG, BACK_BUTTON_STYLE, playCardFlip, playError, playPerfect, playSuccess } from "@/lib/game-constants";
+import { PAGE_BG, playCardFlip, playError, playPerfect, playSuccess } from "@/lib/game-constants";
 import { FloatingLettersBackground } from "@/styles/shared";
 import { MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match-game";
 
 export default function MatchGamePage() {
   var game = useGame();
-  var router = useRouter();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
 
   var _rd = useState(1); var round = _rd[0]; var setRound = _rd[1];
@@ -180,16 +178,10 @@ export default function MatchGamePage() {
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: isPhone ? "1rem" : "1.5rem", paddingBottom: "2rem", paddingLeft: isPhone ? "0.6rem" : PAGE_BG.padding, paddingRight: isPhone ? "0.6rem" : PAGE_BG.padding }}>
       <FloatingLettersBackground />
 
-      <button onClick={function() { router.push("/play"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
-
       <div style={{ width: "100%", maxWidth: isPhone ? "100%" : 1080, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <h1 style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(2rem, 5vw, 3.2rem)", color: "#111319", margin: "0 0 0.4rem", textAlign: "center", lineHeight: 1.05 }}>
           משחק התאמת קלפים
         </h1>
-        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.88rem" : "1rem", color: "rgba(17,19,25,0.55)", margin: "0 0 0.9rem", textAlign: "center", maxWidth: 560, lineHeight: 1.35, padding: isPhone ? "0 0.5rem" : 0 }}>
-          הפכי שני קלפים ומצאי את שתי האותיות הזהות. כשמוצאים את כל הזוגות, הלוח מתערבב לסיבוב חדש.
-        </p>
-
         <div style={{ display: "flex", gap: isPhone ? "0.45rem" : "0.8rem", flexWrap: "nowrap", justifyContent: "center", marginBottom: isPhone ? "0.8rem" : "1.4rem", width: "100%", maxWidth: isPhone ? "100%" : "none" }}>
           {[
             { label: "זמן", value: formatStopwatch(displayDuration), color: "#7C5CFC" },
