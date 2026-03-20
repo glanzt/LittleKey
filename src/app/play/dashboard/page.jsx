@@ -9,7 +9,11 @@ import { FloatingLettersBackground } from "@/styles/shared";
 export default function DashboardPage() {
   var game = useGame();
   var router = useRouter();
-  var sessions = game.sessions;
+  var sessions = useMemo(function() {
+    return game.sessions.slice().sort(function(a, b) {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  }, [game.sessions]);
   var letterStats = game.letterStats;
   var keyboardSessions = useMemo(function() {
     return sessions.filter(function(s) { return s.mode !== "match"; });
@@ -219,9 +223,9 @@ export default function DashboardPage() {
                   <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>🃏 התאמת קלפים</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem" }}>
                     {[
-                      { label: "זמן אחרון", value: formatDuration(matchTimingStats.latest), color: "#7C5CFC" },
-                      { label: "זמן ממוצע", value: formatDuration(matchTimingStats.avg), color: "#E67E22" },
-                      { label: "זמן הכי מהיר", value: formatDuration(matchTimingStats.best), color: "#27AE60" }
+                      { label: "זמן סיום אחרון", value: formatDuration(matchTimingStats.latest), color: "#7C5CFC" },
+                      { label: "זמן סיום ממוצע", value: formatDuration(matchTimingStats.avg), color: "#E67E22" },
+                      { label: "זמן סיום הכי מהיר", value: formatDuration(matchTimingStats.best), color: "#27AE60" }
                     ].map(function(s, i) {
                       return (
                         <div key={i} style={{ background: "rgba(250,250,250,0.9)", borderRadius: 16, padding: "1rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.03)" }}>
@@ -351,7 +355,7 @@ export default function DashboardPage() {
                       <span style={{ fontSize: "0.8rem", color: "#bbb" }}>התאמת קלפים</span>
                     </div>
                     <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.6rem", alignItems: "center" }}>
-                      <span style={{ fontWeight: "600", color: "#E67E22" }}>⏱️ {formatDuration(s.duration)}</span>
+                      <span style={{ fontWeight: "600", color: "#E67E22" }}>⏱️ זמן סיום: {formatDuration(s.duration)}</span>
                     </div>
                   </div>
                 );
