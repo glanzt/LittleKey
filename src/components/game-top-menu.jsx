@@ -14,15 +14,17 @@ export default function GameTopMenu(props) {
   var userInitial = userLabel && userLabel.length > 0 ? userLabel.charAt(0).toUpperCase() : "U";
 
   var menuBtn = {
-    background: "white",
-    border: "1px solid rgba(0,0,0,0.08)",
+    background: "rgba(255,255,255,0.84)",
+    border: "1px solid rgba(17,19,25,0.06)",
     borderRadius: 999,
-    padding: "0.35rem 0.85rem",
+    padding: "0.42rem 0.95rem",
     cursor: "pointer",
-    fontSize: "0.82rem",
+    fontSize: "0.84rem",
     fontFamily: "'Secular One', sans-serif",
     color: "#111319",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+    boxShadow: "0 8px 20px rgba(17,19,25,0.05)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
   };
 
   return (
@@ -36,27 +38,28 @@ export default function GameTopMenu(props) {
       display: "flex",
       alignItems: "center",
       direction: "rtl",
-      padding: "0 1.2rem",
-      background: "rgba(250,250,250,0.92)",
-      backdropFilter: "blur(12px)",
-      WebkitBackdropFilter: "blur(12px)",
-      borderBottom: "1px solid rgba(0,0,0,0.06)",
+      padding: "0 1rem",
+      background: "linear-gradient(180deg, rgba(255,253,248,0.9), rgba(255,249,243,0.82))",
+      backdropFilter: "blur(14px)",
+      WebkitBackdropFilter: "blur(14px)",
+      borderBottom: "1px solid rgba(17,19,25,0.05)",
+      boxShadow: "0 8px 24px rgba(17,19,25,0.04)",
       boxSizing: "border-box",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.4rem", maxWidth: 200 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "wrap" }}>
+        <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.45rem", maxWidth: 220, background: "rgba(255,255,255,0.94)" }}>
           {user && user.image ? (
             <img
               src={user.image}
               alt={userLabel}
-              style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover" }}
+              style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }}
             />
           ) : (
             <div style={{
-              width: 22,
-              height: 22,
+              width: 24,
+              height: 24,
               borderRadius: "50%",
-              background: "rgba(17,19,25,0.1)",
+              background: "linear-gradient(135deg, rgba(124,92,252,0.16), rgba(243,156,18,0.18))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -73,15 +76,15 @@ export default function GameTopMenu(props) {
       <div style={{ flex: 1 }} />
 
       <button onClick={onSignOut} style={{
-        background: "#111319",
+        background: "linear-gradient(135deg, #111319, #363b46)",
         border: "none",
         borderRadius: 999,
-        padding: "0.35rem 1rem",
+        padding: "0.42rem 1rem",
         cursor: "pointer",
-        fontSize: "0.82rem",
+        fontSize: "0.84rem",
         fontFamily: "'Secular One', sans-serif",
         color: "white",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+        boxShadow: "0 10px 20px rgba(17,19,25,0.14)",
       }}>התנתקות</button>
     </div>
   );

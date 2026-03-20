@@ -5,8 +5,8 @@ import { FLOATING_LETTERS, FloatingLettersBackground } from "@/styles/shared";
 
 const S = {
   page: {
-    height: "100vh",
-    background: "#fafafa",
+    minHeight: "100vh",
+    background: "linear-gradient(180deg, #fffdf8 0%, #fff8f2 52%, #f8fbff 100%)",
     position: "relative",
     overflow: "hidden",
     display: "flex",
@@ -21,8 +21,8 @@ const S = {
     position: "absolute",
     inset: 0,
     backgroundImage: [
-      "linear-gradient(rgba(14,14,18,0.045) 1px, transparent 1px)",
-      "linear-gradient(90deg, rgba(14,14,18,0.045) 1px, transparent 1px)",
+      "linear-gradient(rgba(14,14,18,0.038) 1px, transparent 1px)",
+      "linear-gradient(90deg, rgba(14,14,18,0.038) 1px, transparent 1px)",
     ].join(", "),
     backgroundSize: "80px 80px",
     pointerEvents: "none",
@@ -35,7 +35,7 @@ const S = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0.8rem 2rem",
+    padding: "1rem 1.4rem 0.8rem",
     boxSizing: "border-box",
     zIndex: 10,
   },
@@ -45,16 +45,24 @@ const S = {
     fontSize: "1.35rem",
     color: "#111319",
     textDecoration: "none",
+    background: "rgba(255,255,255,0.72)",
+    border: "1px solid rgba(17,19,25,0.06)",
+    borderRadius: 999,
+    padding: "0.5rem 1rem",
+    boxShadow: "0 10px 30px rgba(17,19,25,0.06)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
   },
 
   navCta: {
-    background: "#111319",
+    background: "linear-gradient(135deg, #111319, #383d4b)",
     color: "#fff",
     textDecoration: "none",
     fontSize: "0.92rem",
     fontWeight: 500,
-    padding: "0.5rem 1.1rem",
-    borderRadius: 8,
+    padding: "0.68rem 1.25rem",
+    borderRadius: 999,
+    boxShadow: "0 12px 28px rgba(17,19,25,0.18)",
   },
 
   heroArea: {
@@ -65,45 +73,63 @@ const S = {
     alignItems: "center",
     position: "relative",
     zIndex: 1,
-    paddingTop: "clamp(1rem, 3vw, 2.5rem)",
+    paddingTop: "clamp(1.2rem, 4vw, 2.8rem)",
+    paddingBottom: "1rem",
+  },
+
+  heroBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.45rem",
+    padding: "0.52rem 1rem",
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.72)",
+    border: "1px solid rgba(17,19,25,0.07)",
+    boxShadow: "0 12px 30px rgba(17,19,25,0.06)",
+    color: "#444b57",
+    fontSize: "0.94rem",
+    marginBottom: "1rem",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
   },
 
   title: {
     margin: 0,
-    fontSize: "clamp(2.6rem, 5.8vw, 4.5rem)",
-    lineHeight: 1.06,
+    fontSize: "clamp(2.8rem, 6vw, 4.8rem)",
+    lineHeight: 1.02,
     letterSpacing: "-0.04em",
     fontWeight: 700,
     color: "#111319",
     textAlign: "center",
+    textWrap: "balance",
   },
 
   subtitle: {
-    marginTop: "0.8rem",
-    color: "rgba(20,23,32,0.5)",
-    fontSize: "clamp(0.95rem, 1.6vw, 1.12rem)",
-    lineHeight: 1.55,
-    maxWidth: 580,
+    marginTop: "1rem",
+    color: "rgba(20,23,32,0.56)",
+    fontSize: "clamp(1rem, 1.7vw, 1.14rem)",
+    lineHeight: 1.72,
+    maxWidth: 640,
     textAlign: "center",
     padding: "0 1rem",
   },
 
   actions: {
-    marginTop: "1.2rem",
+    marginTop: "1.5rem",
     display: "flex",
     justifyContent: "center",
-    gap: "0.75rem",
+    gap: "0.85rem",
     flexWrap: "wrap",
   },
 
   btnBase: {
-    minWidth: 160,
-    height: 46,
+    minWidth: 172,
+    height: 50,
     borderRadius: 999,
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "1.06rem",
+    fontSize: "1.05rem",
     fontWeight: 500,
     textDecoration: "none",
     border: "none",
@@ -112,16 +138,18 @@ const S = {
   },
 
   btnPrimary: {
-    background: "#111319",
+    background: "linear-gradient(135deg, #111319, #363b46)",
     color: "#fff",
-    boxShadow: "0 8px 22px rgba(17,19,25,0.22)",
+    boxShadow: "0 14px 28px rgba(17,19,25,0.2)",
   },
 
   btnSecondary: {
-    background: "#fff",
+    background: "rgba(255,255,255,0.8)",
     color: "#1a1f2b",
     border: "1px solid rgba(16,19,28,0.1)",
-    boxShadow: "0 2px 8px rgba(17,20,28,0.04)",
+    boxShadow: "0 10px 22px rgba(17,20,28,0.05)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
   },
 
   stage: {
@@ -129,7 +157,7 @@ const S = {
     width: "100%",
     flex: 1,
     minHeight: 0,
-    marginTop: "1.5rem",
+    marginTop: "1.8rem",
     overflow: "hidden",
   },
 
@@ -143,16 +171,16 @@ const S = {
   },
 
   beamLeft: {
-    background: "repeating-conic-gradient(from 214deg at 52% 58%, rgba(248,193,66,0.5) 0deg 0.36deg, transparent 0.36deg 1.02deg)",
-    opacity: 0.85,
+    background: "repeating-conic-gradient(from 214deg at 52% 58%, rgba(248,193,66,0.42) 0deg 0.36deg, transparent 0.36deg 1.02deg)",
+    opacity: 0.88,
     WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) 60%, transparent 85%)",
     maskImage: "linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) 60%, transparent 85%)",
     mixBlendMode: "multiply",
   },
 
   beamRight: {
-    background: "repeating-conic-gradient(from -34deg at 48% 58%, rgba(49,210,190,0.55) 0deg 0.34deg, transparent 0.34deg 1deg)",
-    opacity: 0.82,
+    background: "repeating-conic-gradient(from -34deg at 48% 58%, rgba(84,214,207,0.5) 0deg 0.34deg, transparent 0.34deg 1deg)",
+    opacity: 0.84,
     WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.96) 60%, transparent 85%)",
     maskImage: "linear-gradient(to left, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.96) 60%, transparent 85%)",
     mixBlendMode: "multiply",
@@ -163,12 +191,12 @@ const S = {
     left: "50%",
     top: "42%",
     transform: "translate(-50%, -50%)",
-    width: "min(500px, 75vw)",
-    height: 300,
-    borderRadius: 24,
-    background: "linear-gradient(96deg, rgba(250,126,109,0.5) 0%, rgba(245,207,73,0.55) 34%, rgba(114,132,245,0.4) 61%, rgba(73,223,201,0.5) 100%)",
-    filter: "blur(20px)",
-    opacity: 0.9,
+    width: "min(580px, 82vw)",
+    height: 340,
+    borderRadius: 36,
+    background: "linear-gradient(100deg, rgba(255,160,122,0.42) 0%, rgba(255,220,120,0.46) 32%, rgba(145,155,255,0.34) 62%, rgba(115,230,210,0.38) 100%)",
+    filter: "blur(24px)",
+    opacity: 0.96,
   },
 
   centerPanel: {
@@ -176,14 +204,14 @@ const S = {
     left: "50%",
     top: "42%",
     transform: "translate(-50%, -50%)",
-    width: "min(360px, 56vw)",
-    height: 260,
-    borderRadius: 18,
-    background: "rgba(250,252,255,0.3)",
-    border: "1px solid rgba(255,255,255,0.6)",
-    backdropFilter: "blur(4px)",
-    WebkitBackdropFilter: "blur(4px)",
-    boxShadow: "0 12px 30px rgba(17,20,28,0.06), 0 -1px 0 rgba(255,255,255,0.45) inset",
+    width: "min(390px, 60vw)",
+    height: 276,
+    borderRadius: 26,
+    background: "linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.18))",
+    border: "1px solid rgba(255,255,255,0.72)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    boxShadow: "0 16px 40px rgba(17,20,28,0.08), 0 -1px 0 rgba(255,255,255,0.55) inset",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -195,14 +223,15 @@ const S = {
     top: "42%",
     transform: "translate(-50%, -50%)",
     fontFamily: '"Suez One", serif',
-    fontSize: "clamp(5rem, 18vw, 9.5rem)",
+    fontSize: "clamp(5.2rem, 18vw, 10rem)",
     lineHeight: 0.88,
     letterSpacing: "0.03em",
-    background: "linear-gradient(178deg, #f5f5f5 0%, #d7d9de 32%, #8e9199 60%, #1d2129 100%)",
+    background: "linear-gradient(180deg, #fffaf6 0%, #e3e2e6 30%, #9da1aa 58%, #242a34 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     zIndex: 3,
     userSelect: "none",
+    textShadow: "0 14px 34px rgba(17,19,25,0.08)",
   },
 
   floatingLetter: {
@@ -218,6 +247,7 @@ export default function Home() {
   return (
     <main style={S.page}>
       <div style={S.bgGrid} aria-hidden="true" />
+      <FloatingLettersBackground />
 
       <nav style={S.nav}>
         <span style={S.navLogo}>ציידת האותיות</span>
@@ -225,16 +255,19 @@ export default function Home() {
       </nav>
 
       <div style={S.heroArea}>
+        <div style={S.heroBadge}>
+          <span>אותיות, רגשות ומשחקים קטנים</span>
+        </div>
         <h1 style={S.title}>
-          ללמוד את המקלדת
+          לשחק, לגלות
           <br />
-          דרך משחק קולי.
+          וללמוד בעברית.
         </h1>
 
         <p style={S.subtitle}>
-          הילדים שומעים אות, מוצאים אותה על המקלדת ולוחצים.
+          משחקי אותיות ורגשות שעוזרים לילדים ללמוד
           <br />
-          ככה הם לומדים להקליד — מיומנות שתישאר לכל החיים.
+          דרך הצלחה, סקרנות והנאה.
         </p>
 
         <div style={S.actions}>
