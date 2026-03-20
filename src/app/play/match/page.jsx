@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
-import { PAGE_BG, BACK_BUTTON_STYLE, HEBREW_LETTERS, playCardFlip, playError, playPerfect, playSuccess, speakLetter } from "@/lib/game-constants";
+import { PAGE_BG, BACK_BUTTON_STYLE, playCardFlip, playError, playPerfect, playSuccess } from "@/lib/game-constants";
 import { FloatingLettersBackground } from "@/styles/shared";
 import { MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match-game";
 
@@ -11,12 +11,9 @@ export default function MatchGamePage() {
   var game = useGame();
   var router = useRouter();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
-  var availableLetters = game.settings.letterSet && game.settings.letterSet.length > 0
-    ? game.settings.letterSet
-    : HEBREW_LETTERS;
 
   var _rd = useState(1); var round = _rd[0]; var setRound = _rd[1];
-  var _cd = useState(function() { return createMatchDeck(availableLetters, MATCH_PAIR_COUNT); }); var cards = _cd[0]; var setCards = _cd[1];
+  var _cd = useState(function() { return createMatchDeck(MATCH_PAIR_COUNT); }); var cards = _cd[0]; var setCards = _cd[1];
   var _op = useState([]); var openIds = _op[0]; var setOpenIds = _op[1];
   var _mv = useState(0); var moves = _mv[0]; var setMoves = _mv[1];
   var _mt = useState(0); var matches = _mt[0]; var setMatches = _mt[1];
@@ -28,7 +25,7 @@ export default function MatchGamePage() {
 
   useEffect(function() {
     resetRound(1);
-  }, [availableLetters.join("|")]);
+  }, []);
 
   useEffect(function() {
     function handleResize() {
@@ -59,7 +56,7 @@ export default function MatchGamePage() {
     setNowTick(Date.now());
     setCompletedRoundDuration(null);
     setRound(nextRound);
-    setCards(createMatchDeck(availableLetters, MATCH_PAIR_COUNT));
+    setCards(createMatchDeck(MATCH_PAIR_COUNT));
     setOpenIds([]);
     setMoves(0);
     setMatches(0);
@@ -75,7 +72,7 @@ export default function MatchGamePage() {
     setCards(function(prev) {
       return prev.map(function(card) {
         if (card.id !== cardId) return card;
-        return { id: card.id, letter: card.letter, revealed: true, matched: card.matched };
+        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, revealed: true, matched: card.matched };
       });
     });
   }
@@ -84,7 +81,7 @@ export default function MatchGamePage() {
     setCards(function(prev) {
       return prev.map(function(card) {
         if (cardIds.indexOf(card.id) === -1) return card;
-        return { id: card.id, letter: card.letter, revealed: false, matched: false };
+        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, revealed: false, matched: false };
       });
     });
   }
@@ -93,7 +90,7 @@ export default function MatchGamePage() {
     setCards(function(prev) {
       return prev.map(function(card) {
         if (cardIds.indexOf(card.id) === -1) return card;
-        return { id: card.id, letter: card.letter, revealed: true, matched: true };
+        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, revealed: true, matched: true };
       });
     });
   }
@@ -117,14 +114,13 @@ export default function MatchGamePage() {
     setMoves(nextMoves);
     setIsBusy(true);
 
-    if (firstCard && firstCard.letter === card.letter) {
+    if (firstCard && firstCard.matchKey === card.matchKey) {
       var nextMatches = matches + 1;
       setTimeout(function() {
         matchCards(chosenIds);
         setOpenIds([]);
         setMatches(nextMatches);
         setIsBusy(false);
-        speakLetter(card.letter);
         if (nextMatches >= MATCH_PAIR_COUNT) {
           var roundDuration = Date.now() - roundStartedAtRef.current;
           setCompletedRoundDuration(roundDuration);
@@ -319,14 +315,24 @@ export default function MatchGamePage() {
                             overflow: "hidden",
                           }}>
                             <span style={{
-                              fontFamily: "'Suez One', serif",
-                              fontSize: isPhone ? (rowCards.length === 6 ? "2rem" : "2.35rem") : "clamp(2.3rem, 5vw, 3.6rem)",
-                              color: card.matched ? "#1E8E52" : "#111319",
-                              lineHeight: 1,
                               position: "relative",
                               zIndex: 2,
+                              width: "76%",
+                              height: "76%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                             }}>
-                              {card.letter}
+                              <img
+                                src={card.imageSrc}
+                                alt={card.label}
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                  filter: card.matched ? "drop-shadow(0 4px 10px rgba(30,142,82,0.18))" : "none",
+                                }}
+                              />
                             </span>
                             <div style={{
                               position: "absolute",
@@ -369,7 +375,7 @@ export default function MatchGamePage() {
         </div>
 
         <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.78rem" : "0.92rem", color: "rgba(17,19,25,0.45)", margin: "0.8rem 0 0", textAlign: "center", maxWidth: 520, padding: isPhone ? "0 0.5rem" : 0 }}>
-          האותיות נבחרות מתוך ההגדרות שלכן כשיש בחירה מותאמת, ובכל סיבוב מתקבל ערבוב חדש.
+          הופכים קלפי רגשות ובכל משחק מקבלים ערבוב חדש של תמונות.
         </p>
       </div>
 
