@@ -317,8 +317,8 @@ export default function MatchGamePage() {
                             <span style={{
                               position: "relative",
                               zIndex: 2,
-                              width: "76%",
-                              height: "76%",
+                              width: "92%",
+                              height: "92%",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -330,6 +330,8 @@ export default function MatchGamePage() {
                                   maxWidth: "100%",
                                   maxHeight: "100%",
                                   objectFit: "contain",
+                                  width: "100%",
+                                  height: "100%",
                                   filter: card.matched ? "drop-shadow(0 4px 10px rgba(30,142,82,0.18))" : "none",
                                 }}
                               />
