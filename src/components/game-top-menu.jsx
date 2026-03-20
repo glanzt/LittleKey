@@ -14,17 +14,15 @@ export default function GameTopMenu(props) {
   var userInitial = userLabel && userLabel.length > 0 ? userLabel.charAt(0).toUpperCase() : "U";
 
   var menuBtn = {
-    background: "rgba(255,255,255,0.84)",
-    border: "1px solid rgba(17,19,25,0.06)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,245,240,0.88))",
+    border: "1px solid rgba(255,194,162,0.28)",
     borderRadius: 999,
-    padding: "0.42rem 0.95rem",
+    padding: "0.46rem 1rem",
     cursor: "pointer",
     fontSize: "0.84rem",
     fontFamily: "'Secular One', sans-serif",
-    color: "#111319",
-    boxShadow: "0 8px 20px rgba(17,19,25,0.05)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    color: "#5c5470",
+    boxShadow: "0 10px 24px rgba(236,160,137,0.14)",
   };
 
   return (
@@ -39,31 +37,31 @@ export default function GameTopMenu(props) {
       alignItems: "center",
       direction: "rtl",
       padding: "0 1rem",
-      background: "linear-gradient(180deg, rgba(255,253,248,0.9), rgba(255,249,243,0.82))",
-      backdropFilter: "blur(14px)",
-      WebkitBackdropFilter: "blur(14px)",
-      borderBottom: "1px solid rgba(17,19,25,0.05)",
-      boxShadow: "0 8px 24px rgba(17,19,25,0.04)",
+      background: "linear-gradient(180deg, rgba(255,249,243,0.96), rgba(255,244,238,0.86))",
+      backdropFilter: "blur(16px)",
+      WebkitBackdropFilter: "blur(16px)",
+      borderBottom: "1px solid rgba(255,194,162,0.2)",
+      boxShadow: "0 12px 26px rgba(236,160,137,0.12)",
       boxSizing: "border-box",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "wrap" }}>
-        <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.45rem", maxWidth: 220, background: "rgba(255,255,255,0.94)" }}>
+        <button onClick={onProfiles} style={{ ...menuBtn, display: "flex", alignItems: "center", gap: "0.45rem", maxWidth: 220, background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,243,236,0.92))" }}>
           {user && user.image ? (
             <img
               src={user.image}
               alt={userLabel}
-              style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }}
+              style={{ width: 26, height: 26, borderRadius: "50%", objectFit: "cover", boxShadow: "0 4px 10px rgba(236,160,137,0.16)" }}
             />
           ) : (
             <div style={{
-              width: 24,
-              height: 24,
+              width: 26,
+              height: 26,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, rgba(124,92,252,0.16), rgba(243,156,18,0.18))",
+              background: "linear-gradient(135deg, rgba(255,176,146,0.42), rgba(180,191,255,0.42))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "0.72rem",
+              fontSize: "0.74rem",
             }}>{userInitial}</div>
           )}
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userLabel}</span>
@@ -76,15 +74,15 @@ export default function GameTopMenu(props) {
       <div style={{ flex: 1 }} />
 
       <button onClick={onSignOut} style={{
-        background: "linear-gradient(135deg, #111319, #363b46)",
+        background: "linear-gradient(135deg, #ff9b83, #ffbf6d)",
         border: "none",
         borderRadius: 999,
-        padding: "0.42rem 1rem",
+        padding: "0.48rem 1.05rem",
         cursor: "pointer",
         fontSize: "0.84rem",
         fontFamily: "'Secular One', sans-serif",
         color: "white",
-        boxShadow: "0 10px 20px rgba(17,19,25,0.14)",
+        boxShadow: "0 12px 24px rgba(255,165,132,0.24)",
       }}>התנתקות</button>
     </div>
   );

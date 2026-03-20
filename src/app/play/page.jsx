@@ -55,26 +55,32 @@ export default function PlayPage() {
   }
 
   return (
-    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "clamp(2rem, 5vw, 3rem)", fontFamily: "'Secular One', 'Rubik', sans-serif", background: "linear-gradient(180deg, #fffdf8 0%, #fff7f0 48%, #f8fbff 100%)" }}>
+    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "clamp(2rem, 5vw, 3rem)", fontFamily: "'Secular One', 'Rubik', sans-serif", background: "linear-gradient(180deg, #fff8f4 0%, #fff7ea 42%, #f1fbff 100%)" }}>
       <FloatingLettersBackground />
+      <div style={{
+        position: "absolute", top: 72, left: "50%", transform: "translateX(-50%)",
+        width: "min(880px, 92vw)", height: 260, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(255,231,174,0.46) 0%, rgba(255,170,167,0.22) 42%, rgba(147,219,255,0.16) 62%, rgba(255,255,255,0) 76%)",
+        filter: "blur(18px)", pointerEvents: "none", zIndex: 0,
+      }} />
 
       <div style={{ width: "100%", maxWidth: 1120, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", padding: "0 1rem 2rem", boxSizing: "border-box" }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "0.45rem",
           padding: "0.5rem 0.95rem", borderRadius: 999,
-          background: "rgba(255,255,255,0.78)", border: "1px solid rgba(17,19,25,0.07)",
-          boxShadow: "0 12px 28px rgba(17,19,25,0.06)", marginBottom: "0.9rem",
-          fontFamily: "'Rubik', sans-serif", color: "rgba(17,19,25,0.66)", fontSize: "0.92rem",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,246,239,0.88))", border: "1px solid rgba(255,188,154,0.32)",
+          boxShadow: "0 14px 28px rgba(255,184,140,0.18)", marginBottom: "0.9rem",
+          fontFamily: "'Rubik', sans-serif", color: "#6f657a", fontSize: "0.92rem",
         }}>
-          בוחרים משחק, משחקים, ולומדים בקצב נעים
+          בוחרים משחק קטן ומתחילים לגלות
         </div>
-        <h1 style={{ fontSize: "clamp(2.6rem, 5.8vw, 4.5rem)", fontFamily: "'Suez One', serif", color: "#111319", margin: "0 0 0.5rem", textAlign: "center", letterSpacing: "-0.04em" }}>
+        <h1 style={{ fontSize: "clamp(2.8rem, 5.8vw, 4.8rem)", fontFamily: "'Suez One', serif", color: "#292338", margin: "0 0 0.5rem", textAlign: "center", letterSpacing: "-0.04em", textShadow: "0 4px 14px rgba(255,255,255,0.35)" }}>
           ציידת האותיות
         </h1>
         <p style={{
           margin: "0 0 1.4rem", maxWidth: 640, textAlign: "center",
           fontFamily: "'Rubik', sans-serif", fontSize: "clamp(1rem, 1.8vw, 1.12rem)",
-          lineHeight: 1.7, color: "rgba(17,19,25,0.58)", padding: "0 0.5rem",
+          lineHeight: 1.7, color: "rgba(92,84,116,0.72)", padding: "0 0.5rem",
         }}>
           עולם קטן של משחקי אותיות ורגשות, עם משימות ברורות, הצלחות קטנות,
           והרבה סקרנות בדרך.
@@ -83,8 +89,8 @@ export default function PlayPage() {
         {game.sync.isAuthenticated && game.activeProfile ? (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "0.55rem",
-            background: "rgba(255,255,255,0.84)", borderRadius: 999, padding: "0.55rem 1.05rem", marginBottom: "2rem",
-            border: "1px solid rgba(17,19,25,0.06)", boxShadow: "0 10px 24px rgba(17,19,25,0.05)",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,246,241,0.9))", borderRadius: 999, padding: "0.6rem 1.1rem", marginBottom: "2rem",
+            border: "1px solid rgba(255,188,154,0.26)", boxShadow: "0 14px 28px rgba(255,184,140,0.14)",
             color: "#111319", fontFamily: "'Rubik', sans-serif",
           }}>
             <span style={{ fontSize: "1.3rem" }}>{game.activeProfile.avatar}</span>
@@ -95,8 +101,8 @@ export default function PlayPage() {
             <a href="/auth/signin?callbackUrl=%2Fplay" style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               padding: "0.8rem 1.7rem", fontSize: "1rem", fontFamily: "'Secular One', sans-serif",
-              background: "rgba(255,255,255,0.92)", color: "#111319", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 999,
-              textDecoration: "none", boxShadow: "0 12px 26px rgba(17,19,25,0.06)",
+              background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,246,255,0.92))", color: "#574f70", border: "1px solid rgba(187,180,224,0.34)", borderRadius: 999,
+              textDecoration: "none", boxShadow: "0 14px 26px rgba(127,118,180,0.12)",
             }}>התחברות לשמירת התקדמות</a>
             <div style={{ marginTop: "0.7rem" }}>
               <a href="/auth/register?callbackUrl=%2Fplay" style={{ fontSize: "0.9rem", color: "rgba(17,19,25,0.5)", fontFamily: "'Rubik', sans-serif", textDecoration: "underline" }}>
@@ -122,30 +128,34 @@ export default function PlayPage() {
 
             return (
               <button key={card.id} onClick={handleClick} style={{
-                textAlign: "right", background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,252,247,0.94))", border: "1px solid rgba(17,19,25,0.07)",
-                borderRadius: 32, padding: "1.45rem", cursor: "pointer", width: "100%",
-                boxShadow: "0 18px 38px rgba(17,19,25,0.08)", transition: "transform 0.18s ease, box-shadow 0.18s ease",
+                textAlign: "right", background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,249,243,0.94))", border: "1px solid rgba(255,255,255,0.8)",
+                borderRadius: 36, padding: "1.55rem 1.45rem 1.5rem", cursor: "pointer", width: "100%",
+                boxShadow: "0 26px 44px rgba(227,146,123,0.14)", transition: "transform 0.18s ease, box-shadow 0.18s ease",
                 position: "relative", overflow: "hidden",
               }}>
                 <div style={{
                   position: "absolute", top: -28, left: -24, width: 120, height: 120,
-                  borderRadius: "50%", background: card.accentSoft, filter: "blur(4px)", opacity: 0.9,
+                  borderRadius: "50%", background: card.accentSoft, filter: "blur(2px)", opacity: 1,
                 }} />
                 <div style={{
-                  width: 78, height: 78, borderRadius: 24, background: "white",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.6rem", marginBottom: "1rem",
-                  boxShadow: "0 12px 24px rgba(17,19,25,0.08)", position: "relative", zIndex: 1,
-                  border: "1px solid rgba(17,19,25,0.05)",
+                  position: "absolute", inset: "auto 16px 16px auto", width: 78, height: 78, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.56)", filter: "blur(10px)", pointerEvents: "none",
+                }} />
+                <div style={{
+                  width: 86, height: 86, borderRadius: 28, background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,248,244,0.9))",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.85rem", marginBottom: "1rem",
+                  boxShadow: "0 18px 30px rgba(227,146,123,0.18)", position: "relative", zIndex: 1,
+                  border: "1px solid rgba(255,255,255,0.84)",
                 }}>
                   <div style={{
-                    width: 62, height: 62, borderRadius: 20, background: card.accentSoft,
+                    width: 68, height: 68, borderRadius: 22, background: "linear-gradient(180deg, " + card.accentSoft + ", rgba(255,255,255,0.3))",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>{card.icon}</div>
                 </div>
-                <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.4rem", color: "#111319", margin: "0 0 0.45rem", position: "relative", zIndex: 1 }}>
+                <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.42rem", color: "#2a2238", margin: "0 0 0.45rem", position: "relative", zIndex: 1 }}>
                   {card.title}
                 </h2>
-                <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.98rem", color: "rgba(17,19,25,0.56)", margin: "0 0 1.25rem", minHeight: 56, lineHeight: 1.62, position: "relative", zIndex: 1 }}>
+                <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.98rem", color: "rgba(83,75,106,0.74)", margin: "0 0 1.25rem", minHeight: 56, lineHeight: 1.62, position: "relative", zIndex: 1 }}>
                   {card.description}
                 </p>
                 <div style={{
@@ -162,8 +172,8 @@ export default function PlayPage() {
 
         <button onClick={function() { router.push("/play/settings"); }} style={{
           marginTop: "1.75rem", padding: "0.85rem 1.5rem", borderRadius: 999,
-          border: "1px solid rgba(17,19,25,0.08)", background: "rgba(255,255,255,0.9)", cursor: "pointer", fontSize: "1rem",
-          boxShadow: "0 10px 24px rgba(17,19,25,0.05)", zIndex: 2, fontFamily: "'Secular One', sans-serif", color: "#111319",
+          border: "1px solid rgba(255,188,154,0.26)", background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,246,241,0.9))", cursor: "pointer", fontSize: "1rem",
+          boxShadow: "0 14px 26px rgba(255,184,140,0.14)", zIndex: 2, fontFamily: "'Secular One', sans-serif", color: "#5a516f",
         }}>הגדרות</button>
       </div>
 
