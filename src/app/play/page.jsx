@@ -23,6 +23,14 @@ var GAME_CARDS = [
     accent: "#7C5CFC",
     accentSoft: "rgba(124,92,252,0.12)",
   },
+  {
+    id: "wheel",
+    icon: "🎡",
+    title: "גלגל הרגשות",
+    description: "מסובבים גלגל, מגלים רגש אחד, ובוחרים את השם המתאים.",
+    accent: "#F39C12",
+    accentSoft: "rgba(243,156,18,0.14)",
+  },
 ];
 
 export default function PlayPage() {
@@ -40,6 +48,10 @@ export default function PlayPage() {
 
   function handleMatchGame() {
     router.push("/play/match");
+  }
+
+  function handleWheelGame() {
+    router.push("/play/wheel");
   }
 
   return (
@@ -80,9 +92,15 @@ export default function PlayPage() {
           {GAME_CARDS.map(function(card) {
             var actionText = card.id === "keyboard"
               ? (game.sync.isAuthenticated ? "לבחירת שלבים" : "התחילי לשחק")
-              : "למשחק הקלפים";
+              : card.id === "match"
+                ? "למשחק הקלפים"
+                : "לגלגל ולנחש";
 
-            var handleClick = card.id === "keyboard" ? handleKeyboardGame : handleMatchGame;
+            var handleClick = card.id === "keyboard"
+              ? handleKeyboardGame
+              : card.id === "match"
+                ? handleMatchGame
+                : handleWheelGame;
 
             return (
               <button key={card.id} onClick={handleClick} style={{
