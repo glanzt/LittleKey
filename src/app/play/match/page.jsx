@@ -149,7 +149,8 @@ export default function MatchGamePage() {
   var displayDuration = completedRoundDuration != null ? completedRoundDuration : (nowTick - roundStartedAtRef.current);
   var isPhone = viewportWidth <= 700;
   var boardGap = isPhone ? 8 : 14;
-  var rowLayout = isPhone ? [4, 4, 4, 4] : MATCH_ROW_LAYOUT;
+  var phoneColumns = 3;
+  var rowLayout = isPhone ? [2, 3, 3, 3, 3, 2] : MATCH_ROW_LAYOUT;
   var rows = useMemo(function() {
     var slices = [];
     var start = 0;
@@ -169,8 +170,8 @@ export default function MatchGamePage() {
     }
 
     return {
-      width: "calc((100% - " + ((rowLength - 1) * boardGap) + "px) / " + rowLength + ")",
-      height: rowLength === 4 ? "6.2rem" : "5.8rem",
+      width: "calc((100% - " + ((phoneColumns - 1) * boardGap) + "px) / " + phoneColumns + ")",
+      height: rowLength === 2 ? "7.5rem" : "7.2rem",
     };
   }
 
