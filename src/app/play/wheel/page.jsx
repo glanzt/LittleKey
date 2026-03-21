@@ -2,24 +2,44 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PAGE_BG, BACK_BUTTON_STYLE, playError, playPerfect } from "@/lib/game-constants";
+import { PAGE_BG, BACK_BUTTON_STYLE, getAudioCtx, playError, playFeelingSound, playPerfect } from "@/lib/game-constants";
+import { useGame } from "@/lib/game-context";
+import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
 import { FloatingLettersBackground } from "@/styles/shared";
+import { useBuildLoop } from "@/lib/build-loop";
 import { FEELING_ITEMS, shuffleArray } from "@/lib/match-game";
 
 var WHEEL_COLORS = ["#FF8A5B", "#FFD166", "#7C5CFC", "#2DCE89", "#3FA7D6", "#F26CA7", "#FFB703", "#8E7DF2", "#00B894", "#FF6B6B"];
-var SPIN_DURATION_MS = 4200;
+var SPIN_FRICTION = 0.98;
+var SPIN_STOP_VELOCITY = 0.01;
+var DRAG_SPIN_THRESHOLD = 0.045;
+var SPIN_SOUND_MIN_DELAY = 45;
+var SPIN_SOUND_MAX_DELAY = 230;
 
 export default function WheelGamePage() {
+  var game = useGame();
   var router = useRouter();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
+  var buildLoop = useBuildLoop("wheel", game.activeProfile ? game.activeProfile.id : null);
   var _wr = useState(0); var wheelRotation = _wr[0]; var setWheelRotation = _wr[1];
   var _sp = useState(false); var isSpinning = _sp[0]; var setIsSpinning = _sp[1];
+  var _dg = useState(false); var isDragging = _dg[0]; var setIsDragging = _dg[1];
   var _sf = useState(null); var selectedFeeling = _sf[0]; var setSelectedFeeling = _sf[1];
-  var _ao = useState(function() { return shuffleArray(FEELING_ITEMS); }); var answerOptions = _ao[0]; var setAnswerOptions = _ao[1];
+  var _ao = useState(function() {
+    return shuffleArray(FEELING_ITEMS).map(function(item) {
+      return { id: item.id, label: item.label, imageSrc: item.imageSrc, audioName: item.audioName, isCorrect: false };
+    });
+  }); var answerOptions = _ao[0]; var setAnswerOptions = _ao[1];
   var _cg = useState(null); var chosenGuess = _cg[0]; var setChosenGuess = _cg[1];
   var _fb = useState(null); var feedback = _fb[0]; var setFeedback = _fb[1];
   var _rc = useState(0); var roundsPlayed = _rc[0]; var setRoundsPlayed = _rc[1];
-  var spinTimerRef = useRef(null);
+  var wheelSurfaceRef = useRef(null);
+  var animationFrameRef = useRef(null);
+  var wheelRotationRef = useRef(0);
+  var spinSoundTimerRef = useRef(null);
+  var spinSoundEnabledRef = useRef(false);
+  var spinVelocityRef = useRef(0);
+  var dragRef = useRef({ pointerId: null, lastAngle: 0, lastTime: 0, velocity: 0, moved: false });
 
   useEffect(function() {
     function handleResize() {
@@ -29,7 +49,8 @@ export default function WheelGamePage() {
     window.addEventListener("resize", handleResize);
     return function() {
       window.removeEventListener("resize", handleResize);
-      if (spinTimerRef.current) clearTimeout(spinTimerRef.current);
+      stopSpinAnimation();
+      stopSpinSound();
     };
   }, []);
 
@@ -52,33 +73,246 @@ export default function WheelGamePage() {
     });
   }, [segmentAngle]);
 
-  function handleSpin() {
-    if (isSpinning) return;
+  function normalizeRotation(rotation) {
+    return ((rotation % 360) + 360) % 360;
+  }
 
-    var chosenIndex = Math.floor(Math.random() * FEELING_ITEMS.length);
-    var chosenFeeling = FEELING_ITEMS[chosenIndex];
+  function normalizeAngleDelta(delta) {
+    if (delta > 180) return delta - 360;
+    if (delta < -180) return delta + 360;
+    return delta;
+  }
 
-    if (spinTimerRef.current) clearTimeout(spinTimerRef.current);
+  function setWheelRotationValue(nextRotation) {
+    wheelRotationRef.current = nextRotation;
+    setWheelRotation(nextRotation);
+  }
 
-    setIsSpinning(true);
+  function clearGuessState() {
     setSelectedFeeling(null);
     setChosenGuess(null);
     setFeedback(null);
+  }
 
-    setWheelRotation(function(prev) {
-      var currentNormalized = ((prev % 360) + 360) % 360;
-      var desiredNormalized = (360 - ((chosenIndex * segmentAngle) % 360)) % 360;
-      var delta = (desiredNormalized - currentNormalized + 360) % 360;
-      var fullTurns = 5 + Math.floor(Math.random() * 3);
-      return prev + (fullTurns * 360) + delta;
-    });
+  function getFeelingForRotation(rotation) {
+    var normalized = normalizeRotation(rotation);
+    var rawIndex = Math.round((((360 - normalized) % 360) / segmentAngle));
+    var chosenIndex = ((rawIndex % FEELING_ITEMS.length) + FEELING_ITEMS.length) % FEELING_ITEMS.length;
+    return FEELING_ITEMS[chosenIndex];
+  }
 
-    spinTimerRef.current = setTimeout(function() {
-      setRoundsPlayed(function(prev) { return prev + 1; });
-      setSelectedFeeling(chosenFeeling);
-      setAnswerOptions(shuffleArray(FEELING_ITEMS));
-      setIsSpinning(false);
-    }, SPIN_DURATION_MS + 80);
+  function commitSpinResult() {
+    var chosenFeeling = getFeelingForRotation(wheelRotationRef.current);
+    setRoundsPlayed(function(prev) { return prev + 1; });
+    setSelectedFeeling(chosenFeeling);
+    setAnswerOptions(shuffleArray(FEELING_ITEMS).map(function(item) {
+      return {
+        id: item.id,
+        label: item.label,
+        imageSrc: item.imageSrc,
+        audioName: item.audioName,
+        isCorrect: item.imageSrc === chosenFeeling.imageSrc,
+      };
+    }));
+  }
+
+  function stopSpinAnimation() {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }
+
+  function getSpinSoundDelay() {
+    var normalizedSpeed = Math.min(1, Math.abs(spinVelocityRef.current) / 3.8);
+    return SPIN_SOUND_MAX_DELAY - ((SPIN_SOUND_MAX_DELAY - SPIN_SOUND_MIN_DELAY) * normalizedSpeed);
+  }
+
+  function playSpinTick() {
+    var ctx = getAudioCtx();
+    if (!ctx) return;
+    ctx.resume();
+
+    var normalizedSpeed = Math.min(1, Math.abs(spinVelocityRef.current) / 3.8);
+    var startFreq = 230 + (normalizedSpeed * 220);
+    var endFreq = 170 + (normalizedSpeed * 120);
+    var peakGain = 0.015 + (normalizedSpeed * 0.02);
+    var filterFreq = 1100 + (normalizedSpeed * 1200);
+
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var filter = ctx.createBiquadFilter();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.04);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(filterFreq, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(peakGain, ctx.currentTime + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.055);
+  }
+
+  function scheduleSpinSoundTick() {
+    if (!spinSoundEnabledRef.current) return;
+    if (spinSoundTimerRef.current) clearTimeout(spinSoundTimerRef.current);
+
+    var delay = getSpinSoundDelay();
+    spinSoundTimerRef.current = setTimeout(function() {
+      spinSoundTimerRef.current = null;
+      if (!spinSoundEnabledRef.current) return;
+      playSpinTick();
+      scheduleSpinSoundTick();
+    }, delay);
+  }
+
+  function startSpinSound() {
+    spinSoundEnabledRef.current = true;
+    if (spinSoundTimerRef.current) return;
+    playSpinTick();
+    scheduleSpinSoundTick();
+  }
+
+  function stopSpinSound() {
+    spinSoundEnabledRef.current = false;
+    spinVelocityRef.current = 0;
+    if (spinSoundTimerRef.current) {
+      clearTimeout(spinSoundTimerRef.current);
+      spinSoundTimerRef.current = null;
+    }
+  }
+
+  function finishSpin() {
+    stopSpinAnimation();
+    stopSpinSound();
+    setIsSpinning(false);
+    commitSpinResult();
+  }
+
+  function startInertiaSpin(initialVelocity) {
+    stopSpinAnimation();
+    setIsSpinning(true);
+    spinVelocityRef.current = Math.abs(initialVelocity);
+    startSpinSound();
+
+    var velocity = initialVelocity;
+    var lastTime = performance.now();
+
+    function step(now) {
+      var elapsed = now - lastTime;
+      lastTime = now;
+
+      setWheelRotationValue(wheelRotationRef.current + (velocity * elapsed));
+      velocity *= Math.pow(SPIN_FRICTION, elapsed / 16.67);
+      spinVelocityRef.current = Math.abs(velocity);
+
+      if (Math.abs(velocity) <= SPIN_STOP_VELOCITY) {
+        finishSpin();
+        return;
+      }
+
+      animationFrameRef.current = requestAnimationFrame(step);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(step);
+  }
+
+  function getPointerAngle(event) {
+    if (!wheelSurfaceRef.current) return 0;
+    var rect = wheelSurfaceRef.current.getBoundingClientRect();
+    var centerX = rect.left + (rect.width / 2);
+    var centerY = rect.top + (rect.height / 2);
+    return Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+  }
+
+  function handleSpin() {
+    if (isSpinning || isDragging) return;
+
+    clearGuessState();
+    startInertiaSpin(3 + (Math.random() * 1.3));
+  }
+
+  function handleWheelPointerDown(event) {
+    if (isSpinning) return;
+
+    clearGuessState();
+    setIsDragging(true);
+    spinVelocityRef.current = 0;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      lastAngle: getPointerAngle(event),
+      lastTime: performance.now(),
+      velocity: 0,
+      moved: false,
+    };
+
+    if (event.currentTarget.setPointerCapture) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+  }
+
+  function handleWheelPointerMove(event) {
+    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
+
+    var currentAngle = getPointerAngle(event);
+    var delta = normalizeAngleDelta(currentAngle - dragRef.current.lastAngle);
+    var now = performance.now();
+    var elapsed = Math.max(1, now - dragRef.current.lastTime);
+
+    dragRef.current.lastAngle = currentAngle;
+    dragRef.current.lastTime = now;
+    dragRef.current.velocity = delta / elapsed;
+    dragRef.current.moved = dragRef.current.moved || Math.abs(delta) > 0.2;
+    spinVelocityRef.current = Math.abs(dragRef.current.velocity * 1.6);
+
+    if (dragRef.current.moved && !spinSoundEnabledRef.current) {
+      startSpinSound();
+    }
+
+    setWheelRotationValue(wheelRotationRef.current + delta);
+  }
+
+  function handleWheelPointerUp(event) {
+    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
+
+    if (event.currentTarget.releasePointerCapture) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    setIsDragging(false);
+
+    if (!dragRef.current.moved) {
+      stopSpinSound();
+      return;
+    }
+
+    if (Math.abs(dragRef.current.velocity) >= DRAG_SPIN_THRESHOLD) {
+      startInertiaSpin(dragRef.current.velocity * 1.6);
+      return;
+    }
+
+    finishSpin();
+  }
+
+  function handleWheelPointerCancel(event) {
+    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
+    setIsDragging(false);
+    stopSpinAnimation();
+    stopSpinSound();
+    if (dragRef.current.moved) {
+      commitSpinResult();
+    }
+    setIsSpinning(false);
   }
 
   function handleGuess(feeling) {
@@ -86,8 +320,10 @@ export default function WheelGamePage() {
 
     setChosenGuess(feeling.id);
 
-    if (feeling.id === selectedFeeling.id) {
+    if (feeling.isCorrect) {
       playPerfect();
+      playFeelingSound(selectedFeeling.audioName || selectedFeeling.label);
+      buildLoop.registerSuccess();
       setFeedback({
         type: "success",
         text: "נכון מאוד! זו ההרגשה " + selectedFeeling.label + ".",
@@ -150,6 +386,19 @@ export default function WheelGamePage() {
           </div>
         </div>
 
+        {buildLoop.hasTheme ? (
+          <BuildLoopHud
+            theme={buildLoop.theme}
+            progress={buildLoop.progress}
+            builtParts={buildLoop.builtParts}
+            justUnlockedPartId={buildLoop.justUnlockedPartId}
+            showNudge={buildLoop.showNudge}
+            isPhone={isPhone}
+            maxWidth={920}
+            margin="0 auto 1rem"
+          />
+        ) : null}
+
         <div style={{
           width: "100%",
           display: "grid",
@@ -189,6 +438,7 @@ export default function WheelGamePage() {
               maxHeight: "100%",
               marginTop: isPhone ? "0.5rem" : "0.7rem",
               marginBottom: "1rem",
+              touchAction: "none",
             }}>
               <div style={{
                 position: "absolute",
@@ -202,9 +452,14 @@ export default function WheelGamePage() {
                   return item.color + " " + start + "deg " + end + "deg";
                 }).join(", ") + ")",
                 transform: "rotate(" + wheelRotation + "deg)",
-                transition: isSpinning ? "transform " + SPIN_DURATION_MS + "ms cubic-bezier(0.14, 0.78, 0.18, 1)" : "none",
                 overflow: "hidden",
-              }}>
+              }}
+              ref={wheelSurfaceRef}
+              onPointerDown={handleWheelPointerDown}
+              onPointerMove={handleWheelPointerMove}
+              onPointerUp={handleWheelPointerUp}
+              onPointerCancel={handleWheelPointerCancel}
+              >
                 {wheelItems.map(function(item) {
                   return (
                     <div
@@ -259,7 +514,7 @@ export default function WheelGamePage() {
 
             <button
               onClick={handleSpin}
-              disabled={isSpinning}
+              disabled={isSpinning || isDragging}
               style={{
                 border: "none",
                 borderRadius: 999,
@@ -267,13 +522,13 @@ export default function WheelGamePage() {
                 fontFamily: "'Secular One', sans-serif",
                 fontSize: isPhone ? "1rem" : "1.08rem",
                 color: "white",
-                cursor: isSpinning ? "wait" : "pointer",
-                background: isSpinning ? "#BCA9F6" : "linear-gradient(135deg, #7C5CFC, #F39C12)",
-                boxShadow: isSpinning ? "none" : "0 10px 22px rgba(124,92,252,0.28)",
+                cursor: isSpinning || isDragging ? "wait" : "pointer",
+                background: isSpinning || isDragging ? "#BCA9F6" : "linear-gradient(135deg, #7C5CFC, #F39C12)",
+                boxShadow: isSpinning || isDragging ? "none" : "0 10px 22px rgba(124,92,252,0.28)",
                 minWidth: isPhone ? 180 : 220,
               }}
             >
-              {isSpinning ? "הגלגל מסתובב..." : selectedFeeling ? "סובבי שוב" : "סובבי את הגלגל"}
+              {isDragging ? "מסובבים..." : isSpinning ? "הגלגל מסתובב..." : selectedFeeling ? "סובבי שוב" : "סובבי את הגלגל"}
             </button>
           </div>
 
@@ -331,7 +586,7 @@ export default function WheelGamePage() {
               gap: "0.65rem",
             }}>
               {answerOptions.map(function(option) {
-                var isCorrectAnswer = selectedFeeling && option.id === selectedFeeling.id;
+                var isCorrectAnswer = !!option.isCorrect;
                 var isPicked = chosenGuess === option.id;
                 var isWrongPick = isPicked && !isCorrectAnswer;
                 var isRevealedCorrect = isSolved && isCorrectAnswer;
@@ -404,6 +659,10 @@ export default function WheelGamePage() {
           </div>
         </div>
       </div>
+
+      {!buildLoop.hasTheme ? (
+        <ThemePickerOverlay themes={buildLoop.themes} onChoose={buildLoop.chooseTheme} isPhone={isPhone} />
+      ) : null}
     </div>
   );
 }

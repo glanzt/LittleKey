@@ -199,6 +199,7 @@ export function playClap() {
 /* ── Recorded Audio Playback ── */
 var _playbackId = 0;
 var _currentAudio = null;
+var _currentFeelingAudio = null;
 var CLIP_OVERLAP_MS = 550;
 var _voiceGender = "male";
 
@@ -247,6 +248,27 @@ export function playRecordingSeq(names) {
 export function speakLetter(letter) {
   var base = KEY_TO_LETTER[letter] || letter;
   playRecordingSeq([base]);
+}
+
+export function playFeelingSound(feelingName) {
+  if (!feelingName || typeof window === "undefined") return;
+  if (_currentFeelingAudio) {
+    _currentFeelingAudio.pause();
+    _currentFeelingAudio = null;
+  }
+
+  var audio = new Audio("/api/feelings-audio?name=" + encodeURIComponent(feelingName));
+  _currentFeelingAudio = audio;
+
+  function cleanup() {
+    if (_currentFeelingAudio === audio) {
+      _currentFeelingAudio = null;
+    }
+  }
+
+  audio.onended = cleanup;
+  audio.onerror = cleanup;
+  audio.play().catch(cleanup);
 }
 
 /* ── Persistence ── */

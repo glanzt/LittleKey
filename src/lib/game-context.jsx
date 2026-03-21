@@ -188,6 +188,7 @@ export function GameProvider(props) {
   var _hf = useState(false); var hintFlipped = _hf[0]; var setHintFlipped = _hf[1];
   var _sd = useState(false); var speakDone = _sd[0]; var setSpeakDone = _sd[1];
   var _lw = useState(false); var showLangWarning = _lw[0]; var setShowLangWarning = _lw[1];
+  var _gil = useState(false); var gameInputLocked = _gil[0]; var setGameInputLocked = _gil[1];
 
   var guestGameRef = useRef(false);
   var lastGameSessionRef = useRef(null);
@@ -197,7 +198,7 @@ export function GameProvider(props) {
     showSuccess: showSuccess, currentIdx: currentIdx, sequence: sequence,
     currentErrors: currentErrors, letterShownAt: letterShownAt, attempts: attempts,
     usedHelp: usedHelp, hintFlipped: hintFlipped, currentGameLevel: currentGameLevel,
-    isGuestGame: guestGameRef.current
+    isGuestGame: guestGameRef.current, gameInputLocked: gameInputLocked
   };
 
   function generateSequence(guest) {
@@ -227,6 +228,7 @@ export function GameProvider(props) {
     setLastPressedKey(null);
     setUsedHelp(false);
     setHintFlipped(false);
+    setGameInputLocked(false);
     setLetterResults(seq.map(function(l, i) { return { letter: l, status: i === 0 ? "current" : "pending" }; }));
     setCurrentGameLevel(level != null ? level : null);
     router.push("/play/game");
@@ -307,7 +309,7 @@ export function GameProvider(props) {
 
   function processGameKeyPress(pressedKey) {
     var st = stateRef.current;
-    if (st.showSuccess || st.currentIdx >= st.sequence.length) return;
+    if (st.gameInputLocked || st.showSuccess || st.currentIdx >= st.sequence.length) return;
 
     if (pressedKey === " ") {
       setHintFlipped(function(prev) {
@@ -520,6 +522,8 @@ export function GameProvider(props) {
     speakDone: speakDone,
     showLangWarning: showLangWarning,
     setShowLangWarning: setShowLangWarning,
+    gameInputLocked: gameInputLocked,
+    setGameInputLocked: setGameInputLocked,
     isGuestGame: guestGameRef.current,
     lastGameSession: lastGameSessionRef.current,
 

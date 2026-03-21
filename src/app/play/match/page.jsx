@@ -2,13 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame } from "@/lib/game-context";
-import { PAGE_BG, playCardFlip, playError, playPerfect, playSuccess } from "@/lib/game-constants";
+import { PAGE_BG, playCardFlip, playError, playFeelingSound, playPerfect, playSuccess } from "@/lib/game-constants";
+import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
 import { FloatingLettersBackground } from "@/styles/shared";
+import { useBuildLoop } from "@/lib/build-loop";
 import { MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match-game";
 
 export default function MatchGamePage() {
   var game = useGame();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
+  var buildLoop = useBuildLoop("match", game.activeProfile ? game.activeProfile.id : null);
+  var themeReadyRef = useRef(false);
 
   var _rd = useState(1); var round = _rd[0]; var setRound = _rd[1];
   var _cd = useState(function() { return createMatchDeck(MATCH_PAIR_COUNT); }); var cards = _cd[0]; var setCards = _cd[1];
@@ -41,6 +45,12 @@ export default function MatchGamePage() {
     return function() { clearInterval(timer); };
   }, []);
 
+  useEffect(function() {
+    if (!buildLoop.hasTheme || themeReadyRef.current) return;
+    themeReadyRef.current = true;
+    resetRound(1);
+  }, [buildLoop.hasTheme]);
+
   function formatStopwatch(ms) {
     var totalMs = Math.max(0, ms || 0);
     var totalSeconds = Math.floor(totalMs / 1000);
@@ -70,7 +80,7 @@ export default function MatchGamePage() {
     setCards(function(prev) {
       return prev.map(function(card) {
         if (card.id !== cardId) return card;
-        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, revealed: true, matched: card.matched };
+        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, audioName: card.audioName, revealed: true, matched: card.matched };
       });
     });
   }
@@ -79,7 +89,7 @@ export default function MatchGamePage() {
     setCards(function(prev) {
       return prev.map(function(card) {
         if (cardIds.indexOf(card.id) === -1) return card;
-        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, revealed: false, matched: false };
+        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, audioName: card.audioName, revealed: false, matched: false };
       });
     });
   }
@@ -88,7 +98,7 @@ export default function MatchGamePage() {
     setCards(function(prev) {
       return prev.map(function(card) {
         if (cardIds.indexOf(card.id) === -1) return card;
-        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, revealed: true, matched: true };
+        return { id: card.id, matchKey: card.matchKey, label: card.label, imageSrc: card.imageSrc, audioName: card.audioName, revealed: true, matched: true };
       });
     });
   }
@@ -129,9 +139,13 @@ export default function MatchGamePage() {
             round: round,
           });
           playPerfect();
+          playFeelingSound(card.audioName || card.label);
+          buildLoop.registerSuccess();
           setRoundComplete(true);
         } else {
           playSuccess();
+          playFeelingSound(card.audioName || card.label);
+          buildLoop.registerSuccess();
         }
       }, 380);
       return;
@@ -183,6 +197,18 @@ export default function MatchGamePage() {
         <h1 style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(2rem, 5vw, 3.2rem)", color: "#111319", margin: "0 0 0.4rem", textAlign: "center", lineHeight: 1.05 }}>
           משחק התאמת קלפים
         </h1>
+        {buildLoop.hasTheme ? (
+          <BuildLoopHud
+            theme={buildLoop.theme}
+            progress={buildLoop.progress}
+            builtParts={buildLoop.builtParts}
+            justUnlockedPartId={buildLoop.justUnlockedPartId}
+            showNudge={buildLoop.showNudge}
+            isPhone={isPhone}
+            maxWidth={840}
+            margin="0 auto 0.9rem"
+          />
+        ) : null}
         <div style={{ display: "flex", gap: isPhone ? "0.45rem" : "0.8rem", flexWrap: "nowrap", justifyContent: "center", marginBottom: isPhone ? "0.8rem" : "1.4rem", width: "100%", maxWidth: isPhone ? "100%" : "none" }}>
           {[
             { label: "זמן", value: formatStopwatch(displayDuration), color: "#7C5CFC" },
@@ -443,6 +469,10 @@ export default function MatchGamePage() {
             </button>
           </div>
         </div>
+      ) : null}
+
+      {!buildLoop.hasTheme ? (
+        <ThemePickerOverlay themes={buildLoop.themes} onChoose={buildLoop.chooseTheme} isPhone={isPhone} />
       ) : null}
     </div>
   );

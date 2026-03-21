@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
 import { BACK_BUTTON_STYLE, NIKUD_MAP, KEY_TO_LETTER, SUCCESS_MSGS, speakLetter } from "@/lib/game-constants";
 import { Confetti, ProgressTracker, FlippingHintCard } from "@/components/game-ui";
+import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
+import { useBuildLoop } from "@/lib/build-loop";
 
 export default function GamePage() {
   var game = useGame();
   var router = useRouter();
   var inputRef = useRef(null);
+  var successSeenRef = useRef(false);
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
 
   // Guard: if no active game, redirect
@@ -35,6 +38,7 @@ export default function GamePage() {
   var displayLetter = nikud ? letter + nikud : letter;
   var isCompact = viewportWidth <= 900;
   var isPhone = viewportWidth <= 700;
+  var buildLoop = useBuildLoop("keyboard", game.activeProfile ? game.activeProfile.id : null);
 
   var successMsg = useMemo(function() {
     return SUCCESS_MSGS[Math.floor(Math.random() * SUCCESS_MSGS.length)];
@@ -49,11 +53,29 @@ export default function GamePage() {
   useEffect(function() {
     if (!isPhone || !inputRef.current) return;
     if (game.showSuccess || game.showError) return;
+    if (!buildLoop.hasTheme) return;
     var timer = setTimeout(function() {
       try { inputRef.current.focus(); } catch (e) { /* noop */ }
     }, 50);
     return function() { clearTimeout(timer); };
-  }, [isPhone, game.currentIdx, game.showSuccess, game.showError]);
+  }, [isPhone, game.currentIdx, game.showSuccess, game.showError, buildLoop.hasTheme]);
+
+  useEffect(function() {
+    game.setGameInputLocked(!buildLoop.hasTheme);
+    return function() {
+      game.setGameInputLocked(false);
+    };
+  }, [buildLoop.hasTheme]);
+
+  useEffect(function() {
+    if (game.showSuccess && !successSeenRef.current && buildLoop.hasTheme) {
+      successSeenRef.current = true;
+      buildLoop.registerSuccess();
+    }
+    if (!game.showSuccess) {
+      successSeenRef.current = false;
+    }
+  }, [game.showSuccess, buildLoop.hasTheme]);
 
   function handlePhoneInput(e) {
     var raw = e.target.value || "";
@@ -124,6 +146,21 @@ export default function GamePage() {
       <div style={{ position: isCompact ? "static" : "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center", marginBottom: isCompact ? "0.75rem" : 0 }}>
         <ProgressTracker letterResults={game.letterResults} compact={isPhone} />
       </div>
+
+      {buildLoop.hasTheme ? (
+        <div style={{ width: "100%", maxWidth: 760, marginTop: isCompact ? "0.4rem" : "2.2rem", marginBottom: isCompact ? "0.6rem" : "0.8rem" }}>
+          <BuildLoopHud
+            theme={buildLoop.theme}
+            progress={buildLoop.progress}
+            builtParts={buildLoop.builtParts}
+            justUnlockedPartId={buildLoop.justUnlockedPartId}
+            showNudge={buildLoop.showNudge}
+            isPhone={isPhone}
+            maxWidth={760}
+            margin="0 auto"
+          />
+        </div>
+      ) : null}
 
       {/* Wrong key floating indicator */}
       {game.showError && game.lastPressedKey && KEY_TO_LETTER[game.lastPressedKey] ? (
@@ -262,6 +299,10 @@ export default function GamePage() {
             }}
           />
         </div>
+      ) : null}
+
+      {!buildLoop.hasTheme ? (
+        <ThemePickerOverlay themes={buildLoop.themes} onChoose={buildLoop.chooseTheme} isPhone={isPhone} />
       ) : null}
     </div>
   );
