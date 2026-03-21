@@ -137,12 +137,11 @@ export function ThemePickerOverlay(props) {
 
 export function BuildLoopHud(props) {
   var theme = props.theme;
-  var progress = props.progress;
   var builtParts = props.builtParts;
-  var justUnlockedPartId = props.justUnlockedPartId;
-  var showNudge = !!props.showNudge;
   var isPhone = !!props.isPhone;
   var palette = getThemePalette(theme.id);
+  var totalParts = theme.parts.length;
+  var completedCount = builtParts.length;
 
   return (
     <div style={{
@@ -173,7 +172,7 @@ export function BuildLoopHud(props) {
             <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 18px 18px, rgba(255,255,255,0.95) 0 1.4px, transparent 1.6px), radial-gradient(circle at 62px 28px, rgba(255,255,255,0.8) 0 1.2px, transparent 1.4px), radial-gradient(circle at 132px 44px, rgba(255,255,255,0.75) 0 1.4px, transparent 1.6px), radial-gradient(circle at 166px 18px, rgba(255,255,255,0.9) 0 1.1px, transparent 1.3px)" }} />
           ) : null}
           {builtParts.map(function(partId) {
-            return renderPart(theme.id, partId, justUnlockedPartId === partId);
+            return renderPart(theme.id, partId, false);
           })}
         </div>
       </div>
@@ -192,35 +191,146 @@ export function BuildLoopHud(props) {
               {theme.label}
             </span>
           </div>
-          <div style={{ display: "flex", gap: "0.35rem" }}>
-            {[0, 1, 2].map(function(index) {
-              var filled = index < progress;
-              return (
-                <div
-                  key={index}
-                  style={{
-                    width: isPhone ? 18 : 20,
-                    height: isPhone ? 18 : 20,
-                    borderRadius: "50%",
-                    background: filled ? palette.slot : "rgba(17,19,25,0.08)",
-                    boxShadow: filled ? "0 0 0 4px rgba(255,215,106,0.18)" : "none",
-                    transform: filled ? "scale(1.08)" : "scale(1)",
-                    transition: "all 160ms ease",
-                  }}
-                />
-              );
-            })}
+          <div style={{
+            minWidth: isPhone ? 54 : 62,
+            height: isPhone ? 34 : 36,
+            padding: "0 0.75rem",
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.72)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "'Secular One', sans-serif",
+            color: palette.accent,
+            fontSize: isPhone ? "0.95rem" : "1rem",
+            boxShadow: "inset 0 0 0 1px rgba(17,19,25,0.04)",
+          }}>
+            {completedCount}/{totalParts}
           </div>
         </div>
 
         <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.86rem" : "0.92rem", color: "rgba(17,19,25,0.54)", marginTop: "0.55rem" }}>
-          {showNudge ? "רוצה להוסיף עוד?" : "עוד 3 הצלחות מוסיפות חלק חדש"}
+          בסוף כל משחק נפתח חלק חדש בעולם שבחרת
         </div>
       </div>
 
       <style>{
         "@keyframes buildLoopPartIn { 0%{ transform: translateY(8px) scale(0.86); opacity: 0 } 100%{ transform: translateY(0) scale(1); opacity: 1 } }"
       }</style>
+    </div>
+  );
+}
+
+export function BuildRewardPopup(props) {
+  var theme = props.theme;
+  var builtParts = props.builtParts;
+  var revealedPartId = props.revealedPartId;
+  var isPhone = !!props.isPhone;
+  var onPlayAgain = props.onPlayAgain;
+  var palette = getThemePalette(theme.id);
+
+  if (!theme || !revealedPartId) return null;
+
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 1300,
+      background: "rgba(17,19,25,0.42)",
+      backdropFilter: "blur(8px)",
+      WebkitBackdropFilter: "blur(8px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "1rem",
+      direction: "rtl",
+    }}>
+      <div style={{
+        width: "min(100%, 460px)",
+        borderRadius: isPhone ? 28 : 34,
+        overflow: "hidden",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,247,241,0.96))",
+        boxShadow: "0 28px 70px rgba(17,19,25,0.24)",
+        border: "1px solid rgba(255,255,255,0.55)",
+      }}>
+        <div style={{
+          padding: isPhone ? "1.1rem 1rem 0.9rem" : "1.3rem 1.3rem 1rem",
+          textAlign: "center",
+        }}>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minWidth: 92,
+            height: 38,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.72)",
+            boxShadow: "0 10px 24px rgba(17,19,25,0.08)",
+            padding: "0 0.95rem",
+            fontFamily: "'Secular One', sans-serif",
+            color: palette.accent,
+            marginBottom: "0.75rem",
+          }}>
+            חלק חדש!
+          </div>
+
+          <div style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "1.7rem" : "2rem", color: "#111319", marginBottom: "0.35rem" }}>
+            העולם שלך גדל
+          </div>
+          <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: isPhone ? "0.94rem" : "1rem", color: "rgba(17,19,25,0.58)", lineHeight: 1.5 }}>
+            סיימת משחק שלם ופתחת עוד חלק ב{theme.label}
+          </div>
+        </div>
+
+        <div style={{ padding: isPhone ? "0.2rem 1rem 1rem" : "0.2rem 1.2rem 1.1rem" }}>
+          <div style={{
+            position: "relative",
+            height: isPhone ? 220 : 250,
+            borderRadius: 28,
+            overflow: "hidden",
+            background: palette.scene,
+            boxShadow: "inset 0 -20px 40px rgba(255,255,255,0.16), 0 16px 40px rgba(17,19,25,0.12)",
+          }}>
+            {theme.id === "space" ? (
+              <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 18px 18px, rgba(255,255,255,0.95) 0 1.4px, transparent 1.6px), radial-gradient(circle at 62px 28px, rgba(255,255,255,0.8) 0 1.2px, transparent 1.4px), radial-gradient(circle at 132px 44px, rgba(255,255,255,0.75) 0 1.4px, transparent 1.6px), radial-gradient(circle at 166px 18px, rgba(255,255,255,0.9) 0 1.1px, transparent 1.3px)" }} />
+            ) : null}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "radial-gradient(circle at 50% 34%, rgba(255,255,255,0.58), transparent 34%)",
+              animation: "buildLoopGlow 1200ms ease-out both",
+            }} />
+            {builtParts.map(function(partId) {
+              return renderPart(theme.id, partId, partId === revealedPartId);
+            })}
+          </div>
+        </div>
+
+        <div style={{ padding: isPhone ? "0 1rem 1rem" : "0 1.2rem 1.2rem" }}>
+          <button
+            onClick={onPlayAgain}
+            style={{
+              width: "100%",
+              border: "none",
+              borderRadius: 22,
+              background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
+              color: "white",
+              cursor: "pointer",
+              boxShadow: "0 14px 28px rgba(75,137,240,0.3)",
+              padding: "0.95rem 1rem",
+              fontFamily: "'Secular One', sans-serif",
+              fontSize: isPhone ? "1.05rem" : "1.12rem",
+            }}
+          >
+            שחקי שוב
+          </button>
+        </div>
+
+        <style>{
+          "@keyframes buildLoopPartIn { 0%{ transform: translateY(18px) scale(0.72); opacity: 0 } 55%{ transform: translateY(-4px) scale(1.08); opacity: 1 } 100%{ transform: translateY(0) scale(1); opacity: 1 } }" +
+          "@keyframes buildLoopGlow { 0%{ opacity: 0; transform: scale(0.8) } 40%{ opacity: 1; transform: scale(1) } 100%{ opacity: 0.15; transform: scale(1.08) } }"
+        }</style>
+      </div>
     </div>
   );
 }

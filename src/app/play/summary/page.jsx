@@ -3,12 +3,16 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
+import { BuildRewardPopup } from "@/components/build-loop";
+import { GameBackgroundMusic } from "@/components/game-background-music";
+import { useBuildLoop } from "@/lib/build-loop";
 import { PAGE_BG, TTC_OUTLIER_MS } from "@/lib/game-constants";
 import { FloatingLettersBackground } from "@/styles/shared";
 
 export default function SummaryPage() {
   var game = useGame();
   var router = useRouter();
+  var buildLoop = useBuildLoop("keyboard", game.activeProfile ? game.activeProfile.id : null);
 
   var session = game.isGuestGame ? game.lastGameSession : (game.sessions.length > 0 ? game.sessions[game.sessions.length - 1] : null);
 
@@ -18,6 +22,11 @@ export default function SummaryPage() {
       router.replace(game.sync.isAuthenticated ? "/play/levels" : "/play");
     }
   }, [session]);
+
+  useEffect(function() {
+    if (!session || !buildLoop.hasTheme) return;
+    buildLoop.unlockForCompletion("keyboard-" + session.id);
+  }, [session && session.id, buildLoop.hasTheme]);
 
   if (!session) return null;
 
@@ -44,6 +53,7 @@ export default function SummaryPage() {
   var currentGameLevel = game.currentGameLevel;
 
   function handlePlayAgain() {
+    buildLoop.dismissReveal();
     if (isGuest) {
       game.startGame(null, true);
     } else if (currentGameLevel != null) {
@@ -60,6 +70,7 @@ export default function SummaryPage() {
 
   return (
     <div style={PAGE_BG}>
+      <GameBackgroundMusic />
       <FloatingLettersBackground />
       {currentGameLevel != null ? (
         <div style={{
@@ -157,6 +168,15 @@ export default function SummaryPage() {
       <style>{
         "@keyframes popIn { 0%{ transform: scale(0.5); opacity: 0 } 100%{ transform: scale(1); opacity: 1 } }"
       }</style>
+
+      {buildLoop.hasTheme && buildLoop.pendingRevealPartId ? (
+        <BuildRewardPopup
+          theme={buildLoop.theme}
+          builtParts={buildLoop.builtParts}
+          revealedPartId={buildLoop.pendingRevealPartId}
+          onPlayAgain={handlePlayAgain}
+        />
+      ) : null}
     </div>
   );
 }

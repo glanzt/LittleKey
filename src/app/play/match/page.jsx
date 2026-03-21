@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame } from "@/lib/game-context";
 import { PAGE_BG, playCardFlip, playError, playFeelingSound, playPerfect, playSuccess } from "@/lib/game-constants";
-import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
+import { BuildLoopHud, BuildRewardPopup, ThemePickerOverlay } from "@/components/build-loop";
+import { GameBackgroundMusic } from "@/components/game-background-music";
 import { FloatingLettersBackground } from "@/styles/shared";
 import { useBuildLoop } from "@/lib/build-loop";
 import { fetchFeelingItems } from "@/lib/feelings";
@@ -86,6 +87,7 @@ export default function MatchGamePage() {
   }
 
   function handlePlayAgain() {
+    buildLoop.dismissReveal();
     resetRound(round + 1);
   }
 
@@ -153,12 +155,11 @@ export default function MatchGamePage() {
           });
           playPerfect();
           playFeelingSound(card.audioName);
-          buildLoop.registerSuccess();
+          buildLoop.unlockForCompletion("match-" + roundStartedAtRef.current);
           setRoundComplete(true);
         } else {
           playSuccess();
           playFeelingSound(card.audioName);
-          buildLoop.registerSuccess();
         }
       }, 380);
       return;
@@ -204,6 +205,7 @@ export default function MatchGamePage() {
 
   return (
     <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: isPhone ? "1rem" : "1.5rem", paddingBottom: "2rem", paddingLeft: isPhone ? "0.6rem" : PAGE_BG.padding, paddingRight: isPhone ? "0.6rem" : PAGE_BG.padding }}>
+      <GameBackgroundMusic />
       <FloatingLettersBackground />
 
       <div style={{ width: "100%", maxWidth: isPhone ? "100%" : 1080, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -213,10 +215,7 @@ export default function MatchGamePage() {
         {buildLoop.hasTheme ? (
           <BuildLoopHud
             theme={buildLoop.theme}
-            progress={buildLoop.progress}
             builtParts={buildLoop.builtParts}
-            justUnlockedPartId={buildLoop.justUnlockedPartId}
-            showNudge={buildLoop.showNudge}
             isPhone={isPhone}
             maxWidth={840}
             margin="0 auto 0.9rem"
@@ -414,74 +413,51 @@ export default function MatchGamePage() {
       </div>
 
       {roundComplete ? (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 1000,
-          background: "rgba(17,19,25,0.34)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
-        }}>
+        buildLoop.hasTheme && buildLoop.pendingRevealPartId ? (
+          <BuildRewardPopup
+            theme={buildLoop.theme}
+            builtParts={buildLoop.builtParts}
+            revealedPartId={buildLoop.pendingRevealPartId}
+            isPhone={isPhone}
+            onPlayAgain={handlePlayAgain}
+          />
+        ) : (
           <div style={{
-            width: "100%", maxWidth: 380, borderRadius: 28, background: "white", textAlign: "center",
-            padding: "2rem 1.6rem", boxShadow: "0 20px 60px rgba(17,19,25,0.2)",
+            position: "fixed", inset: 0, zIndex: 1000,
+            background: "rgba(17,19,25,0.34)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
           }}>
-            <div style={{ fontSize: "3rem", marginBottom: "0.6rem" }}>🎉</div>
-            <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.35rem", color: "#111319", margin: "0 0 0.5rem" }}>
-              כל הזוגות נמצאו!
-            </h2>
-            <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.25rem" }}>
-              סיימת בזמן של {formatStopwatch(completedRoundDuration)}.
-            </p>
-            <button
-              onClick={handlePlayAgain}
-              style={{
-                width: "100%",
-                border: "none",
-                borderRadius: 22,
-                background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
-                color: "white",
-                cursor: "pointer",
-                boxShadow: "0 12px 26px rgba(75,137,240,0.3)",
-                padding: "0.9rem 1rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.8rem",
-                fontFamily: "'Secular One', sans-serif",
-                fontSize: "1.15rem",
-              }}
-            >
-              <span style={{
-                width: 46,
-                height: 46,
-                borderRadius: "50%",
-                background: "rgba(6,12,33,0.24)",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)",
-              }}>
-                <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
-                  <path
-                    d="M28 12 L14 22 L28 32"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M18 22c5-8 14-12 24-10c13 2 22 13 22 26c0 15-12 26-27 26c-11 0-21-7-25-18"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span>שחק שוב</span>
-            </button>
+            <div style={{
+              width: "100%", maxWidth: 380, borderRadius: 28, background: "white", textAlign: "center",
+              padding: "2rem 1.6rem", boxShadow: "0 20px 60px rgba(17,19,25,0.2)",
+            }}>
+              <div style={{ fontSize: "3rem", marginBottom: "0.6rem" }}>🎉</div>
+              <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.35rem", color: "#111319", margin: "0 0 0.5rem" }}>
+                כל הזוגות נמצאו!
+              </h2>
+              <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.25rem" }}>
+                סיימת בזמן של {formatStopwatch(completedRoundDuration)}.
+              </p>
+              <button
+                onClick={handlePlayAgain}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  borderRadius: 22,
+                  background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
+                  color: "white",
+                  cursor: "pointer",
+                  boxShadow: "0 12px 26px rgba(75,137,240,0.3)",
+                  padding: "0.9rem 1rem",
+                  fontFamily: "'Secular One', sans-serif",
+                  fontSize: "1.15rem",
+                }}
+              >
+                שחק שוב
+              </button>
+            </div>
           </div>
-        </div>
+        )
       ) : null}
 
       {!buildLoop.hasTheme ? (

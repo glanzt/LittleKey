@@ -35,10 +35,10 @@ function getStorageKey(gameKey, profileId) {
 function getDefaultState() {
   return {
     themeId: null,
-    progress: 0,
     builtParts: [],
-    justUnlockedPartId: null,
-    showNudge: false,
+    pendingRevealPartId: null,
+    pendingRevealKey: null,
+    lastCompletionKey: null,
     startedAt: null,
   };
 }
@@ -49,12 +49,14 @@ function sanitizeState(raw) {
   var theme = raw.themeId ? THEMES_BY_ID[raw.themeId] : null;
   return {
     themeId: theme ? theme.id : null,
-    progress: raw.progress === 1 || raw.progress === 2 ? raw.progress : 0,
     builtParts: theme && Array.isArray(raw.builtParts)
       ? raw.builtParts.filter(function(partId) { return theme.parts.indexOf(partId) >= 0; })
       : [],
-    justUnlockedPartId: null,
-    showNudge: false,
+    pendingRevealPartId: theme && raw.pendingRevealPartId && theme.parts.indexOf(raw.pendingRevealPartId) >= 0
+      ? raw.pendingRevealPartId
+      : null,
+    pendingRevealKey: typeof raw.pendingRevealKey === "string" ? raw.pendingRevealKey : null,
+    lastCompletionKey: typeof raw.lastCompletionKey === "string" ? raw.lastCompletionKey : null,
     startedAt: typeof raw.startedAt === "number" ? raw.startedAt : null,
   };
 }
@@ -74,8 +76,10 @@ function saveSessionState(storageKey, state) {
   try {
     window.sessionStorage.setItem(storageKey, JSON.stringify({
       themeId: state.themeId,
-      progress: state.progress,
       builtParts: state.builtParts,
+      pendingRevealPartId: state.pendingRevealPartId,
+      pendingRevealKey: state.pendingRevealKey,
+      lastCompletionKey: state.lastCompletionKey,
       startedAt: state.startedAt,
     }));
   } catch (error) {
@@ -100,34 +104,16 @@ export function useBuildLoop(gameKey, profileId) {
 
   useEffect(function() {
     saveSessionState(storageKey, state);
-  }, [storageKey, state.themeId, state.progress, state.builtParts, state.startedAt]);
-
-  useEffect(function() {
-    if (!state.justUnlockedPartId && !state.showNudge) return;
-    var timer = setTimeout(function() {
-      setState(function(prev) {
-        if (!prev.justUnlockedPartId && !prev.showNudge) return prev;
-        return {
-          themeId: prev.themeId,
-          progress: prev.progress,
-          builtParts: prev.builtParts,
-          justUnlockedPartId: null,
-          showNudge: false,
-          startedAt: prev.startedAt,
-        };
-      });
-    }, 1800);
-    return function() { clearTimeout(timer); };
-  }, [state.justUnlockedPartId, state.showNudge]);
+  }, [storageKey, state.themeId, state.builtParts, state.pendingRevealPartId, state.pendingRevealKey, state.lastCompletionKey, state.startedAt]);
 
   function chooseTheme(themeId) {
     if (!THEMES_BY_ID[themeId]) return;
     setState({
       themeId: themeId,
-      progress: 0,
       builtParts: [],
-      justUnlockedPartId: null,
-      showNudge: false,
+      pendingRevealPartId: null,
+      pendingRevealKey: null,
+      lastCompletionKey: null,
       startedAt: Date.now(),
     });
   }
@@ -140,31 +126,48 @@ export function useBuildLoop(gameKey, profileId) {
     }
   }
 
-  function registerSuccess() {
+  function unlockForCompletion(completionKey) {
+    if (!completionKey) return null;
+
+    var unlockedPartId = null;
     setState(function(prev) {
       var theme = prev.themeId ? THEMES_BY_ID[prev.themeId] : null;
       if (!theme) return prev;
-
-      var nextProgress = prev.progress + 1;
-      if (nextProgress < 3) {
+      if (prev.lastCompletionKey === completionKey) {
         return {
           themeId: prev.themeId,
-          progress: nextProgress,
           builtParts: prev.builtParts,
-          justUnlockedPartId: null,
-          showNudge: false,
-          startedAt: prev.startedAt || Date.now(),
+          pendingRevealPartId: prev.pendingRevealPartId,
+          pendingRevealKey: prev.pendingRevealKey,
+          lastCompletionKey: prev.lastCompletionKey,
+          startedAt: prev.startedAt,
         };
       }
 
       var nextPartId = theme.parts[prev.builtParts.length] || null;
+      unlockedPartId = nextPartId;
       return {
         themeId: prev.themeId,
-        progress: 0,
         builtParts: nextPartId ? prev.builtParts.concat([nextPartId]) : prev.builtParts,
-        justUnlockedPartId: nextPartId,
-        showNudge: true,
+        pendingRevealPartId: nextPartId,
+        pendingRevealKey: nextPartId ? completionKey : null,
+        lastCompletionKey: completionKey,
         startedAt: prev.startedAt || Date.now(),
+      };
+    });
+    return unlockedPartId;
+  }
+
+  function dismissReveal() {
+    setState(function(prev) {
+      if (!prev.pendingRevealPartId && !prev.pendingRevealKey) return prev;
+      return {
+        themeId: prev.themeId,
+        builtParts: prev.builtParts,
+        pendingRevealPartId: null,
+        pendingRevealKey: null,
+        lastCompletionKey: prev.lastCompletionKey,
+        startedAt: prev.startedAt,
       };
     });
   }
@@ -173,12 +176,11 @@ export function useBuildLoop(gameKey, profileId) {
     hasTheme: !!state.themeId,
     themeId: state.themeId,
     theme: state.themeId ? THEMES_BY_ID[state.themeId] : null,
-    progress: state.progress,
     builtParts: state.builtParts,
-    justUnlockedPartId: state.justUnlockedPartId,
-    showNudge: state.showNudge,
+    pendingRevealPartId: state.pendingRevealPartId,
     chooseTheme: chooseTheme,
-    registerSuccess: registerSuccess,
+    unlockForCompletion: unlockForCompletion,
+    dismissReveal: dismissReveal,
     resetLoop: resetLoop,
     themes: BUILD_THEMES,
   };

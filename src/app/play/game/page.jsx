@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
 import { BACK_BUTTON_STYLE, NIKUD_MAP, KEY_TO_LETTER, SUCCESS_MSGS, speakLetter } from "@/lib/game-constants";
 import { Confetti, ProgressTracker, FlippingHintCard } from "@/components/game-ui";
+import { GameBackgroundMusic } from "@/components/game-background-music";
 import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
 import { useBuildLoop } from "@/lib/build-loop";
 
@@ -12,7 +13,6 @@ export default function GamePage() {
   var game = useGame();
   var router = useRouter();
   var inputRef = useRef(null);
-  var successSeenRef = useRef(false);
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
 
   // Guard: if no active game, redirect
@@ -67,16 +67,6 @@ export default function GamePage() {
     };
   }, [buildLoop.hasTheme]);
 
-  useEffect(function() {
-    if (game.showSuccess && !successSeenRef.current && buildLoop.hasTheme) {
-      successSeenRef.current = true;
-      buildLoop.registerSuccess();
-    }
-    if (!game.showSuccess) {
-      successSeenRef.current = false;
-    }
-  }, [game.showSuccess, buildLoop.hasTheme]);
-
   function handlePhoneInput(e) {
     var raw = e.target.value || "";
     var pressedKey = raw.slice(-1);
@@ -126,6 +116,7 @@ export default function GamePage() {
       padding: isPhone ? "5.5rem 1rem 8.5rem" : undefined,
       boxSizing: "border-box",
     }}>
+      <GameBackgroundMusic />
       <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;600;700&family=Suez+One&display=swap" rel="stylesheet" />
 
       <Confetti active={game.showSuccess} />
@@ -151,10 +142,7 @@ export default function GamePage() {
         <div style={{ width: "100%", maxWidth: 760, marginTop: isCompact ? "0.4rem" : "2.2rem", marginBottom: isCompact ? "0.6rem" : "0.8rem" }}>
           <BuildLoopHud
             theme={buildLoop.theme}
-            progress={buildLoop.progress}
             builtParts={buildLoop.builtParts}
-            justUnlockedPartId={buildLoop.justUnlockedPartId}
-            showNudge={buildLoop.showNudge}
             isPhone={isPhone}
             maxWidth={760}
             margin="0 auto"
