@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
-import { FEELING_ITEMS } from "@/lib/match-game";
-
-var ALLOWED_AUDIO_NAMES = new Set(
-  FEELING_ITEMS.map(function(item) {
-    return item.audioName || item.label;
-  })
-);
 
 export async function GET(request) {
   var url = new URL(request.url);
   var name = url.searchParams.get("name");
 
-  if (!name || !ALLOWED_AUDIO_NAMES.has(name)) {
-    return NextResponse.json({ error: "Unknown feeling audio" }, { status: 404 });
+  if (!name || path.basename(name) !== name) {
+    return NextResponse.json({ error: "Invalid feeling audio name" }, { status: 400 });
   }
 
   try {

@@ -23,7 +23,7 @@ describe("match game helpers", () => {
     expect(new Set(ids).size).toBe(8);
     items.forEach((item) => {
       expect(FEELING_ITEMS).toEqual(expect.arrayContaining([expect.objectContaining({ id: item.id })]));
-      expect(item.imageSrc).toMatch(/^\/feelings\/.+\.png$/);
+      expect(item.imageSrc).toMatch(/^\/api\/feelings\?type=image&name=/);
     });
   });
 });

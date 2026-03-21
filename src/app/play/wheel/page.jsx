@@ -7,7 +7,8 @@ import { useGame } from "@/lib/game-context";
 import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
 import { FloatingLettersBackground } from "@/styles/shared";
 import { useBuildLoop } from "@/lib/build-loop";
-import { FEELING_ITEMS, shuffleArray } from "@/lib/match-game";
+import { fetchFeelingItems, pickRandomFeelings, shuffleArray } from "@/lib/feelings";
+import { FEELING_ITEMS } from "@/lib/match-game";
 
 var WHEEL_COLORS = ["#FF8A5B", "#FFD166", "#7C5CFC", "#2DCE89", "#3FA7D6", "#F26CA7", "#FFB703", "#8E7DF2", "#00B894", "#FF6B6B"];
 var SPIN_FRICTION = 0.98;
@@ -15,18 +16,22 @@ var SPIN_STOP_VELOCITY = 0.01;
 var DRAG_SPIN_THRESHOLD = 0.045;
 var SPIN_SOUND_MIN_DELAY = 45;
 var SPIN_SOUND_MAX_DELAY = 230;
+var WHEEL_FEELING_COUNT = 8;
 
 export default function WheelGamePage() {
   var game = useGame();
   var router = useRouter();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
   var buildLoop = useBuildLoop("wheel", game.activeProfile ? game.activeProfile.id : null);
+  var _fi = useState(function() {
+    return pickRandomFeelings(FEELING_ITEMS, Math.min(WHEEL_FEELING_COUNT, FEELING_ITEMS.length));
+  }); var feelingItems = _fi[0]; var setFeelingItems = _fi[1];
   var _wr = useState(0); var wheelRotation = _wr[0]; var setWheelRotation = _wr[1];
   var _sp = useState(false); var isSpinning = _sp[0]; var setIsSpinning = _sp[1];
   var _dg = useState(false); var isDragging = _dg[0]; var setIsDragging = _dg[1];
   var _sf = useState(null); var selectedFeeling = _sf[0]; var setSelectedFeeling = _sf[1];
   var _ao = useState(function() {
-    return shuffleArray(FEELING_ITEMS).map(function(item) {
+    return shuffleArray(feelingItems).map(function(item) {
       return { id: item.id, label: item.label, imageSrc: item.imageSrc, audioName: item.audioName, isCorrect: false };
     });
   }); var answerOptions = _ao[0]; var setAnswerOptions = _ao[1];
@@ -54,15 +59,30 @@ export default function WheelGamePage() {
     };
   }, []);
 
+  useEffect(function() {
+    var alive = true;
+    fetchFeelingItems().then(function(items) {
+      if (!alive || !items || items.length === 0) return;
+      var nextItems = pickRandomFeelings(items, Math.min(WHEEL_FEELING_COUNT, items.length));
+      setFeelingItems(nextItems);
+      setAnswerOptions(shuffleArray(nextItems).map(function(item) {
+        return { id: item.id, label: item.label, imageSrc: item.imageSrc, audioName: item.audioName, isCorrect: false };
+      }));
+      clearGuessState();
+      setWheelRotationValue(0);
+    });
+    return function() { alive = false; };
+  }, []);
+
   var isPhone = viewportWidth <= 760;
-  var segmentAngle = 360 / FEELING_ITEMS.length;
+  var segmentAngle = 360 / Math.max(1, feelingItems.length);
   var wheelSize = isPhone ? 320 : 470;
   var badgeSize = isPhone ? 60 : 78;
   var badgeRadius = (wheelSize / 2) - (badgeSize / 2) - (isPhone ? 18 : 24);
   var isSolved = feedback && feedback.type === "success";
 
   var wheelItems = useMemo(function() {
-    return FEELING_ITEMS.map(function(item, index) {
+    return feelingItems.map(function(item, index) {
       return {
         id: item.id,
         label: item.label,
@@ -71,7 +91,7 @@ export default function WheelGamePage() {
         color: WHEEL_COLORS[index % WHEEL_COLORS.length],
       };
     });
-  }, [segmentAngle]);
+  }, [feelingItems, segmentAngle]);
 
   function normalizeRotation(rotation) {
     return ((rotation % 360) + 360) % 360;
@@ -95,17 +115,19 @@ export default function WheelGamePage() {
   }
 
   function getFeelingForRotation(rotation) {
+    if (feelingItems.length === 0) return null;
     var normalized = normalizeRotation(rotation);
     var rawIndex = Math.round((((360 - normalized) % 360) / segmentAngle));
-    var chosenIndex = ((rawIndex % FEELING_ITEMS.length) + FEELING_ITEMS.length) % FEELING_ITEMS.length;
-    return FEELING_ITEMS[chosenIndex];
+    var chosenIndex = ((rawIndex % feelingItems.length) + feelingItems.length) % feelingItems.length;
+    return feelingItems[chosenIndex];
   }
 
   function commitSpinResult() {
     var chosenFeeling = getFeelingForRotation(wheelRotationRef.current);
+    if (!chosenFeeling) return;
     setRoundsPlayed(function(prev) { return prev + 1; });
     setSelectedFeeling(chosenFeeling);
-    setAnswerOptions(shuffleArray(FEELING_ITEMS).map(function(item) {
+    setAnswerOptions(shuffleArray(feelingItems).map(function(item) {
       return {
         id: item.id,
         label: item.label,
@@ -322,7 +344,7 @@ export default function WheelGamePage() {
 
     if (feeling.isCorrect) {
       playPerfect();
-      playFeelingSound(selectedFeeling.audioName || selectedFeeling.label);
+      playFeelingSound(selectedFeeling.audioName);
       buildLoop.registerSuccess();
       setFeedback({
         type: "success",
@@ -379,7 +401,7 @@ export default function WheelGamePage() {
 
         <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "1.4rem" }}>
           <div style={{ background: "white", borderRadius: 999, padding: "0.55rem 1rem", boxShadow: "0 6px 20px rgba(17,19,25,0.08)", fontFamily: "'Secular One', sans-serif", color: "#111319" }}>
-            רגשות בגלגל: {FEELING_ITEMS.length}
+            רגשות בגלגל: {feelingItems.length}
           </div>
           <div style={{ background: "white", borderRadius: 999, padding: "0.55rem 1rem", boxShadow: "0 6px 20px rgba(17,19,25,0.08)", fontFamily: "'Secular One', sans-serif", color: "#111319" }}>
             סיבובים: {roundsPlayed}

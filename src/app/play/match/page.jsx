@@ -6,16 +6,18 @@ import { PAGE_BG, playCardFlip, playError, playFeelingSound, playPerfect, playSu
 import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
 import { FloatingLettersBackground } from "@/styles/shared";
 import { useBuildLoop } from "@/lib/build-loop";
-import { MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match-game";
+import { fetchFeelingItems } from "@/lib/feelings";
+import { FEELING_ITEMS, MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match-game";
 
 export default function MatchGamePage() {
   var game = useGame();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
   var buildLoop = useBuildLoop("match", game.activeProfile ? game.activeProfile.id : null);
   var themeReadyRef = useRef(false);
+  var _fp = useState(FEELING_ITEMS); var feelingPool = _fp[0]; var setFeelingPool = _fp[1];
 
   var _rd = useState(1); var round = _rd[0]; var setRound = _rd[1];
-  var _cd = useState(function() { return createMatchDeck(MATCH_PAIR_COUNT); }); var cards = _cd[0]; var setCards = _cd[1];
+  var _cd = useState(function() { return createMatchDeck(MATCH_PAIR_COUNT, FEELING_ITEMS); }); var cards = _cd[0]; var setCards = _cd[1];
   var _op = useState([]); var openIds = _op[0]; var setOpenIds = _op[1];
   var _mv = useState(0); var moves = _mv[0]; var setMoves = _mv[1];
   var _mt = useState(0); var matches = _mt[0]; var setMatches = _mt[1];
@@ -27,6 +29,16 @@ export default function MatchGamePage() {
 
   useEffect(function() {
     resetRound(1);
+  }, []);
+
+  useEffect(function() {
+    var alive = true;
+    fetchFeelingItems().then(function(items) {
+      if (!alive || !items || items.length < MATCH_PAIR_COUNT) return;
+      setFeelingPool(items);
+      resetRound(1, items);
+    });
+    return function() { alive = false; };
   }, []);
 
   useEffect(function() {
@@ -59,12 +71,13 @@ export default function MatchGamePage() {
     return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
   }
 
-  function resetRound(nextRound) {
+  function resetRound(nextRound, nextFeelingPool) {
+    var pool = nextFeelingPool || feelingPool;
     roundStartedAtRef.current = Date.now();
     setNowTick(Date.now());
     setCompletedRoundDuration(null);
     setRound(nextRound);
-    setCards(createMatchDeck(MATCH_PAIR_COUNT));
+    setCards(createMatchDeck(MATCH_PAIR_COUNT, pool));
     setOpenIds([]);
     setMoves(0);
     setMatches(0);
@@ -139,12 +152,12 @@ export default function MatchGamePage() {
             round: round,
           });
           playPerfect();
-          playFeelingSound(card.audioName || card.label);
+          playFeelingSound(card.audioName);
           buildLoop.registerSuccess();
           setRoundComplete(true);
         } else {
           playSuccess();
-          playFeelingSound(card.audioName || card.label);
+          playFeelingSound(card.audioName);
           buildLoop.registerSuccess();
         }
       }, 380);
