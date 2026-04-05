@@ -15,6 +15,7 @@ import {
   loadColoringProgress,
   saveColoringProgress,
 } from "@/lib/coloring-storage";
+import crayonPaths from "@/lib/coloring-crayon-paths";
 
 function playCrayonSound() {
   try {
@@ -128,6 +129,223 @@ function ActionButton(props) {
     >
       {props.children}
     </button>
+  );
+}
+
+function PenMarker(props) {
+  var color = props.color;
+  var num = props.num;
+  var selected = props.selected;
+  var _h = useState(false); var hovered = _h[0]; var setHovered = _h[1];
+  var tx = selected ? -22 : hovered ? -12 : 0;
+  var shadow = selected
+    ? "0 4px 18px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.14)"
+    : hovered
+      ? "0 2px 10px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08)"
+      : "0 1px 3px rgba(0,0,0,0.06)";
+
+  return (
+    <div style={{ width: "100%" }}>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          minHeight: 52,
+          alignItems: "center",
+          justifyContent: "center",
+          transform: "translateX(" + tx + "px)",
+          transition: "transform 0.25s ease-out",
+          cursor: "pointer",
+        }}
+        onMouseEnter={function() { setHovered(true); }}
+        onMouseLeave={function() { setHovered(false); }}
+        onClick={props.onClick}
+        role="button"
+        aria-pressed={selected}
+        tabIndex={0}
+        onKeyDown={function(e) {
+          if (e.key === "Enter" || e.key === " ") props.onClick();
+        }}
+      >
+        <div style={{ transform: "rotate(-90deg)", flex: "none" }}>
+          <div style={{
+            display: "flex",
+            gap: "9.198px",
+            height: "265.836px",
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            overflow: "clip",
+            position: "relative",
+            boxShadow: shadow,
+            transition: "box-shadow 0.25s ease-out",
+          }}>
+            <div style={{ height: "242.794px", position: "relative", width: "48.806px", flexShrink: 0 }}>
+              <svg style={{ position: "absolute", display: "block", width: "100%", height: "100%" }} fill="none" preserveAspectRatio="none" viewBox="0 0 48.8057 242.794">
+                <path d={crayonPaths.p3805a200} fill="#D6D6D6" />
+                <path d={crayonPaths.p2f40ea00} fill="#D6D6D6" />
+                <path d={crayonPaths.p2eb74780} fill={color.hex} />
+                <path d={crayonPaths.p24fcd400} fill={color.light} />
+                <path d={crayonPaths.p19885e00} fill={color.hex} />
+                <path d={crayonPaths.p12956c00} fill={color.dark} />
+                <path d={crayonPaths.p34b3ce80} fill="#E8E8E8" />
+              </svg>
+            </div>
+            <div style={{
+              position: "absolute",
+              left: "calc(50% + 0.46px)",
+              top: "97.53px",
+              width: "24.836px",
+              height: "24.836px",
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}>
+              <div style={{ transform: "rotate(90deg)", flex: "none" }}>
+                <div style={{
+                  background: "white",
+                  position: "relative",
+                  borderRadius: "19.232px",
+                  width: "24.836px",
+                  height: "24.836px",
+                  transform: selected ? "scale(1.08)" : hovered ? "scale(1.04)" : "scale(1)",
+                  transition: "transform 0.25s ease-out",
+                }}>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "clip",
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "inherit",
+                    paddingBottom: "2.045px",
+                    paddingTop: "4.091px",
+                    paddingLeft: "12.272px",
+                    paddingRight: "12.272px",
+                    boxSizing: "border-box",
+                  }}>
+                    <p style={{ fontFamily: "Heebo, sans-serif", fontWeight: 700, fontSize: "18.41px", lineHeight: "16.363px", color: "#081e45", textAlign: "center", letterSpacing: "-2.7px", whiteSpace: "nowrap", margin: 0 }}>
+                      {num}
+                    </p>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: "-0.828px",
+                      pointerEvents: "none",
+                      borderRadius: "20.06px",
+                      border: selected ? "1.8px solid " + color.dark : "0.828px solid #081e45",
+                      transition: "border 0.2s ease",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarkerPalette(props) {
+  var _vp = useState(false); var compact = _vp[0]; var setCompact = _vp[1];
+
+  useEffect(function() {
+    function syncCompact() {
+      if (typeof window === "undefined") return;
+      setCompact(window.innerWidth <= 960);
+    }
+
+    syncCompact();
+    window.addEventListener("resize", syncCompact);
+    return function() {
+      window.removeEventListener("resize", syncCompact);
+    };
+  }, []);
+
+  return (
+    <div style={{
+      width: compact ? "100%" : 220,
+      flexShrink: 0,
+      alignSelf: "stretch",
+      position: compact ? "static" : "sticky",
+      top: compact ? "auto" : 108,
+    }}>
+      <div style={{
+        background: "white",
+        borderRadius: compact ? 24 : "30px 0 0 30px",
+        padding: compact ? "1rem 0.9rem" : "20px 15px 20px 40px",
+        boxShadow: "0 18px 40px rgba(15,23,42,0.08)",
+        overflow: "hidden",
+      }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "4.6px",
+          alignItems: compact ? "center" : "flex-end",
+          paddingTop: compact ? 0 : "16.557px",
+          width: "100%",
+          whiteSpace: "nowrap",
+          marginBottom: compact ? "0.9rem" : 0,
+        }}>
+          <p style={{ margin: 0, fontFamily: "Heebo, sans-serif", fontWeight: 700, fontSize: "18px", lineHeight: "14.718px", letterSpacing: "0.5519px", color: "black" }}>
+            הפלטה שלי
+          </p>
+          <p style={{ margin: 0, fontFamily: "Heebo, sans-serif", fontWeight: 500, fontSize: "12px", lineHeight: "18.397px", color: "rgba(0,0,0,0.5)" }}>
+            בחר צבע ולחץ על כל אזור שתרצה
+          </p>
+        </div>
+
+        <div style={{
+          display: "flex",
+          flexDirection: compact ? "row" : "column",
+          alignItems: "center",
+          justifyContent: compact ? "flex-start" : "space-between",
+          gap: compact ? "0.6rem" : "0.15rem",
+          height: compact ? "auto" : "580.424px",
+          overflowX: compact ? "auto" : "visible",
+          overflowY: "visible",
+          padding: compact ? "0.2rem 0.1rem" : "18px 0",
+        }}>
+          {props.colors.map(function(color) {
+            return (
+              <div key={color.id} style={{ width: compact ? 72 : "100%", flexShrink: 0 }}>
+                {compact ? (
+                  <button
+                    type="button"
+                    onClick={function() { props.onSelect(color.id); }}
+                    style={{
+                      width: "100%",
+                      border: props.selectedColor === color.id ? "2px solid " + color.dark : "1px solid rgba(148,163,184,0.25)",
+                      borderRadius: 18,
+                      background: "white",
+                      padding: "0.55rem 0.35rem",
+                      cursor: "pointer",
+                      boxShadow: props.selectedColor === color.id ? "0 12px 24px rgba(15,23,42,0.12)" : "0 6px 14px rgba(15,23,42,0.06)",
+                    }}
+                  >
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: color.hex, margin: "0 auto 0.35rem" }} />
+                    <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: "0.8rem", color: "#0f172a" }}>{color.id}</div>
+                  </button>
+                ) : (
+                  <PenMarker
+                    color={color}
+                    num={color.id}
+                    selected={props.selectedColor === color.id}
+                    onClick={function() { props.onSelect(color.id); }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -344,51 +562,20 @@ export default function ColoringCanvas(props) {
           </div>
 
           <div style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr)",
+            display: "flex",
+            flexDirection: "row-reverse",
+            alignItems: "flex-start",
             gap: "1rem",
+            flexWrap: "wrap",
           }}>
+            <MarkerPalette
+              colors={COLORING_PALETTE.filter(function(entry) { return usedColorIds.indexOf(entry.id) >= 0; })}
+              selectedColor={selectedColor}
+              onSelect={setSelectedColor}
+            />
             <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(64px, 1fr))",
-              gap: "0.65rem",
-            }}>
-              {usedColorIds.map(function(colorId) {
-                var color = COLORING_PALETTE.find(function(entry) { return entry.id === colorId; });
-                if (!color) return null;
-                var isSelected = selectedColor === color.id;
-                return (
-                  <button
-                    key={color.id}
-                    type="button"
-                    onClick={function() { setSelectedColor(color.id); }}
-                    style={{
-                      borderRadius: 22,
-                      border: isSelected ? "2px solid rgba(15,23,42,0.65)" : "1px solid rgba(148,163,184,0.28)",
-                      background: "rgba(255,255,255,0.88)",
-                      padding: "0.55rem 0.35rem 0.65rem",
-                      cursor: "pointer",
-                      boxShadow: isSelected ? "0 16px 30px rgba(15,23,42,0.14)" : "0 8px 18px rgba(15,23,42,0.06)",
-                    }}
-                  >
-                    <div style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: "50%",
-                      margin: "0 auto 0.45rem",
-                      background: color.hex,
-                      border: "2px solid rgba(255,255,255,0.88)",
-                      boxShadow: "0 8px 18px rgba(15,23,42,0.14)",
-                    }} />
-                    <div style={{ fontFamily: "'Secular One', sans-serif", color: "#1f2937", fontSize: "0.92rem" }}>
-                      {color.id}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div style={{
+              flex: "1 1 640px",
+              minWidth: 0,
               borderRadius: 30,
               padding: "clamp(0.85rem, 2vw, 1.2rem)",
               background: "linear-gradient(180deg, #ffffff, #f8fbff)",
