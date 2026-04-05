@@ -11,10 +11,17 @@ function PlayShell(props) {
   var game = useGame();
   var router = useRouter();
   var pathname = usePathname();
+  
+  function allowsMissingProfile(currentPathname) {
+    return currentPathname === "/play/game"
+      || currentPathname === "/play/summary"
+      || currentPathname === "/play/profiles"
+      || currentPathname.indexOf("/play/coloring") === 0;
+  }
 
-  // Auth guard: force profile selection if no profile picked (except during game/summary)
+  // Coloring ships with local-only progress first, so it stays accessible without a selected profile.
   var needsProfile = game.sync.isAuthenticated && !game.activeProfile
-    && pathname !== "/play/game" && pathname !== "/play/summary" && pathname !== "/play/profiles";
+    && !allowsMissingProfile(pathname);
 
   if (needsProfile && pathname !== "/play/profiles") {
     router.replace("/play/profiles");

@@ -14,6 +14,10 @@ var GAME_CARDS = [
     description: "מקשיבים לאות ומוצאים אותה על המקלדת צעד אחר צעד.",
     accent: "#E74C3C",
     accentSoft: "rgba(231,76,60,0.12)",
+    href: "/play/levels",
+    guestAction: "prompt",
+    actionTextAuth: "לבחירת שלבים",
+    actionTextGuest: "התחילי לשחק",
   },
   {
     id: "match",
@@ -22,6 +26,8 @@ var GAME_CARDS = [
     description: "הופכים קלפים, מגלים זוגות, ולומדים תוך כדי משחק.",
     accent: "#7C5CFC",
     accentSoft: "rgba(124,92,252,0.12)",
+    href: "/play/match",
+    actionText: "למשחק הקלפים",
   },
   {
     id: "wheel",
@@ -30,6 +36,18 @@ var GAME_CARDS = [
     description: "מסובבים, מגלים רגש, ובוחרים את התמונה המתאימה.",
     accent: "#F39C12",
     accentSoft: "rgba(243,156,18,0.14)",
+    href: "/play/wheel",
+    actionText: "לגלגל ולנחש",
+  },
+  {
+    id: "coloring",
+    icon: "🎨",
+    title: "צביעת סיפורים",
+    description: "בוחרים ציור, ממלאים צבעים, וממשיכים בדיוק מהמקום שעצרתם.",
+    accent: "#16A34A",
+    accentSoft: "rgba(34,197,94,0.14)",
+    href: "/play/coloring",
+    actionText: "לגלריית הציורים",
   },
 ];
 
@@ -38,20 +56,18 @@ export default function PlayPage() {
   var router = useRouter();
   var _sp = useState(false); var showPlayPrompt = _sp[0]; var setShowPlayPrompt = _sp[1];
 
-  function handleKeyboardGame() {
-    if (game.sync.isAuthenticated) {
-      router.push("/play/levels");
-      return;
+  function getCardAction(card) {
+    if (card.guestAction === "prompt" && !game.sync.isAuthenticated) {
+      return {
+        actionText: card.actionTextGuest,
+        onClick: function() { setShowPlayPrompt(true); },
+      };
     }
-    setShowPlayPrompt(true);
-  }
 
-  function handleMatchGame() {
-    router.push("/play/match");
-  }
-
-  function handleWheelGame() {
-    router.push("/play/wheel");
+    return {
+      actionText: card.actionTextAuth || card.actionText,
+      onClick: function() { router.push(card.href); },
+    };
   }
 
   return (
@@ -114,20 +130,10 @@ export default function PlayPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.2rem", width: "100%", maxWidth: 940 }}>
           {GAME_CARDS.map(function(card) {
-            var actionText = card.id === "keyboard"
-              ? (game.sync.isAuthenticated ? "לבחירת שלבים" : "התחילי לשחק")
-              : card.id === "match"
-                ? "למשחק הקלפים"
-                : "לגלגל ולנחש";
-
-            var handleClick = card.id === "keyboard"
-              ? handleKeyboardGame
-              : card.id === "match"
-                ? handleMatchGame
-                : handleWheelGame;
+            var action = getCardAction(card);
 
             return (
-              <button key={card.id} onClick={handleClick} style={{
+              <button key={card.id} onClick={action.onClick} style={{
                 textAlign: "right", background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,249,243,0.94))", border: "1px solid rgba(255,255,255,0.8)",
                 borderRadius: 36, padding: "1.55rem 1.45rem 1.5rem", cursor: "pointer", width: "100%",
                 boxShadow: "0 26px 44px rgba(227,146,123,0.14)", transition: "transform 0.18s ease, box-shadow 0.18s ease",
@@ -162,7 +168,7 @@ export default function PlayPage() {
                   display: "inline-flex", alignItems: "center", gap: "0.4rem",
                   color: card.accent, fontFamily: "'Secular One', sans-serif", fontSize: "0.98rem", position: "relative", zIndex: 1,
                 }}>
-                  <span>{actionText}</span>
+                  <span>{action.actionText}</span>
                   <span>←</span>
                 </div>
               </button>
