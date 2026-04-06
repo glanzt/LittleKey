@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   COLORING_ARTWORKS,
   COLORING_PALETTE,
-  getArtworkDifficultyMeta,
   getArtworkDifficultyScore,
   getArtworkViewport,
 } from "@/lib/coloring-data";
@@ -16,26 +15,46 @@ import {
   loadColoringProgress,
 } from "@/lib/coloring-storage";
 
+function usePhonePortraitDetector() {
+  var _s = useState(false); var show = _s[0]; var setShow = _s[1];
+
+  useEffect(function() {
+    function check() {
+      var isPhone = window.matchMedia("(max-width: 900px) and (pointer: coarse)").matches;
+      var isPortrait = window.matchMedia("(orientation: portrait)").matches;
+      setShow(isPhone && isPortrait);
+    }
+    check();
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
+    return function() {
+      window.removeEventListener("resize", check);
+      window.removeEventListener("orientationchange", check);
+    };
+  }, []);
+
+  return show;
+}
+
 function ArtworkCard(props) {
   var artwork = props.artwork;
   var completed = props.completed;
   var filled = loadColoringProgress(artwork.id);
   var hasProgress = Object.keys(filled).length > 0;
   var viewport = getArtworkViewport(artwork);
-  var difficulty = getArtworkDifficultyMeta(artwork);
 
   return (
     <Link href={"/play/coloring/" + artwork.id} style={{ textDecoration: "none" }}>
       <div style={{
         position: "relative",
-        borderRadius: 28,
-        padding: "1rem",
+        borderRadius: 22,
+        padding: "0.75rem",
         background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.94))",
         border: completed ? "2px solid rgba(34,197,94,0.38)" : "1px solid rgba(184,199,218,0.35)",
         boxShadow: "0 24px 42px rgba(111, 131, 157, 0.12)",
         color: "#0f172a",
         display: "block",
-        minHeight: 260,
+        minHeight: 200,
       }}>
         {completed ? (
           <div style={{
@@ -56,11 +75,11 @@ function ArtworkCard(props) {
         ) : null}
 
         <div style={{
-          borderRadius: 22,
+          borderRadius: 16,
           background: "linear-gradient(180deg, #ffffff, #eef4fb)",
           border: "1px solid rgba(191,219,254,0.45)",
-          padding: 12,
-          marginBottom: "0.95rem",
+          padding: 8,
+          marginBottom: "0.65rem",
         }}>
           <svg viewBox={viewport.viewBox} preserveAspectRatio="xMidYMid meet" style={{ display: "block", width: "100%", aspectRatio: "1 / 1" }}>
             <rect x={viewport.minX} y={viewport.minY} width={viewport.width} height={viewport.height} fill="#f8fafc" rx="10" />
@@ -82,49 +101,27 @@ function ArtworkCard(props) {
           </svg>
         </div>
 
-        <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", color: "#1f2937", marginBottom: "0.45rem" }}>
+        <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: "0.95rem", color: "#1f2937", marginBottom: "0.35rem" }}>
           {artwork.title}
         </div>
 
-        <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "0.55rem" }}>
-          <span style={{
-            borderRadius: 999,
-            padding: "0.35rem 0.7rem",
-            background: "rgba(103,112,181,0.12)",
-            color: "#4c5ca9",
+        {(completed || hasProgress) ? (
+          <div style={{
             fontFamily: "'Rubik', sans-serif",
-            fontSize: "0.82rem",
-            fontWeight: 700,
+            fontSize: "0.8rem",
+            color: hasProgress ? "#0f766e" : "rgba(71,85,105,0.86)",
+            lineHeight: 1.5,
           }}>
-            {difficulty.label}
-          </span>
-          <span style={{
-            borderRadius: 999,
-            padding: "0.35rem 0.7rem",
-            background: "rgba(59,130,246,0.1)",
-            color: "#2563eb",
-            fontFamily: "'Rubik', sans-serif",
-            fontSize: "0.82rem",
-            fontWeight: 700,
-          }}>
-            {difficulty.score} צבעים
-          </span>
-        </div>
-
-        <div style={{
-          fontFamily: "'Rubik', sans-serif",
-          fontSize: "0.9rem",
-          color: hasProgress ? "#0f766e" : "rgba(71,85,105,0.86)",
-          lineHeight: 1.6,
-        }}>
-          {completed ? "סיימת את הציור הזה. אפשר לחזור ולצבוע שוב." : hasProgress ? "יש כאן התקדמות שמחכה לך." : "פותחים ציור חדש ומתחילים לצבוע."}
-        </div>
+            {completed ? "סיימת את הציור הזה. אפשר לחזור ולצבוע שוב." : "יש כאן התקדמות שמחכה לך."}
+          </div>
+        ) : null}
       </div>
     </Link>
   );
 }
 
 export default function ColoringGallery() {
+  var showRotatePrompt = usePhonePortraitDetector();
   var _pv = useState(0); var progressVersion = _pv[0]; var setProgressVersion = _pv[1];
 
   useEffect(function() {
@@ -253,7 +250,7 @@ export default function ColoringGallery() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
           gap: "1rem",
         }}>
           {visibleArtworks.map(function(artwork) {
@@ -267,6 +264,58 @@ export default function ColoringGallery() {
           })}
         </div>
       </div>
+
+      {showRotatePrompt ? (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(8,30,69,0.86)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1100,
+          padding: "1.25rem",
+        }}>
+          <div style={{
+            width: "min(100%, 420px)",
+            borderRadius: 28,
+            background: "white",
+            padding: "1.5rem",
+            textAlign: "center",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>📱</div>
+            <div style={{ fontFamily: "'Suez One', serif", fontSize: "1.8rem", color: "#1f2937", marginBottom: "0.65rem" }}>
+              הכי נוח לצבוע לרוחב
+            </div>
+            <p style={{ fontFamily: "'Rubik', sans-serif", color: "#475569", lineHeight: 1.7, margin: "0 0 1rem" }}>
+              סובבו את המכשיר למצב רוחב כדי לקבל יותר מקום לציור.
+            </p>
+            <button onClick={function() {
+              try {
+                var root = document.documentElement;
+                if (root.requestFullscreen && !document.fullscreenElement) root.requestFullscreen();
+              } catch (_e) {}
+              try {
+                if (screen.orientation && typeof screen.orientation.lock === "function") screen.orientation.lock("landscape");
+              } catch (_e) {}
+            }} style={{
+              borderRadius: 999,
+              border: "none",
+              background: "#4c5ca9",
+              color: "white",
+              cursor: "pointer",
+              fontFamily: "'Secular One', sans-serif",
+              fontSize: "1rem",
+              padding: "0.9rem 1.2rem",
+              width: "100%",
+            }}>
+              נסו לעבור למסך רוחב
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

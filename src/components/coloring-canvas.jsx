@@ -518,6 +518,45 @@ export default function ColoringCanvas(props) {
             }}>
               {svgBlock}
             </div>
+            {isPhoneLandscape ? (
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                padding: "6px 4px",
+                alignItems: "center",
+                justifyContent: "center",
+                alignSelf: "stretch",
+              }}>
+                <button onClick={handleUndo} disabled={paintHistory.length === 0} style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  border: "1px solid rgba(147,197,253,0.4)",
+                  background: paintHistory.length === 0 ? "#f1f5f9" : "#eff6ff",
+                  cursor: paintHistory.length === 0 ? "default" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.15rem", opacity: paintHistory.length === 0 ? 0.4 : 1,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }} title="בטל">↩️</button>
+                <button onClick={goToRandomArtwork} style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  border: "1px solid rgba(147,197,253,0.4)",
+                  background: "#eff6ff",
+                  cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.15rem",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }} title="ציור הבא">➡️</button>
+                <button onClick={function() { router.push("/play/coloring"); }} style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  border: "1px solid rgba(147,197,253,0.4)",
+                  background: "#eff6ff",
+                  cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.15rem",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }} title="תפריט ראשי">🏠</button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
