@@ -554,7 +554,16 @@ export default function ColoringCanvas(props) {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: "1.15rem",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                }} title="תפריט ראשי">🏠</button>
+                }} title="חזרה לדפי צביעה">🖼️</button>
+                <button onClick={function() { router.push("/play"); }} style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  border: "1px solid rgba(147,197,253,0.4)",
+                  background: "#eff6ff",
+                  cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.15rem",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }} title="מסך בית">🏠</button>
               </div>
             ) : null}
           </div>

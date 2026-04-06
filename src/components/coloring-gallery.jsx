@@ -171,81 +171,41 @@ export default function ColoringGallery() {
     }}>
       <div style={{ maxWidth: 1240, margin: "0 auto" }}>
         <div style={{
-          borderRadius: 34,
+          borderRadius: 24,
           background: "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,250,244,0.88))",
           border: "1px solid rgba(255,194,149,0.26)",
-          boxShadow: "0 28px 58px rgba(116, 90, 70, 0.1)",
-          padding: "clamp(1.2rem, 3vw, 2rem)",
-          marginBottom: "1.25rem",
+          boxShadow: "0 12px 32px rgba(116, 90, 70, 0.08)",
+          padding: "1rem 1.5rem",
+          marginBottom: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-            <div style={{ maxWidth: 620 }}>
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.45rem",
-                borderRadius: 999,
-                background: "rgba(103,112,181,0.12)",
-                color: "#4c5ca9",
-                padding: "0.5rem 0.8rem",
-                fontFamily: "'Secular One', sans-serif",
-                fontSize: "0.92rem",
-                marginBottom: "0.9rem",
-              }}>
-                משחק צביעה חדש בתוך MAY
-              </div>
-              <h1 style={{
-                margin: "0 0 0.55rem",
-                fontFamily: "'Suez One', serif",
-                fontSize: "clamp(2.2rem, 5vw, 4rem)",
-                color: "#2b2540",
-                lineHeight: 1.05,
-              }}>
-                צובעים סיפור
-              </h1>
-              <p style={{
-                margin: 0,
-                fontFamily: "'Rubik', sans-serif",
-                fontSize: "1rem",
-                lineHeight: 1.75,
-                color: "rgba(71,85,105,0.9)",
-              }}>
-                בוחרים ציור, ממשיכים מהמקום שבו עצרתם, וצובעים בחופשיות עם כל צבע שתרצו.
-              </p>
-            </div>
-
-            <div style={{ display: "grid", gap: "0.75rem", minWidth: "min(100%, 300px)" }}>
-              <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                <span style={{ borderRadius: 999, padding: "0.5rem 0.8rem", background: "#f0fdf4", color: "#15803d", fontFamily: "'Secular One', sans-serif" }}>
-                  {visibleArtworks.length} ציורים זמינים
-                </span>
-                <span style={{ borderRadius: 999, padding: "0.5rem 0.8rem", background: "#eff6ff", color: "#2563eb", fontFamily: "'Secular One', sans-serif" }}>
-                  {completedIds.size} הושלמו
-                </span>
-              </div>
-              <button onClick={handleResetAll} disabled={!canResetAll} style={{
-                borderRadius: 999,
-                border: canResetAll ? "1px solid rgba(248,113,113,0.35)" : "1px solid rgba(203,213,225,0.55)",
-                background: canResetAll ? "#fff1f2" : "#f8fafc",
-                color: canResetAll ? "#be123c" : "#94a3b8",
-                cursor: canResetAll ? "pointer" : "not-allowed",
-                fontFamily: "'Secular One', sans-serif",
-                fontSize: "0.92rem",
-                padding: "0.85rem 1rem",
-              }}>
-                אפס את כל הציורים
-              </button>
-            </div>
-          </div>
-
-          <p style={{
-            margin: "1.1rem 0 0",
-            fontFamily: "'Rubik', sans-serif",
-            color: "rgba(71,85,105,0.82)",
-            lineHeight: 1.6,
+          <Link href="/play" style={{
+            position: "absolute",
+            right: "1rem",
+            borderRadius: 999,
+            textDecoration: "none",
+            padding: "0.5rem 0.9rem",
+            background: "rgba(255,255,255,0.88)",
+            color: "#4c5ca9",
+            fontFamily: "'Secular One', sans-serif",
+            fontSize: "0.85rem",
+            border: "1px solid rgba(103,112,181,0.2)",
           }}>
-            כל הציורים פתוחים כברירת מחדל, ואפשר לבחור כל צבע לכל אזור.
-          </p>
+            חזרה לתפריט
+          </Link>
+          <h1 style={{
+            margin: 0,
+            fontFamily: "'Suez One', serif",
+            fontSize: "clamp(1.8rem, 4vw, 3rem)",
+            color: "#2b2540",
+            lineHeight: 1.1,
+            textAlign: "center",
+          }}>
+            דפי צביעה
+          </h1>
         </div>
 
         <div style={{
