@@ -15,13 +15,18 @@ import {
 } from "@/lib/game-constants";
 
 var GameContext = createContext(null);
+var ACTIVE_PROFILE_STORAGE_KEY = "lh-active-profile";
+
+function getRememberedProfileKey(userId) {
+  return storageKey(ACTIVE_PROFILE_STORAGE_KEY, userId);
+}
 
 export function GameProvider(props) {
   var children = props.children;
   var router = useRouter();
   var pathname = usePathname();
 
-  var _ap = useState(function() { return loadData("lh-active-profile", null); });
+  var _ap = useState(function() { return loadData(ACTIVE_PROFILE_STORAGE_KEY, null); });
   var activeProfile = _ap[0]; var setActiveProfile = _ap[1];
   var profileId = activeProfile ? activeProfile.id : null;
 
@@ -65,7 +70,12 @@ export function GameProvider(props) {
   useEffect(function() { if (profileId) saveData(storageKey("lh-sessions", profileId), sessions); }, [sessions, profileId]);
   useEffect(function() { if (profileId) saveData(storageKey("lh-letter-stats", profileId), letterStats); letterStatsRef.current = letterStats; }, [letterStats, profileId]);
   useEffect(function() { if (profileId) saveData(storageKey("lh-level-progress", profileId), levelProgress); }, [levelProgress, profileId]);
-  useEffect(function() { saveData("lh-active-profile", activeProfile); }, [activeProfile]);
+  useEffect(function() {
+    saveData(ACTIVE_PROFILE_STORAGE_KEY, activeProfile);
+    if (sync.user?.id) {
+      saveData(getRememberedProfileKey(sync.user.id), activeProfile);
+    }
+  }, [activeProfile, sync.user?.id]);
 
   // Ensure selected profile belongs to current authenticated user
   useEffect(function() {
@@ -74,15 +84,20 @@ export function GameProvider(props) {
       return;
     }
     var currentUserId = sync.user.id;
-    if (lastSyncedUserIdRef.current !== currentUserId) {
-      lastSyncedUserIdRef.current = currentUserId;
-      setActiveProfile(null);
-    }
+    var previousUserId = lastSyncedUserIdRef.current;
+    var userChanged = !!previousUserId && previousUserId !== currentUserId;
+    var storedProfile = loadData(getRememberedProfileKey(currentUserId), null);
+
+    lastSyncedUserIdRef.current = currentUserId;
     profilesHook.fetchProfiles().then(function(list) {
-      if (!list || list.length === 0) return;
+      if (!list || list.length === 0) {
+        setActiveProfile(null);
+        return;
+      }
       setActiveProfile(function(prev) {
-        if (prev && list.some(function(p) { return p.id === prev.id; })) return prev;
-        return null;
+        if (!userChanged && prev && list.some(function(p) { return p.id === prev.id; })) return prev;
+        if (storedProfile && list.some(function(p) { return p.id === storedProfile.id; })) return storedProfile;
+        return list[0];
       });
     });
   }, [sync.isAuthenticated, sync.user?.id, profilesHook.fetchProfiles]);

@@ -1,4 +1,5 @@
 import AuthSessionProvider from "@/components/session-provider";
+import { auth } from "@/lib/auth";
 import packageJson from "../../package.json";
 
 export const metadata = {
@@ -11,8 +12,9 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   var appVersion = "v" + packageJson.version;
+  var session = await auth();
 
   return (
     <html lang="he" dir="rtl">
@@ -39,7 +41,7 @@ export default function RootLayout({ children }) {
         }}>
           {appVersion}
         </div>
-        <AuthSessionProvider>{children}</AuthSessionProvider>
+        <AuthSessionProvider session={session}>{children}</AuthSessionProvider>
       </body>
     </html>
   );

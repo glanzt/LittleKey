@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from "next/navigation";
 import { GameProvider, useGame } from "@/lib/game-context";
 import GameTopMenu from "@/components/game-top-menu";
-import FeedbackWidget from "@/components/feedback-widget";
 import { TOP_BAR_HEIGHT } from "@/lib/game-constants";
 
 function PlayShell(props) {
@@ -42,7 +41,6 @@ function PlayShell(props) {
         <div style={{ paddingTop: TOP_BAR_HEIGHT }}>
           {children}
         </div>
-        <FeedbackWidget />
       </>
     );
   }
@@ -50,7 +48,6 @@ function PlayShell(props) {
   return (
     <>
       {children}
-      <FeedbackWidget />
     </>
   );
 }
