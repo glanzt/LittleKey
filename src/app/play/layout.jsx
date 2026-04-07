@@ -15,7 +15,8 @@ function PlayShell(props) {
     return currentPathname === "/play/game"
       || currentPathname === "/play/summary"
       || currentPathname === "/play/profiles"
-      || currentPathname.indexOf("/play/coloring") === 0;
+      || currentPathname.indexOf("/play/coloring") === 0
+      || currentPathname.indexOf("/play/gan-sheli") === 0;
   }
 
   // Coloring ships with local-only progress first, so it stays accessible without a selected profile.

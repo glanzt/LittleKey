@@ -1,0 +1,2478 @@
+{
+  "modelId": "eleven_v3",
+  "generatedAt": "2026-04-07T12:27:17.813Z",
+  "count": 130,
+  "clipsPerLevel": 4,
+  "levels": [
+    {
+      "id": 1,
+      "title": {
+        "text": "שים את העיפרון במגירה",
+        "path": "/audio/gan-sheli/001-title.mp3"
+      },
+      "voiceover": {
+        "text": "עיפרון — אוכלים? שים אותו במקום הנכון!",
+        "path": "/audio/gan-sheli/001-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! עיפרון לא אוכלים!",
+        "path": "/audio/gan-sheli/001-success.mp3"
+      },
+      "failure": {
+        "text": "עיפרון? לא אוכלים! למגירה!",
+        "path": "/audio/gan-sheli/001-failure.mp3"
+      }
+    },
+    {
+      "id": 2,
+      "title": {
+        "text": "כדור — אוכלים?",
+        "path": "/audio/gan-sheli/002-title.mp3"
+      },
+      "voiceover": {
+        "text": "כדור — אוכלים אותו? כן או לא?",
+        "path": "/audio/gan-sheli/002-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! כדור זה לשחק, לא לאכול!",
+        "path": "/audio/gan-sheli/002-success.mp3"
+      },
+      "failure": {
+        "text": "כדור? לא! כדור לא אוכלים — משחקים בו!",
+        "path": "/audio/gan-sheli/002-failure.mp3"
+      }
+    },
+    {
+      "id": 3,
+      "title": {
+        "text": "שים 4 צורות במקום",
+        "path": "/audio/gan-sheli/003-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבע צורות מחכות! שים כל אחת במקום שלה!",
+        "path": "/audio/gan-sheli/003-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! כל הצורות במקום!",
+        "path": "/audio/gan-sheli/003-success.mp3"
+      },
+      "failure": {
+        "text": "הצורה הזו לא מתאימה פה — נסה מקום אחר!",
+        "path": "/audio/gan-sheli/003-failure.mp3"
+      }
+    },
+    {
+      "id": 4,
+      "title": {
+        "text": "מצא את הריבוע",
+        "path": "/audio/gan-sheli/004-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה הריבוע? לחץ עליו!",
+        "path": "/audio/gan-sheli/004-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! ריבוע! יש לו ארבע פינות!",
+        "path": "/audio/gan-sheli/004-success.mp3"
+      },
+      "failure": {
+        "text": "הריבוע הוא הצורה עם ארבע פינות שוות!",
+        "path": "/audio/gan-sheli/004-failure.mp3"
+      }
+    },
+    {
+      "id": 5,
+      "title": {
+        "text": "כמה דגים?",
+        "path": "/audio/gan-sheli/005-title.mp3"
+      },
+      "voiceover": {
+        "text": "כמה דגים שוחים במים? ספור ולחץ!",
+        "path": "/audio/gan-sheli/005-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! 5 דגים!",
+        "path": "/audio/gan-sheli/005-success.mp3"
+      },
+      "failure": {
+        "text": "בוא נספור את הדגים ביחד!",
+        "path": "/audio/gan-sheli/005-failure.mp3"
+      }
+    },
+    {
+      "id": 6,
+      "title": {
+        "text": "מי לא בגד?",
+        "path": "/audio/gan-sheli/006-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה דברים! אחד לא שייך! מי זה?",
+        "path": "/audio/gan-sheli/006-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! ספל לא לובשים — שותים ממנו!",
+        "path": "/audio/gan-sheli/006-success.mp3"
+      },
+      "failure": {
+        "text": "חולצה, מכנסיים וכובע — כולם בגדים! מי לא?",
+        "path": "/audio/gan-sheli/006-failure.mp3"
+      }
+    },
+    {
+      "id": 7,
+      "title": {
+        "text": "לחם או מפתח?",
+        "path": "/audio/gan-sheli/007-title.mp3"
+      },
+      "voiceover": {
+        "text": "שני דברים — שים כל אחד במקום הנכון! אוכל בצלחת, לא אוכל במגירה!",
+        "path": "/audio/gan-sheli/007-voiceover.mp3"
+      },
+      "success": {
+        "text": "סיימת! לחם אוכלים, מפתח לא!",
+        "path": "/audio/gan-sheli/007-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב! חשוב — מה אוכלים?",
+        "path": "/audio/gan-sheli/007-failure.mp3"
+      }
+    },
+    {
+      "id": 8,
+      "title": {
+        "text": "איפה יש 5?",
+        "path": "/audio/gan-sheli/008-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה יש חמש אבנים צבעוניות? לחץ על הקבוצה!",
+        "path": "/audio/gan-sheli/008-voiceover.mp3"
+      },
+      "success": {
+        "text": "מעולה! 5 אבנים!",
+        "path": "/audio/gan-sheli/008-success.mp3"
+      },
+      "failure": {
+        "text": "ספור לאט — כאן ארבע, וכאן חמש!",
+        "path": "/audio/gan-sheli/008-failure.mp3"
+      }
+    },
+    {
+      "id": 9,
+      "title": {
+        "text": "מיון גדול — 5 דברים",
+        "path": "/audio/gan-sheli/009-title.mp3"
+      },
+      "voiceover": {
+        "text": "הפעם חמישה דברים! שים כל אחד בצלחת אם אוכלים, או במגירה אם לא!",
+        "path": "/audio/gan-sheli/009-voiceover.mp3"
+      },
+      "success": {
+        "text": "אלוף המיון! כל דבר במקום הנכון!",
+        "path": "/audio/gan-sheli/009-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב! חשוב — אוכלים את זה?",
+        "path": "/audio/gan-sheli/009-failure.mp3"
+      }
+    },
+    {
+      "id": 10,
+      "title": {
+        "text": "מה הצורה של הגג?",
+        "path": "/audio/gan-sheli/010-title.mp3"
+      },
+      "voiceover": {
+        "text": "תסתכל על הגג — מה הצורה שלו?",
+        "path": "/audio/gan-sheli/010-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה! הגג בצורת משולש!",
+        "path": "/audio/gan-sheli/010-success.mp3"
+      },
+      "failure": {
+        "text": "הגג הוא עם שלוש פינות — משולש!",
+        "path": "/audio/gan-sheli/010-failure.mp3"
+      }
+    },
+    {
+      "id": 11,
+      "title": {
+        "text": "צל של מכונית",
+        "path": "/audio/gan-sheli/011-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה מתחבא בצל? לחץ על התמונה הנכונה!",
+        "path": "/audio/gan-sheli/011-voiceover.mp3"
+      },
+      "success": {
+        "text": "ברום ברום! זו מכונית!",
+        "path": "/audio/gan-sheli/011-success.mp3"
+      },
+      "failure": {
+        "text": "תסתכל — יש לה ארבעה גלגלים!",
+        "path": "/audio/gan-sheli/011-failure.mp3"
+      }
+    },
+    {
+      "id": 12,
+      "title": {
+        "text": "נעל — אוכלים?",
+        "path": "/audio/gan-sheli/012-title.mp3"
+      },
+      "voiceover": {
+        "text": "נעל — אפשר לאכול? כן או לא?",
+        "path": "/audio/gan-sheli/012-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! נעל לא אוכלים! היא בשביל הרגליים!",
+        "path": "/audio/gan-sheli/012-success.mp3"
+      },
+      "failure": {
+        "text": "נעל? לא! נעל לא אוכלים!",
+        "path": "/audio/gan-sheli/012-failure.mp3"
+      }
+    },
+    {
+      "id": 13,
+      "title": {
+        "text": "מצא את המשולש",
+        "path": "/audio/gan-sheli/013-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה המשולש? הצורה עם שלוש פינות!",
+        "path": "/audio/gan-sheli/013-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצאת את המשולש! שלוש פינות!",
+        "path": "/audio/gan-sheli/013-success.mp3"
+      },
+      "failure": {
+        "text": "המשולש הוא עם שלוש פינות — כמו גג של בית!",
+        "path": "/audio/gan-sheli/013-failure.mp3"
+      }
+    },
+    {
+      "id": 14,
+      "title": {
+        "text": "כמה בלונים?",
+        "path": "/audio/gan-sheli/014-title.mp3"
+      },
+      "voiceover": {
+        "text": "כמה בלונים אתה רואה? ספור ולחץ!",
+        "path": "/audio/gan-sheli/014-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! 4 בלונים!",
+        "path": "/audio/gan-sheli/014-success.mp3"
+      },
+      "failure": {
+        "text": "ננסה עוד פעם! אחת, שתיים, שלוש, ארבע!",
+        "path": "/audio/gan-sheli/014-failure.mp3"
+      }
+    },
+    {
+      "id": 15,
+      "title": {
+        "text": "3 צלליות — מעורבב",
+        "path": "/audio/gan-sheli/015-title.mp3"
+      },
+      "voiceover": {
+        "text": "שלוש צלליות! גרור כל תמונה לצל שלה!",
+        "path": "/audio/gan-sheli/015-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הצלליות נחשפו! אלוף!",
+        "path": "/audio/gan-sheli/015-success.mp3"
+      },
+      "failure": {
+        "text": "לא פה — תסתכל על הצורה!",
+        "path": "/audio/gan-sheli/015-failure.mp3"
+      }
+    },
+    {
+      "id": 16,
+      "title": {
+        "text": "2 צלליות — כלי רכב",
+        "path": "/audio/gan-sheli/016-title.mp3"
+      },
+      "voiceover": {
+        "text": "אוטובוס ואופניים מתחבאים! גרור כל אחד לצל שלו!",
+        "path": "/audio/gan-sheli/016-voiceover.mp3"
+      },
+      "success": {
+        "text": "האוטובוס במקום! ביפ ביפ!",
+        "path": "/audio/gan-sheli/016-success.mp3"
+      },
+      "failure": {
+        "text": "לא פה — תסתכל על הצורה!",
+        "path": "/audio/gan-sheli/016-failure.mp3"
+      }
+    },
+    {
+      "id": 17,
+      "title": {
+        "text": "מצא את העיגול",
+        "path": "/audio/gan-sheli/017-title.mp3"
+      },
+      "voiceover": {
+        "text": "מצא את העיגול ולחץ עליו!",
+        "path": "/audio/gan-sheli/017-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! זה עיגול! הוא עגול עגול!",
+        "path": "/audio/gan-sheli/017-success.mp3"
+      },
+      "failure": {
+        "text": "זה לא עיגול. העיגול הוא העגול — בלי פינות!",
+        "path": "/audio/gan-sheli/017-failure.mp3"
+      }
+    },
+    {
+      "id": 18,
+      "title": {
+        "text": "שים את הגזר בצלחת",
+        "path": "/audio/gan-sheli/018-title.mp3"
+      },
+      "voiceover": {
+        "text": "גזר — אוכלים אותו? שים אותו בצלחת אם כן, או במגירה אם לא!",
+        "path": "/audio/gan-sheli/018-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! גזר אוכלים!",
+        "path": "/audio/gan-sheli/018-success.mp3"
+      },
+      "failure": {
+        "text": "גזר אוכלים! שים אותו בצלחת!",
+        "path": "/audio/gan-sheli/018-failure.mp3"
+      }
+    },
+    {
+      "id": 19,
+      "title": {
+        "text": "צל של מטריה",
+        "path": "/audio/gan-sheli/019-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה מתחבא בצל? בחר את התמונה הנכונה!",
+        "path": "/audio/gan-sheli/019-voiceover.mp3"
+      },
+      "success": {
+        "text": "מטריה! בשביל הגשם!",
+        "path": "/audio/gan-sheli/019-success.mp3"
+      },
+      "failure": {
+        "text": "תסתכל על הידית — זו מטריה!",
+        "path": "/audio/gan-sheli/019-failure.mp3"
+      }
+    },
+    {
+      "id": 20,
+      "title": {
+        "text": "כמה תפוחים?",
+        "path": "/audio/gan-sheli/020-title.mp3"
+      },
+      "voiceover": {
+        "text": "כמה תפוחים אתה רואה? לחץ על המספר הנכון!",
+        "path": "/audio/gan-sheli/020-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! יש 2 תפוחים!",
+        "path": "/audio/gan-sheli/020-success.mp3"
+      },
+      "failure": {
+        "text": "ננסה שוב! ספור איתי — אחת, שתיים!",
+        "path": "/audio/gan-sheli/020-failure.mp3"
+      }
+    },
+    {
+      "id": 21,
+      "title": {
+        "text": "מי לא עף?",
+        "path": "/audio/gan-sheli/021-title.mp3"
+      },
+      "voiceover": {
+        "text": "שלושה מהם — אחד לא שייך! מי לא יכול לעוף?",
+        "path": "/audio/gan-sheli/021-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! דג שוחה — הוא לא עף!",
+        "path": "/audio/gan-sheli/021-success.mp3"
+      },
+      "failure": {
+        "text": "ציפור ופרפר עפים — מי לא עף?",
+        "path": "/audio/gan-sheli/021-failure.mp3"
+      }
+    },
+    {
+      "id": 22,
+      "title": {
+        "text": "שים 3 צורות במקום",
+        "path": "/audio/gan-sheli/022-title.mp3"
+      },
+      "voiceover": {
+        "text": "שים כל צורה במקום הנכון! גרור אותן!",
+        "path": "/audio/gan-sheli/022-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הצורות במקום! אלוף!",
+        "path": "/audio/gan-sheli/022-success.mp3"
+      },
+      "failure": {
+        "text": "לא פה — נסה מקום אחר!",
+        "path": "/audio/gan-sheli/022-failure.mp3"
+      }
+    },
+    {
+      "id": 23,
+      "title": {
+        "text": "צל של כוכב",
+        "path": "/audio/gan-sheli/023-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה הצורה שמתחבאת? לחץ על התמונה!",
+        "path": "/audio/gan-sheli/023-voiceover.mp3"
+      },
+      "success": {
+        "text": "כוכב! הוא נוצץ!",
+        "path": "/audio/gan-sheli/023-success.mp3"
+      },
+      "failure": {
+        "text": "ספור את הקצוות — זה כוכב!",
+        "path": "/audio/gan-sheli/023-failure.mp3"
+      }
+    },
+    {
+      "id": 24,
+      "title": {
+        "text": "מי לא מהמטבח?",
+        "path": "/audio/gan-sheli/024-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה דברים! אחד לא מהמטבח. מצא אותו!",
+        "path": "/audio/gan-sheli/024-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! כדורגל לא מהמטבח — הוא מהמגרש!",
+        "path": "/audio/gan-sheli/024-success.mp3"
+      },
+      "failure": {
+        "text": "סיר, מצקת, צלחת וכוס — כולם במטבח! מי לא?",
+        "path": "/audio/gan-sheli/024-failure.mp3"
+      }
+    },
+    {
+      "id": 25,
+      "title": {
+        "text": "מי לא חיה?",
+        "path": "/audio/gan-sheli/025-title.mp3"
+      },
+      "voiceover": {
+        "text": "שלושה דברים — אחד לא שייך! מי זה?",
+        "path": "/audio/gan-sheli/025-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! כלב וחתול הם חיות — כיסא לא!",
+        "path": "/audio/gan-sheli/025-success.mp3"
+      },
+      "failure": {
+        "text": "כלב וחתול — שניהם חיות! מה לא חיה?",
+        "path": "/audio/gan-sheli/025-failure.mp3"
+      }
+    },
+    {
+      "id": 26,
+      "title": {
+        "text": "צל של חתול",
+        "path": "/audio/gan-sheli/026-title.mp3"
+      },
+      "voiceover": {
+        "text": "מי מתחבא בצל הזה? לחץ על התמונה הנכונה!",
+        "path": "/audio/gan-sheli/026-voiceover.mp3"
+      },
+      "success": {
+        "text": "מיאו! זה חתול!",
+        "path": "/audio/gan-sheli/026-success.mp3"
+      },
+      "failure": {
+        "text": "לא בדיוק — תסתכל על הצורה שוב!",
+        "path": "/audio/gan-sheli/026-failure.mp3"
+      }
+    },
+    {
+      "id": 27,
+      "title": {
+        "text": "מצא את כל האוכל — 5 דברים",
+        "path": "/audio/gan-sheli/027-title.mp3"
+      },
+      "voiceover": {
+        "text": "יש פה הרבה דברים! לחץ רק על מה שאוכלים!",
+        "path": "/audio/gan-sheli/027-voiceover.mp3"
+      },
+      "success": {
+        "text": "מעולה! ענבים, פיצה וגבינה — אלה אוכל!",
+        "path": "/audio/gan-sheli/027-success.mp3"
+      },
+      "failure": {
+        "text": "לא אוכלים את זה! נסה שוב!",
+        "path": "/audio/gan-sheli/027-failure.mp3"
+      }
+    },
+    {
+      "id": 28,
+      "title": {
+        "text": "בננה — אוכלים?",
+        "path": "/audio/gan-sheli/028-title.mp3"
+      },
+      "voiceover": {
+        "text": "בננה — אפשר לאכול אותה? לחץ כן או לא!",
+        "path": "/audio/gan-sheli/028-voiceover.mp3"
+      },
+      "success": {
+        "text": "ניאם! בננה טעימה!",
+        "path": "/audio/gan-sheli/028-success.mp3"
+      },
+      "failure": {
+        "text": "בננה? כן! אפשר לאכול בננה!",
+        "path": "/audio/gan-sheli/028-failure.mp3"
+      }
+    },
+    {
+      "id": 29,
+      "title": {
+        "text": "גלידה — אוכלים?",
+        "path": "/audio/gan-sheli/029-title.mp3"
+      },
+      "voiceover": {
+        "text": "גלידה — אפשר לאכול? כן או לא?",
+        "path": "/audio/gan-sheli/029-voiceover.mp3"
+      },
+      "success": {
+        "text": "כן! גלידה טעימה!",
+        "path": "/audio/gan-sheli/029-success.mp3"
+      },
+      "failure": {
+        "text": "גלידה? בטח שכן! אפשר לאכול גלידה!",
+        "path": "/audio/gan-sheli/029-failure.mp3"
+      }
+    },
+    {
+      "id": 30,
+      "title": {
+        "text": "מי לא ירקות?",
+        "path": "/audio/gan-sheli/030-title.mp3"
+      },
+      "voiceover": {
+        "text": "שלושה דברים! אחד לא שייך — מצא אותו!",
+        "path": "/audio/gan-sheli/030-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! גזר ומלפפון הם ירקות — דובי הוא צעצוע!",
+        "path": "/audio/gan-sheli/030-success.mp3"
+      },
+      "failure": {
+        "text": "גזר ומלפפון גדלים באדמה — שניהם ירקות! מה לא ירק?",
+        "path": "/audio/gan-sheli/030-failure.mp3"
+      }
+    },
+    {
+      "id": 31,
+      "title": {
+        "text": "מי לא כלי נגינה?",
+        "path": "/audio/gan-sheli/031-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה דברים! אחד מהם לא כלי נגינה! מצא אותו!",
+        "path": "/audio/gan-sheli/031-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! מטריה היא לא כלי נגינה!",
+        "path": "/audio/gan-sheli/031-success.mp3"
+      },
+      "failure": {
+        "text": "תוף, חליל וגיטרה — כולם עושים מוזיקה! מי לא?",
+        "path": "/audio/gan-sheli/031-failure.mp3"
+      }
+    },
+    {
+      "id": 32,
+      "title": {
+        "text": "צל של גיטרה",
+        "path": "/audio/gan-sheli/032-title.mp3"
+      },
+      "voiceover": {
+        "text": "כלי נגינה מתחבא! מי זה?",
+        "path": "/audio/gan-sheli/032-voiceover.mp3"
+      },
+      "success": {
+        "text": "גיטרה! שמעת את הצליל?",
+        "path": "/audio/gan-sheli/032-success.mp3"
+      },
+      "failure": {
+        "text": "תסתכל על הצורה — גוף ארוך עם חורים!",
+        "path": "/audio/gan-sheli/032-failure.mp3"
+      }
+    },
+    {
+      "id": 33,
+      "title": {
+        "text": "צל של פרח",
+        "path": "/audio/gan-sheli/033-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה מתחבא בצל הזה? לחץ!",
+        "path": "/audio/gan-sheli/033-voiceover.mp3"
+      },
+      "success": {
+        "text": "פרח! כמה יפה!",
+        "path": "/audio/gan-sheli/033-success.mp3"
+      },
+      "failure": {
+        "text": "תראה את העלי כותרת — זה פרח!",
+        "path": "/audio/gan-sheli/033-failure.mp3"
+      }
+    },
+    {
+      "id": 34,
+      "title": {
+        "text": "מי לא כלי רכב?",
+        "path": "/audio/gan-sheli/034-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה דברים! אחד לא שייך — מצא אותו!",
+        "path": "/audio/gan-sheli/034-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! תפוח הוא פרי — לא כלי רכב!",
+        "path": "/audio/gan-sheli/034-success.mp3"
+      },
+      "failure": {
+        "text": "מכונית, אוטובוס ורכבת — כולם נוסעים! מי לא?",
+        "path": "/audio/gan-sheli/034-failure.mp3"
+      }
+    },
+    {
+      "id": 35,
+      "title": {
+        "text": "מצא את הכוכב",
+        "path": "/audio/gan-sheli/035-title.mp3"
+      },
+      "voiceover": {
+        "text": "מצא את הכוכב ולחץ עליו!",
+        "path": "/audio/gan-sheli/035-voiceover.mp3"
+      },
+      "success": {
+        "text": "כוכב! הוא נוצץ בשבילך!",
+        "path": "/audio/gan-sheli/035-success.mp3"
+      },
+      "failure": {
+        "text": "הכוכב הוא עם הקרניים!",
+        "path": "/audio/gan-sheli/035-failure.mp3"
+      }
+    },
+    {
+      "id": 36,
+      "title": {
+        "text": "מי לא מבית הספר?",
+        "path": "/audio/gan-sheli/036-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה דברים — מצא את מי שלא שייך!",
+        "path": "/audio/gan-sheli/036-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! אריה הוא לא מבית הספר!",
+        "path": "/audio/gan-sheli/036-success.mp3"
+      },
+      "failure": {
+        "text": "עיפרון, מחברת, צבעים ומחק — כולם לבית הספר! מי לא?",
+        "path": "/audio/gan-sheli/036-failure.mp3"
+      }
+    },
+    {
+      "id": 37,
+      "title": {
+        "text": "מי לא גר במים?",
+        "path": "/audio/gan-sheli/037-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבע חיות! אחת לא גרה במים. מי זה?",
+        "path": "/audio/gan-sheli/037-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! פרה גרה ביבשה, לא במים!",
+        "path": "/audio/gan-sheli/037-success.mp3"
+      },
+      "failure": {
+        "text": "דג, כוכב ים וצב ים — כולם במים! מי לא?",
+        "path": "/audio/gan-sheli/037-failure.mp3"
+      }
+    },
+    {
+      "id": 38,
+      "title": {
+        "text": "כמה פרפרים?",
+        "path": "/audio/gan-sheli/038-title.mp3"
+      },
+      "voiceover": {
+        "text": "כמה פרפרים עפים? ספור ולחץ על המספר!",
+        "path": "/audio/gan-sheli/038-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! פרפר אחד!",
+        "path": "/audio/gan-sheli/038-success.mp3"
+      },
+      "failure": {
+        "text": "תסתכל טוב — כמה פרפרים יש?",
+        "path": "/audio/gan-sheli/038-failure.mp3"
+      }
+    },
+    {
+      "id": 39,
+      "title": {
+        "text": "מצא את כל האוכל",
+        "path": "/audio/gan-sheli/039-title.mp3"
+      },
+      "voiceover": {
+        "text": "לחץ על כל הדברים שאפשר לאכול!",
+        "path": "/audio/gan-sheli/039-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! תפוח ועוגיה — אלה דברים שאוכלים!",
+        "path": "/audio/gan-sheli/039-success.mp3"
+      },
+      "failure": {
+        "text": "לא אוכלים את זה!",
+        "path": "/audio/gan-sheli/039-failure.mp3"
+      }
+    },
+    {
+      "id": 40,
+      "title": {
+        "text": "2 צלליות — חיות",
+        "path": "/audio/gan-sheli/040-title.mp3"
+      },
+      "voiceover": {
+        "text": "שתי חיות מתחבאות! גרור כל אחת לצל הנכון!",
+        "path": "/audio/gan-sheli/040-voiceover.mp3"
+      },
+      "success": {
+        "text": "מו! הפרה במקום!",
+        "path": "/audio/gan-sheli/040-success.mp3"
+      },
+      "failure": {
+        "text": "לא הצל הזה — נסה את האחר!",
+        "path": "/audio/gan-sheli/040-failure.mp3"
+      }
+    },
+    {
+      "id": 41,
+      "title": {
+        "text": "לחץ על 2 פרחים",
+        "path": "/audio/gan-sheli/041-title.mp3"
+      },
+      "voiceover": {
+        "text": "לחץ על שני פרחים!",
+        "path": "/audio/gan-sheli/041-voiceover.mp3"
+      },
+      "success": {
+        "text": "בדיוק 2! כל הכבוד!",
+        "path": "/audio/gan-sheli/041-success.mp3"
+      },
+      "failure": {
+        "text": "אופס! ננסה שוב — רק שניים!",
+        "path": "/audio/gan-sheli/041-failure.mp3"
+      }
+    },
+    {
+      "id": 42,
+      "title": {
+        "text": "צל של ארנב",
+        "path": "/audio/gan-sheli/042-title.mp3"
+      },
+      "voiceover": {
+        "text": "מי מתחבא בצל? תסתכל על הצורה!",
+        "path": "/audio/gan-sheli/042-voiceover.mp3"
+      },
+      "success": {
+        "text": "קופצני! זה ארנב!",
+        "path": "/audio/gan-sheli/042-success.mp3"
+      },
+      "failure": {
+        "text": "תסתכל על האוזניים הארוכות — מי יש לו אוזניים כאלה?",
+        "path": "/audio/gan-sheli/042-failure.mp3"
+      }
+    },
+    {
+      "id": 43,
+      "title": {
+        "text": "לחץ על 3 עוגיות",
+        "path": "/audio/gan-sheli/043-title.mp3"
+      },
+      "voiceover": {
+        "text": "לחץ על שלוש עוגיות!",
+        "path": "/audio/gan-sheli/043-voiceover.mp3"
+      },
+      "success": {
+        "text": "ממש 3! אתה מספרן מעולה!",
+        "path": "/audio/gan-sheli/043-success.mp3"
+      },
+      "failure": {
+        "text": "עוד פעם! רק שלוש עוגיות!",
+        "path": "/audio/gan-sheli/043-failure.mp3"
+      }
+    },
+    {
+      "id": 44,
+      "title": {
+        "text": "איפה יש 3?",
+        "path": "/audio/gan-sheli/044-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה יש שלוש חיפושיות? לחץ על הקבוצה הנכונה!",
+        "path": "/audio/gan-sheli/044-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! 3 חיפושיות!",
+        "path": "/audio/gan-sheli/044-success.mp3"
+      },
+      "failure": {
+        "text": "בוא נספור — כאן יש אחת, שתיים. וכאן? אחת, שתיים, שלוש!",
+        "path": "/audio/gan-sheli/044-failure.mp3"
+      }
+    },
+    {
+      "id": 45,
+      "title": {
+        "text": "מה הצורה של העוגה?",
+        "path": "/audio/gan-sheli/045-title.mp3"
+      },
+      "voiceover": {
+        "text": "העוגה הזו — מה הצורה שלה? עיגול, ריבוע, או משולש?",
+        "path": "/audio/gan-sheli/045-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! העוגה עגולה כמו עיגול!",
+        "path": "/audio/gan-sheli/045-success.mp3"
+      },
+      "failure": {
+        "text": "תסתכל על העוגה — היא עגולה! כמו עיגול!",
+        "path": "/audio/gan-sheli/045-failure.mp3"
+      }
+    },
+    {
+      "id": 46,
+      "title": {
+        "text": "מה הצורה של החלון?",
+        "path": "/audio/gan-sheli/046-title.mp3"
+      },
+      "voiceover": {
+        "text": "החלון הזה — מה הצורה שלו?",
+        "path": "/audio/gan-sheli/046-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! החלון מרובע!",
+        "path": "/audio/gan-sheli/046-success.mp3"
+      },
+      "failure": {
+        "text": "לחלון יש ארבע פינות — הוא ריבוע!",
+        "path": "/audio/gan-sheli/046-failure.mp3"
+      }
+    },
+    {
+      "id": 47,
+      "title": {
+        "text": "שים את העיגול במקום",
+        "path": "/audio/gan-sheli/047-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור את העיגול למקום הנכון!",
+        "path": "/audio/gan-sheli/047-voiceover.mp3"
+      },
+      "success": {
+        "text": "מושלם! העיגול במקום!",
+        "path": "/audio/gan-sheli/047-success.mp3"
+      },
+      "failure": {
+        "text": "לא בדיוק — נסה את המקום האחר!",
+        "path": "/audio/gan-sheli/047-failure.mp3"
+      }
+    },
+    {
+      "id": 48,
+      "title": {
+        "text": "כמה כוכבים?",
+        "path": "/audio/gan-sheli/048-title.mp3"
+      },
+      "voiceover": {
+        "text": "כמה כוכבים יש? ספור ולחץ!",
+        "path": "/audio/gan-sheli/048-voiceover.mp3"
+      },
+      "success": {
+        "text": "מעולה! 3 כוכבים!",
+        "path": "/audio/gan-sheli/048-success.mp3"
+      },
+      "failure": {
+        "text": "בוא נספור ביחד!",
+        "path": "/audio/gan-sheli/048-failure.mp3"
+      }
+    },
+    {
+      "id": 49,
+      "title": {
+        "text": "לחץ על 4 ציפורים",
+        "path": "/audio/gan-sheli/049-title.mp3"
+      },
+      "voiceover": {
+        "text": "לחץ על ארבע ציפורים!",
+        "path": "/audio/gan-sheli/049-voiceover.mp3"
+      },
+      "success": {
+        "text": "4 ציפורים! מושלם!",
+        "path": "/audio/gan-sheli/049-success.mp3"
+      },
+      "failure": {
+        "text": "רק ארבע! ננסה שוב!",
+        "path": "/audio/gan-sheli/049-failure.mp3"
+      }
+    },
+    {
+      "id": 50,
+      "title": {
+        "text": "מי לא פרי?",
+        "path": "/audio/gan-sheli/050-title.mp3"
+      },
+      "voiceover": {
+        "text": "השלב האחרון! שלושה דברים! אחד לא שייך — מי זה? לחץ עליו!",
+        "path": "/audio/gan-sheli/050-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! סיימת את כל המשחק! אתה אלוף אמיתי!",
+        "path": "/audio/gan-sheli/050-success.mp3"
+      },
+      "failure": {
+        "text": "תפוח ובננה דומים — שניהם פירות! מי לא פרי?",
+        "path": "/audio/gan-sheli/050-failure.mp3"
+      }
+    },
+    {
+      "id": 51,
+      "title": {
+        "text": "העיגול הכחול",
+        "path": "/audio/gan-sheli/051-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה עיגולים — אחד בצבע אחר! מצא אותו!",
+        "path": "/audio/gan-sheli/051-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! העיגול הכחול שונה מהאדומים!",
+        "path": "/audio/gan-sheli/051-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את העיגול שבצבע שונה!",
+        "path": "/audio/gan-sheli/051-failure.mp3"
+      }
+    },
+    {
+      "id": 52,
+      "title": {
+        "text": "הכוכב הירוק",
+        "path": "/audio/gan-sheli/052-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה כוכבים — מי בצבע שונה?",
+        "path": "/audio/gan-sheli/052-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! הכוכב הירוק שונה מהצהובים!",
+        "path": "/audio/gan-sheli/052-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את הכוכב שבצבע שונה!",
+        "path": "/audio/gan-sheli/052-failure.mp3"
+      }
+    },
+    {
+      "id": 53,
+      "title": {
+        "text": "הריבוע הסגול",
+        "path": "/audio/gan-sheli/053-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה ריבועים — מי בצבע אחר? מצא אותו!",
+        "path": "/audio/gan-sheli/053-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! הריבוע הסגול שונה מהכתומים!",
+        "path": "/audio/gan-sheli/053-success.mp3"
+      },
+      "failure": {
+        "text": "חפש ריבוע בצבע אחר!",
+        "path": "/audio/gan-sheli/053-failure.mp3"
+      }
+    },
+    {
+      "id": 54,
+      "title": {
+        "text": "הלב האדום",
+        "path": "/audio/gan-sheli/054-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה לבבות — מי בצבע שונה?",
+        "path": "/audio/gan-sheli/054-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! הלב האדום שונה מהירוקים!",
+        "path": "/audio/gan-sheli/054-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את הלב שבצבע שונה!",
+        "path": "/audio/gan-sheli/054-failure.mp3"
+      }
+    },
+    {
+      "id": 55,
+      "title": {
+        "text": "העיגול הקטן",
+        "path": "/audio/gan-sheli/055-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה עיגולים — מי בגודל שונה?",
+        "path": "/audio/gan-sheli/055-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! העיגול הקטן שונה מהגדולים!",
+        "path": "/audio/gan-sheli/055-success.mp3"
+      },
+      "failure": {
+        "text": "חפש עיגול בגודל אחר!",
+        "path": "/audio/gan-sheli/055-failure.mp3"
+      }
+    },
+    {
+      "id": 56,
+      "title": {
+        "text": "הריבוע הקטן",
+        "path": "/audio/gan-sheli/056-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה ריבועים — מי הכי שונה בגודל?",
+        "path": "/audio/gan-sheli/056-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! הריבוע הקטן שונה מהגדולים!",
+        "path": "/audio/gan-sheli/056-success.mp3"
+      },
+      "failure": {
+        "text": "חפש ריבוע בגודל שונה!",
+        "path": "/audio/gan-sheli/056-failure.mp3"
+      }
+    },
+    {
+      "id": 57,
+      "title": {
+        "text": "הכוכב הגדול",
+        "path": "/audio/gan-sheli/057-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה כוכבים — מי בגודל שונה? לחץ עליו!",
+        "path": "/audio/gan-sheli/057-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! הכוכב הגדול שונה מהקטנים!",
+        "path": "/audio/gan-sheli/057-success.mp3"
+      },
+      "failure": {
+        "text": "חפש כוכב בגודל שונה!",
+        "path": "/audio/gan-sheli/057-failure.mp3"
+      }
+    },
+    {
+      "id": 58,
+      "title": {
+        "text": "הריבוע בין העיגולים",
+        "path": "/audio/gan-sheli/058-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה דברים — מי בצורה שונה?",
+        "path": "/audio/gan-sheli/058-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! הריבוע שונה מהעיגולים!",
+        "path": "/audio/gan-sheli/058-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את מי שבצורה שונה!",
+        "path": "/audio/gan-sheli/058-failure.mp3"
+      }
+    },
+    {
+      "id": 59,
+      "title": {
+        "text": "העיגול בין המשולשים",
+        "path": "/audio/gan-sheli/059-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבע צורות — מי שונה? לחץ עליו!",
+        "path": "/audio/gan-sheli/059-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! העיגול שונה מהמשולשים!",
+        "path": "/audio/gan-sheli/059-success.mp3"
+      },
+      "failure": {
+        "text": "חפש צורה שונה מהאחרות!",
+        "path": "/audio/gan-sheli/059-failure.mp3"
+      }
+    },
+    {
+      "id": 60,
+      "title": {
+        "text": "הכוכב בין הריבועים",
+        "path": "/audio/gan-sheli/060-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמש צורות — מצא את מי שבצורה שונה!",
+        "path": "/audio/gan-sheli/060-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! הכוכב שונה מהריבועים!",
+        "path": "/audio/gan-sheli/060-success.mp3"
+      },
+      "failure": {
+        "text": "חפש צורה שונה!",
+        "path": "/audio/gan-sheli/060-failure.mp3"
+      }
+    },
+    {
+      "id": 61,
+      "title": {
+        "text": "החץ ההפוך",
+        "path": "/audio/gan-sheli/061-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה חיצים — מי פונה לכיוון אחר?",
+        "path": "/audio/gan-sheli/061-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! החץ הזה פונה לכיוון אחר!",
+        "path": "/audio/gan-sheli/061-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את החץ שפונה לצד שונה!",
+        "path": "/audio/gan-sheli/061-failure.mp3"
+      }
+    },
+    {
+      "id": 62,
+      "title": {
+        "text": "החץ שמסתכל למטה",
+        "path": "/audio/gan-sheli/062-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה חיצים — מי מסתכל לכיוון אחר?",
+        "path": "/audio/gan-sheli/062-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! החץ הזה מסתכל למטה!",
+        "path": "/audio/gan-sheli/062-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את החץ שפונה לכיוון שונה!",
+        "path": "/audio/gan-sheli/062-failure.mp3"
+      }
+    },
+    {
+      "id": 63,
+      "title": {
+        "text": "המשולש ההפוך",
+        "path": "/audio/gan-sheli/063-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה משולשים — מי הפוך?",
+        "path": "/audio/gan-sheli/063-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! המשולש הזה הפוך!",
+        "path": "/audio/gan-sheli/063-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את המשולש שמסתכל לכיוון אחר!",
+        "path": "/audio/gan-sheli/063-failure.mp3"
+      }
+    },
+    {
+      "id": 64,
+      "title": {
+        "text": "העיגול הריק",
+        "path": "/audio/gan-sheli/064-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה עיגולים — מי נראה שונה?",
+        "path": "/audio/gan-sheli/064-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! העיגול הזה ריק בפנים!",
+        "path": "/audio/gan-sheli/064-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את העיגול שנראה אחרת!",
+        "path": "/audio/gan-sheli/064-failure.mp3"
+      }
+    },
+    {
+      "id": 65,
+      "title": {
+        "text": "הריבוע הריק",
+        "path": "/audio/gan-sheli/065-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה ריבועים — מי שונה?",
+        "path": "/audio/gan-sheli/065-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! הריבוע הזה ריק בפנים!",
+        "path": "/audio/gan-sheli/065-success.mp3"
+      },
+      "failure": {
+        "text": "חפש ריבוע שנראה שונה מהאחרים!",
+        "path": "/audio/gan-sheli/065-failure.mp3"
+      }
+    },
+    {
+      "id": 66,
+      "title": {
+        "text": "הכוכב המלא",
+        "path": "/audio/gan-sheli/066-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה כוכבים — מי שונה מהאחרים?",
+        "path": "/audio/gan-sheli/066-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! הכוכב הזה מלא בפנים!",
+        "path": "/audio/gan-sheli/066-success.mp3"
+      },
+      "failure": {
+        "text": "חפש כוכב שנראה שונה!",
+        "path": "/audio/gan-sheli/066-failure.mp3"
+      }
+    },
+    {
+      "id": 67,
+      "title": {
+        "text": "הריבוע המוטה",
+        "path": "/audio/gan-sheli/067-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה ריבועים — מי מסובב?",
+        "path": "/audio/gan-sheli/067-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! הריבוע הזה מסובב!",
+        "path": "/audio/gan-sheli/067-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את הריבוע שעומד אחרת!",
+        "path": "/audio/gan-sheli/067-failure.mp3"
+      }
+    },
+    {
+      "id": 68,
+      "title": {
+        "text": "המשולש המוטה",
+        "path": "/audio/gan-sheli/068-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה משולשים — מי מסובב? לחץ עליו!",
+        "path": "/audio/gan-sheli/068-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! המשולש הזה מסובב!",
+        "path": "/audio/gan-sheli/068-success.mp3"
+      },
+      "failure": {
+        "text": "חפש משולש שעומד אחרת!",
+        "path": "/audio/gan-sheli/068-failure.mp3"
+      }
+    },
+    {
+      "id": 69,
+      "title": {
+        "text": "המעוין המוטה",
+        "path": "/audio/gan-sheli/069-title.mp3"
+      },
+      "voiceover": {
+        "text": "חמישה מעויינים — מי מסובב?",
+        "path": "/audio/gan-sheli/069-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! המעוין הזה מסובב!",
+        "path": "/audio/gan-sheli/069-success.mp3"
+      },
+      "failure": {
+        "text": "חפש מעוין שנראה מוטה!",
+        "path": "/audio/gan-sheli/069-failure.mp3"
+      }
+    },
+    {
+      "id": 70,
+      "title": {
+        "text": "הלב המוטה",
+        "path": "/audio/gan-sheli/070-title.mp3"
+      },
+      "voiceover": {
+        "text": "ארבעה לבבות — מי מסובב? מצא אותו!",
+        "path": "/audio/gan-sheli/070-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! הלב הזה מוטה!",
+        "path": "/audio/gan-sheli/070-success.mp3"
+      },
+      "failure": {
+        "text": "חפש את הלב שעומד אחרת!",
+        "path": "/audio/gan-sheli/070-failure.mp3"
+      }
+    },
+    {
+      "id": 71,
+      "title": {
+        "text": "אדום כחול",
+        "path": "/audio/gan-sheli/071-title.mp3"
+      },
+      "voiceover": {
+        "text": "תסתכל טוב. מה חסר בסוף?",
+        "path": "/audio/gan-sheli/071-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! הכחול בא עכשיו!",
+        "path": "/audio/gan-sheli/071-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! ננסה שוב.",
+        "path": "/audio/gan-sheli/071-failure.mp3"
+      }
+    },
+    {
+      "id": 72,
+      "title": {
+        "text": "ריבוע עיגול",
+        "path": "/audio/gan-sheli/072-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה בא עכשיו?",
+        "path": "/audio/gan-sheli/072-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! עכשיו בא עיגול!",
+        "path": "/audio/gan-sheli/072-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! בוא נבדוק שוב.",
+        "path": "/audio/gan-sheli/072-failure.mp3"
+      }
+    },
+    {
+      "id": 73,
+      "title": {
+        "text": "גדול קטן",
+        "path": "/audio/gan-sheli/073-title.mp3"
+      },
+      "voiceover": {
+        "text": "מי בא עכשיו? הגדול או הקטן?",
+        "path": "/audio/gan-sheli/073-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה! עכשיו בא הקטן!",
+        "path": "/audio/gan-sheli/073-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תסתכל על הגדלים.",
+        "path": "/audio/gan-sheli/073-failure.mp3"
+      }
+    },
+    {
+      "id": 74,
+      "title": {
+        "text": "ימינה שמאלה",
+        "path": "/audio/gan-sheli/074-title.mp3"
+      },
+      "voiceover": {
+        "text": "איזה חץ בא עכשיו?",
+        "path": "/audio/gan-sheli/074-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! עכשיו שמאלה!",
+        "path": "/audio/gan-sheli/074-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה לאן החץ פונה.",
+        "path": "/audio/gan-sheli/074-failure.mp3"
+      }
+    },
+    {
+      "id": 75,
+      "title": {
+        "text": "לבבות בזוגות",
+        "path": "/audio/gan-sheli/075-title.mp3"
+      },
+      "voiceover": {
+        "text": "תראה את הזוגות. מה חסר?",
+        "path": "/audio/gan-sheli/075-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! עוד אדום!",
+        "path": "/audio/gan-sheli/075-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה איך הם באים בזוגות.",
+        "path": "/audio/gan-sheli/075-failure.mp3"
+      }
+    },
+    {
+      "id": 76,
+      "title": {
+        "text": "שלוש צורות",
+        "path": "/audio/gan-sheli/076-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה בא אחרי ריבוע?",
+        "path": "/audio/gan-sheli/076-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! עכשיו בא משולש!",
+        "path": "/audio/gan-sheli/076-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! בוא נסתכל מה חוזר.",
+        "path": "/audio/gan-sheli/076-failure.mp3"
+      }
+    },
+    {
+      "id": 77,
+      "title": {
+        "text": "שלושה צבעים",
+        "path": "/audio/gan-sheli/077-title.mp3"
+      },
+      "voiceover": {
+        "text": "איזה צבע בא עכשיו?",
+        "path": "/audio/gan-sheli/077-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! עכשיו בא כחול!",
+        "path": "/audio/gan-sheli/077-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה את הצבעים שחוזרים.",
+        "path": "/audio/gan-sheli/077-failure.mp3"
+      }
+    },
+    {
+      "id": 78,
+      "title": {
+        "text": "צורות בזוגות",
+        "path": "/audio/gan-sheli/078-title.mp3"
+      },
+      "voiceover": {
+        "text": "תראה את הזוגות. מה בא עכשיו?",
+        "path": "/audio/gan-sheli/078-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה מאוד! שוב עיגול!",
+        "path": "/audio/gan-sheli/078-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! הם באים שניים שניים.",
+        "path": "/audio/gan-sheli/078-failure.mp3"
+      }
+    },
+    {
+      "id": 79,
+      "title": {
+        "text": "גרור את החסר",
+        "path": "/audio/gan-sheli/079-title.mp3"
+      },
+      "voiceover": {
+        "text": "בחר את מה שחסר, ואז שים אותו בסוף.",
+        "path": "/audio/gan-sheli/079-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! השלמת את הסדרה!",
+        "path": "/audio/gan-sheli/079-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! ננסה עוד פעם.",
+        "path": "/audio/gan-sheli/079-failure.mp3"
+      }
+    },
+    {
+      "id": 80,
+      "title": {
+        "text": "סדרה ארוכה",
+        "path": "/audio/gan-sheli/080-title.mp3"
+      },
+      "voiceover": {
+        "text": "הסדרה כמעט גמורה. בחר את מה שחסר ושים אותו בסוף.",
+        "path": "/audio/gan-sheli/080-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! הסדרה הושלמה!",
+        "path": "/audio/gan-sheli/080-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תסתכל מה חוזר.",
+        "path": "/audio/gan-sheli/080-failure.mp3"
+      }
+    },
+    {
+      "id": 81,
+      "title": {
+        "text": "חצים בזוגות",
+        "path": "/audio/gan-sheli/081-title.mp3"
+      },
+      "voiceover": {
+        "text": "תראה את החיצים בזוגות. מה חסר בסוף?",
+        "path": "/audio/gan-sheli/081-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! שוב למעלה!",
+        "path": "/audio/gan-sheli/081-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה איך הכיוון חוזר.",
+        "path": "/audio/gan-sheli/081-failure.mp3"
+      }
+    },
+    {
+      "id": 82,
+      "title": {
+        "text": "גדולים וקטנים",
+        "path": "/audio/gan-sheli/082-title.mp3"
+      },
+      "voiceover": {
+        "text": "תראה את הגדולים והקטנים. מה בא עכשיו?",
+        "path": "/audio/gan-sheli/082-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה! שוב גדול!",
+        "path": "/audio/gan-sheli/082-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה מי באים שניים שניים.",
+        "path": "/audio/gan-sheli/082-failure.mp3"
+      }
+    },
+    {
+      "id": 83,
+      "title": {
+        "text": "שני חברים",
+        "path": "/audio/gan-sheli/083-title.mp3"
+      },
+      "voiceover": {
+        "text": "מי בא עכשיו?",
+        "path": "/audio/gan-sheli/083-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! עכשיו בא הריבוע הכחול!",
+        "path": "/audio/gan-sheli/083-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה מי חוזר אחרי מי.",
+        "path": "/audio/gan-sheli/083-failure.mp3"
+      }
+    },
+    {
+      "id": 84,
+      "title": {
+        "text": "מלא ריק",
+        "path": "/audio/gan-sheli/084-title.mp3"
+      },
+      "voiceover": {
+        "text": "מי בא עכשיו? המלא או הריק?",
+        "path": "/audio/gan-sheli/084-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! עכשיו בא הריק!",
+        "path": "/audio/gan-sheli/084-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה מי מלא ומי ריק.",
+        "path": "/audio/gan-sheli/084-failure.mp3"
+      }
+    },
+    {
+      "id": 85,
+      "title": {
+        "text": "לב כוכב ריבוע",
+        "path": "/audio/gan-sheli/085-title.mp3"
+      },
+      "voiceover": {
+        "text": "מה בא עכשיו?",
+        "path": "/audio/gan-sheli/085-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! עכשיו בא ריבוע!",
+        "path": "/audio/gan-sheli/085-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה מה חוזר כל פעם.",
+        "path": "/audio/gan-sheli/085-failure.mp3"
+      }
+    },
+    {
+      "id": 86,
+      "title": {
+        "text": "בחר ושים חץ",
+        "path": "/audio/gan-sheli/086-title.mp3"
+      },
+      "voiceover": {
+        "text": "בחר את החץ שחסר, ואז שים אותו בסוף.",
+        "path": "/audio/gan-sheli/086-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! הסדרה הושלמה!",
+        "path": "/audio/gan-sheli/086-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה לאן החץ פונה.",
+        "path": "/audio/gan-sheli/086-failure.mp3"
+      }
+    },
+    {
+      "id": 87,
+      "title": {
+        "text": "בחר ושים גודל",
+        "path": "/audio/gan-sheli/087-title.mp3"
+      },
+      "voiceover": {
+        "text": "בחר את הגודל שחסר, ואז שים אותו בסוף.",
+        "path": "/audio/gan-sheli/087-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה! עכשיו בא הקטן!",
+        "path": "/audio/gan-sheli/087-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תסתכל על הגודל.",
+        "path": "/audio/gan-sheli/087-failure.mp3"
+      }
+    },
+    {
+      "id": 88,
+      "title": {
+        "text": "שלושה צבעים ארוך",
+        "path": "/audio/gan-sheli/088-title.mp3"
+      },
+      "voiceover": {
+        "text": "איזה צבע חסר? בחר ושים בסוף.",
+        "path": "/audio/gan-sheli/088-voiceover.mp3"
+      },
+      "success": {
+        "text": "נכון! עכשיו בא הכתום!",
+        "path": "/audio/gan-sheli/088-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה את הצבעים שחוזרים.",
+        "path": "/audio/gan-sheli/088-failure.mp3"
+      }
+    },
+    {
+      "id": 89,
+      "title": {
+        "text": "מלאים וריקים בזוגות",
+        "path": "/audio/gan-sheli/089-title.mp3"
+      },
+      "voiceover": {
+        "text": "תראה את הזוגות. מה חסר בסוף?",
+        "path": "/audio/gan-sheli/089-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! שוב מלא!",
+        "path": "/audio/gan-sheli/089-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה איך הם באים בזוגות.",
+        "path": "/audio/gan-sheli/089-failure.mp3"
+      }
+    },
+    {
+      "id": 90,
+      "title": {
+        "text": "השלם את הסדרה",
+        "path": "/audio/gan-sheli/090-title.mp3"
+      },
+      "voiceover": {
+        "text": "הסדרה כמעט גמורה. בחר את מה שחסר ושים בסוף.",
+        "path": "/audio/gan-sheli/090-voiceover.mp3"
+      },
+      "success": {
+        "text": "מדהים! השלמת את כל הסדרות!",
+        "path": "/audio/gan-sheli/090-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט! תראה מי חוזר כל פעם.",
+        "path": "/audio/gan-sheli/090-failure.mp3"
+      }
+    },
+    {
+      "id": 91,
+      "title": {
+        "text": "מה מתחיל ב",
+        "path": "/audio/gan-sheli/091-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל בְּ. הקשיבו טוב: בְּ.",
+        "path": "/audio/gan-sheli/091-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! בית ובננה מתחילים בְּ.",
+        "path": "/audio/gan-sheli/091-success.mp3"
+      },
+      "failure": {
+        "text": "נמשיך לחפש יחד מה מתחיל בְּ.",
+        "path": "/audio/gan-sheli/091-failure.mp3"
+      }
+    },
+    {
+      "id": 92,
+      "title": {
+        "text": "מה מתחיל מ",
+        "path": "/audio/gan-sheli/092-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל מְ. הקשיבו טוב: מְ.",
+        "path": "/audio/gan-sheli/092-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! מטרייה ומטוס מתחילים מְ.",
+        "path": "/audio/gan-sheli/092-success.mp3"
+      },
+      "failure": {
+        "text": "נקשיב שוב ונמצא מה מתחיל מְ.",
+        "path": "/audio/gan-sheli/092-failure.mp3"
+      }
+    },
+    {
+      "id": 93,
+      "title": {
+        "text": "מה מתחיל ל",
+        "path": "/audio/gan-sheli/093-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל לְ. הקשיבו טוב: לְ.",
+        "path": "/audio/gan-sheli/093-voiceover.mp3"
+      },
+      "success": {
+        "text": "נהדר! לב ולימון מתחילים לְ.",
+        "path": "/audio/gan-sheli/093-success.mp3"
+      },
+      "failure": {
+        "text": "עוד רגע תמצאו מה מתחיל לְ.",
+        "path": "/audio/gan-sheli/093-failure.mp3"
+      }
+    },
+    {
+      "id": 94,
+      "title": {
+        "text": "מה מתחיל פ",
+        "path": "/audio/gan-sheli/094-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל פְּ. הקשיבו טוב: פְּ.",
+        "path": "/audio/gan-sheli/094-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה מאוד! פיל ופרח מתחילים פְּ.",
+        "path": "/audio/gan-sheli/094-success.mp3"
+      },
+      "failure": {
+        "text": "נמשיך לחפש מה מתחיל פְּ.",
+        "path": "/audio/gan-sheli/094-failure.mp3"
+      }
+    },
+    {
+      "id": 95,
+      "title": {
+        "text": "מה מתחיל ש",
+        "path": "/audio/gan-sheli/095-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל שְׁ. הקשיבו טוב: שְׁ.",
+        "path": "/audio/gan-sheli/095-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! שמש ושן מתחילים שְׁ.",
+        "path": "/audio/gan-sheli/095-success.mp3"
+      },
+      "failure": {
+        "text": "חפשו שוב מה מתחיל שְׁ.",
+        "path": "/audio/gan-sheli/095-failure.mp3"
+      }
+    },
+    {
+      "id": 96,
+      "title": {
+        "text": "מה מתחיל ד",
+        "path": "/audio/gan-sheli/096-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל דְ. הקשיבו טוב: דְ.",
+        "path": "/audio/gan-sheli/096-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! דג ודובי מתחילים דְ.",
+        "path": "/audio/gan-sheli/096-success.mp3"
+      },
+      "failure": {
+        "text": "בואו נמצא יחד מה מתחיל דְ.",
+        "path": "/audio/gan-sheli/096-failure.mp3"
+      }
+    },
+    {
+      "id": 97,
+      "title": {
+        "text": "מה מתחיל נ",
+        "path": "/audio/gan-sheli/097-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל נְ. הקשיבו טוב: נְ.",
+        "path": "/audio/gan-sheli/097-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! נעל, נר ונחש מתחילים נְ.",
+        "path": "/audio/gan-sheli/097-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט. יש עוד תמונות שמתחילות נְ.",
+        "path": "/audio/gan-sheli/097-failure.mp3"
+      }
+    },
+    {
+      "id": 98,
+      "title": {
+        "text": "מה מתחיל ת",
+        "path": "/audio/gan-sheli/098-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל תְּ. הקשיבו טוב: תְּ.",
+        "path": "/audio/gan-sheli/098-voiceover.mp3"
+      },
+      "success": {
+        "text": "מעולה! תפוח, תוף ותרנגול מתחילים תְּ.",
+        "path": "/audio/gan-sheli/098-success.mp3"
+      },
+      "failure": {
+        "text": "נקשיב שוב לצליל תְּ ונמשיך לחפש.",
+        "path": "/audio/gan-sheli/098-failure.mp3"
+      }
+    },
+    {
+      "id": 99,
+      "title": {
+        "text": "מה מתחיל ס",
+        "path": "/audio/gan-sheli/099-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל סְ. הקשיבו טוב: סְ.",
+        "path": "/audio/gan-sheli/099-voiceover.mp3"
+      },
+      "success": {
+        "text": "אלופים! סוס, ספר וסירה מתחילים סְ.",
+        "path": "/audio/gan-sheli/099-success.mp3"
+      },
+      "failure": {
+        "text": "חפשו את מה שבאמת מתחיל סְ.",
+        "path": "/audio/gan-sheli/099-failure.mp3"
+      }
+    },
+    {
+      "id": 100,
+      "title": {
+        "text": "מה מתחיל ק",
+        "path": "/audio/gan-sheli/100-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל קְ. הקשיבו טוב: קְ.",
+        "path": "/audio/gan-sheli/100-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! קובייה, קשת וקטר מתחילים קְ.",
+        "path": "/audio/gan-sheli/100-success.mp3"
+      },
+      "failure": {
+        "text": "נמשיך לחפש מה מתחיל קְ.",
+        "path": "/audio/gan-sheli/100-failure.mp3"
+      }
+    },
+    {
+      "id": 101,
+      "title": {
+        "text": "מה מתחיל ג",
+        "path": "/audio/gan-sheli/101-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל גְ. הקשיבו טוב: גְ.",
+        "path": "/audio/gan-sheli/101-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! גזר וגלידה מתחילים גְ.",
+        "path": "/audio/gan-sheli/101-success.mp3"
+      },
+      "failure": {
+        "text": "עוד חפץ או שניים מתחילים גְ.",
+        "path": "/audio/gan-sheli/101-failure.mp3"
+      }
+    },
+    {
+      "id": 102,
+      "title": {
+        "text": "מה מתחיל כ",
+        "path": "/audio/gan-sheli/102-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל כְּ. הקשיבו טוב: כְּ.",
+        "path": "/audio/gan-sheli/102-voiceover.mp3"
+      },
+      "success": {
+        "text": "נהדר! כובע, כדור וכפית מתחילים כְּ.",
+        "path": "/audio/gan-sheli/102-success.mp3"
+      },
+      "failure": {
+        "text": "בואו נקשיב שוב לצליל כְּ.",
+        "path": "/audio/gan-sheli/102-failure.mp3"
+      }
+    },
+    {
+      "id": 103,
+      "title": {
+        "text": "מה מתחיל ט",
+        "path": "/audio/gan-sheli/103-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל טְ. הקשיבו טוב: טְ.",
+        "path": "/audio/gan-sheli/103-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! טלפון וטלה מתחילים טְ.",
+        "path": "/audio/gan-sheli/103-success.mp3"
+      },
+      "failure": {
+        "text": "נמשיך לחפש מה מתחיל טְ.",
+        "path": "/audio/gan-sheli/103-failure.mp3"
+      }
+    },
+    {
+      "id": 104,
+      "title": {
+        "text": "מה מתחיל צ",
+        "path": "/audio/gan-sheli/104-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל צְ. הקשיבו טוב: צְ.",
+        "path": "/audio/gan-sheli/104-voiceover.mp3"
+      },
+      "success": {
+        "text": "יפה מאוד! ציפור, צב וצלחת מתחילים צְ.",
+        "path": "/audio/gan-sheli/104-success.mp3"
+      },
+      "failure": {
+        "text": "יש עוד תמונות שמתחילות צְ.",
+        "path": "/audio/gan-sheli/104-failure.mp3"
+      }
+    },
+    {
+      "id": 105,
+      "title": {
+        "text": "מה מתחיל ח",
+        "path": "/audio/gan-sheli/105-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל חְ. הקשיבו טוב: חְ.",
+        "path": "/audio/gan-sheli/105-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! חלון וחתול מתחילים חְ.",
+        "path": "/audio/gan-sheli/105-success.mp3"
+      },
+      "failure": {
+        "text": "בואו נחפש מה מתחיל חְ.",
+        "path": "/audio/gan-sheli/105-failure.mp3"
+      }
+    },
+    {
+      "id": 106,
+      "title": {
+        "text": "מה מתחיל א",
+        "path": "/audio/gan-sheli/106-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל אַ. הקשיבו טוב: אַ.",
+        "path": "/audio/gan-sheli/106-voiceover.mp3"
+      },
+      "success": {
+        "text": "איזה יופי! אריה, ארנב ואפרוח מתחילים אַ.",
+        "path": "/audio/gan-sheli/106-success.mp3"
+      },
+      "failure": {
+        "text": "נמשיך לחפש מה מתחיל אַ.",
+        "path": "/audio/gan-sheli/106-failure.mp3"
+      }
+    },
+    {
+      "id": 107,
+      "title": {
+        "text": "מה מתחיל ב קשה",
+        "path": "/audio/gan-sheli/107-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל בְּ. הקשיבו טוב: בְּ.",
+        "path": "/audio/gan-sheli/107-voiceover.mp3"
+      },
+      "success": {
+        "text": "מקסים! בית, בלון ובננה מתחילים בְּ.",
+        "path": "/audio/gan-sheli/107-success.mp3"
+      },
+      "failure": {
+        "text": "חפשו בזהירות מה מתחיל בְּ.",
+        "path": "/audio/gan-sheli/107-failure.mp3"
+      }
+    },
+    {
+      "id": 108,
+      "title": {
+        "text": "מה מתחיל מ קשה",
+        "path": "/audio/gan-sheli/108-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל מְ. הקשיבו טוב: מְ.",
+        "path": "/audio/gan-sheli/108-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! מטרייה, מפתח ומכונית מתחילים מְ.",
+        "path": "/audio/gan-sheli/108-success.mp3"
+      },
+      "failure": {
+        "text": "נמשיך לחפש מה מתחיל מְ.",
+        "path": "/audio/gan-sheli/108-failure.mp3"
+      }
+    },
+    {
+      "id": 109,
+      "title": {
+        "text": "מה מתחיל ש קשה",
+        "path": "/audio/gan-sheli/109-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל שְׁ. הקשיבו טוב: שְׁ.",
+        "path": "/audio/gan-sheli/109-voiceover.mp3"
+      },
+      "success": {
+        "text": "מעולה! שמש, שן ושעון מתחילים שְׁ.",
+        "path": "/audio/gan-sheli/109-success.mp3"
+      },
+      "failure": {
+        "text": "עוד רגע תמצאו את כל מה שמתחיל שְׁ.",
+        "path": "/audio/gan-sheli/109-failure.mp3"
+      }
+    },
+    {
+      "id": 110,
+      "title": {
+        "text": "מה מתחיל ל קשה",
+        "path": "/audio/gan-sheli/110-title.mp3"
+      },
+      "voiceover": {
+        "text": "סמנו את כל הציורים שמתחילים בצליל לְ. הקשיבו טוב: לְ.",
+        "path": "/audio/gan-sheli/110-voiceover.mp3"
+      },
+      "success": {
+        "text": "נהדר! לב, לחם ולימון מתחילים לְ.",
+        "path": "/audio/gan-sheli/110-success.mp3"
+      },
+      "failure": {
+        "text": "נקשיב שוב ונמצא מה מתחיל לְ.",
+        "path": "/audio/gan-sheli/110-failure.mp3"
+      }
+    },
+    {
+      "id": 111,
+      "title": {
+        "text": "שני בלונים",
+        "path": "/audio/gan-sheli/111-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה 2?",
+        "path": "/audio/gan-sheli/111-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! זה 2!",
+        "path": "/audio/gan-sheli/111-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, נסה שוב.",
+        "path": "/audio/gan-sheli/111-failure.mp3"
+      }
+    },
+    {
+      "id": 112,
+      "title": {
+        "text": "שלושה תפוחים",
+        "path": "/audio/gan-sheli/112-title.mp3"
+      },
+      "voiceover": {
+        "text": "מצא את 3",
+        "path": "/audio/gan-sheli/112-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! זה 3!",
+        "path": "/audio/gan-sheli/112-success.mp3"
+      },
+      "failure": {
+        "text": "בוא ננסה שוב.",
+        "path": "/audio/gan-sheli/112-failure.mp3"
+      }
+    },
+    {
+      "id": 113,
+      "title": {
+        "text": "ארבע מכוניות",
+        "path": "/audio/gan-sheli/113-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה 4?",
+        "path": "/audio/gan-sheli/113-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! זה 4!",
+        "path": "/audio/gan-sheli/113-success.mp3"
+      },
+      "failure": {
+        "text": "עוד פעם, אתה מצליח.",
+        "path": "/audio/gan-sheli/113-failure.mp3"
+      }
+    },
+    {
+      "id": 114,
+      "title": {
+        "text": "חמישה כוכבים",
+        "path": "/audio/gan-sheli/114-title.mp3"
+      },
+      "voiceover": {
+        "text": "מצא את 5",
+        "path": "/audio/gan-sheli/114-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! זה 5!",
+        "path": "/audio/gan-sheli/114-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, נסה שוב.",
+        "path": "/audio/gan-sheli/114-failure.mp3"
+      }
+    },
+    {
+      "id": 115,
+      "title": {
+        "text": "גרור את 3 לכדורים",
+        "path": "/audio/gan-sheli/115-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור 3 לכדורים",
+        "path": "/audio/gan-sheli/115-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! חיברת נכון!",
+        "path": "/audio/gan-sheli/115-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב, אתה בדרך הנכונה.",
+        "path": "/audio/gan-sheli/115-failure.mp3"
+      }
+    },
+    {
+      "id": 116,
+      "title": {
+        "text": "הצעצועים אל 4",
+        "path": "/audio/gan-sheli/116-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור ל-4",
+        "path": "/audio/gan-sheli/116-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! זה 4!",
+        "path": "/audio/gan-sheli/116-success.mp3"
+      },
+      "failure": {
+        "text": "עוד פעם, זה יצליח.",
+        "path": "/audio/gan-sheli/116-failure.mp3"
+      }
+    },
+    {
+      "id": 117,
+      "title": {
+        "text": "חמישה חתולים",
+        "path": "/audio/gan-sheli/117-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור 5 לחתולים",
+        "path": "/audio/gan-sheli/117-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! חיברת נכון!",
+        "path": "/audio/gan-sheli/117-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, בוא ננסה שוב.",
+        "path": "/audio/gan-sheli/117-failure.mp3"
+      }
+    },
+    {
+      "id": 118,
+      "title": {
+        "text": "הבננות אל 6",
+        "path": "/audio/gan-sheli/118-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור ל-6",
+        "path": "/audio/gan-sheli/118-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! זה 6!",
+        "path": "/audio/gan-sheli/118-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב, אתה קרוב.",
+        "path": "/audio/gan-sheli/118-failure.mp3"
+      }
+    },
+    {
+      "id": 119,
+      "title": {
+        "text": "בלונים ומכוניות",
+        "path": "/audio/gan-sheli/119-title.mp3"
+      },
+      "voiceover": {
+        "text": "בלונים, ואז 5",
+        "path": "/audio/gan-sheli/119-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! 5 בלונים!",
+        "path": "/audio/gan-sheli/119-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, נסה שוב.",
+        "path": "/audio/gan-sheli/119-failure.mp3"
+      }
+    },
+    {
+      "id": 120,
+      "title": {
+        "text": "כדורים וכוכבים",
+        "path": "/audio/gan-sheli/120-title.mp3"
+      },
+      "voiceover": {
+        "text": "כדורים, ואז 6",
+        "path": "/audio/gan-sheli/120-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! זה 6!",
+        "path": "/audio/gan-sheli/120-success.mp3"
+      },
+      "failure": {
+        "text": "בוא ננסה שוב.",
+        "path": "/audio/gan-sheli/120-failure.mp3"
+      }
+    },
+    {
+      "id": 121,
+      "title": {
+        "text": "החתולים והשבע",
+        "path": "/audio/gan-sheli/121-title.mp3"
+      },
+      "voiceover": {
+        "text": "חתולים, ואז 7",
+        "path": "/audio/gan-sheli/121-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! זה 7!",
+        "path": "/audio/gan-sheli/121-success.mp3"
+      },
+      "failure": {
+        "text": "עוד פעם, אתה מצליח.",
+        "path": "/audio/gan-sheli/121-failure.mp3"
+      }
+    },
+    {
+      "id": 122,
+      "title": {
+        "text": "הצעצועים והשמונה",
+        "path": "/audio/gan-sheli/122-title.mp3"
+      },
+      "voiceover": {
+        "text": "צעצועים, ואז 8",
+        "path": "/audio/gan-sheli/122-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! זה 8!",
+        "path": "/audio/gan-sheli/122-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב, אתה קרוב.",
+        "path": "/audio/gan-sheli/122-failure.mp3"
+      }
+    },
+    {
+      "id": 123,
+      "title": {
+        "text": "שלוש קבוצות וכוכבים",
+        "path": "/audio/gan-sheli/123-title.mp3"
+      },
+      "voiceover": {
+        "text": "כוכבים, ואז 6",
+        "path": "/audio/gan-sheli/123-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! 6 כוכבים!",
+        "path": "/audio/gan-sheli/123-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, נסה שוב.",
+        "path": "/audio/gan-sheli/123-failure.mp3"
+      }
+    },
+    {
+      "id": 124,
+      "title": {
+        "text": "גרור את 7 לכדורים",
+        "path": "/audio/gan-sheli/124-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור 7 לכדורים",
+        "path": "/audio/gan-sheli/124-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! זה 7!",
+        "path": "/audio/gan-sheli/124-success.mp3"
+      },
+      "failure": {
+        "text": "בוא ננסה שוב.",
+        "path": "/audio/gan-sheli/124-failure.mp3"
+      }
+    },
+    {
+      "id": 125,
+      "title": {
+        "text": "הבננות והשמונה",
+        "path": "/audio/gan-sheli/125-title.mp3"
+      },
+      "voiceover": {
+        "text": "איפה 8?",
+        "path": "/audio/gan-sheli/125-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! זה 8!",
+        "path": "/audio/gan-sheli/125-success.mp3"
+      },
+      "failure": {
+        "text": "עוד פעם, אתה מצליח.",
+        "path": "/audio/gan-sheli/125-failure.mp3"
+      }
+    },
+    {
+      "id": 126,
+      "title": {
+        "text": "הבלונים והתשע",
+        "path": "/audio/gan-sheli/126-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור ל-9",
+        "path": "/audio/gan-sheli/126-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! זה 9!",
+        "path": "/audio/gan-sheli/126-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב, אתה קרוב.",
+        "path": "/audio/gan-sheli/126-failure.mp3"
+      }
+    },
+    {
+      "id": 127,
+      "title": {
+        "text": "שמונה מכוניות",
+        "path": "/audio/gan-sheli/127-title.mp3"
+      },
+      "voiceover": {
+        "text": "מצא את 8",
+        "path": "/audio/gan-sheli/127-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! זה 8!",
+        "path": "/audio/gan-sheli/127-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, נסה שוב.",
+        "path": "/audio/gan-sheli/127-failure.mp3"
+      }
+    },
+    {
+      "id": 128,
+      "title": {
+        "text": "תשעה כוכבים",
+        "path": "/audio/gan-sheli/128-title.mp3"
+      },
+      "voiceover": {
+        "text": "גרור 9 לכוכבים",
+        "path": "/audio/gan-sheli/128-voiceover.mp3"
+      },
+      "success": {
+        "text": "מצוין! 9 כוכבים!",
+        "path": "/audio/gan-sheli/128-success.mp3"
+      },
+      "failure": {
+        "text": "בוא ננסה שוב.",
+        "path": "/audio/gan-sheli/128-failure.mp3"
+      }
+    },
+    {
+      "id": 129,
+      "title": {
+        "text": "בלונים או כדורים",
+        "path": "/audio/gan-sheli/129-title.mp3"
+      },
+      "voiceover": {
+        "text": "בלונים, ואז 9",
+        "path": "/audio/gan-sheli/129-voiceover.mp3"
+      },
+      "success": {
+        "text": "כל הכבוד! זה 9!",
+        "path": "/audio/gan-sheli/129-success.mp3"
+      },
+      "failure": {
+        "text": "נסה שוב, אתה בדרך הנכונה.",
+        "path": "/audio/gan-sheli/129-failure.mp3"
+      }
+    },
+    {
+      "id": 130,
+      "title": {
+        "text": "הכוכבים הגדולים",
+        "path": "/audio/gan-sheli/130-title.mp3"
+      },
+      "voiceover": {
+        "text": "כוכבים, ואז 9",
+        "path": "/audio/gan-sheli/130-voiceover.mp3"
+      },
+      "success": {
+        "text": "יופי! סיימת נהדר!",
+        "path": "/audio/gan-sheli/130-success.mp3"
+      },
+      "failure": {
+        "text": "כמעט, בוא ננסה שוב.",
+        "path": "/audio/gan-sheli/130-failure.mp3"
+      }
+    }
+  ]
+}

@@ -49,6 +49,16 @@ var GAME_CARDS = [
     href: "/play/coloring",
     actionText: "לגלריית הציורים",
   },
+  {
+    id: "gan-sheli",
+    icon: "🧒",
+    title: "גן שלי",
+    description: "130 משחקים של ספירה, צורות, מיון, סדרות, צלליות ועוד.",
+    accent: "#FF9F43",
+    accentSoft: "rgba(255,159,67,0.14)",
+    href: "/play/gan-sheli",
+    actionText: "בואו נשחק!",
+  },
 ];
 
 export default function PlayPage() {
