@@ -176,9 +176,11 @@ export default function GamePage() {
         }}>
           {displayLetter}
         </div>
+
+        {!isCompact ? helpControls : null}
       </div>
 
-      {helpControls}
+      {isCompact ? helpControls : null}
 
       {!game.showSuccess && !game.showError ? (
         <p style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.5rem)", color: "#888", marginTop: "1.2rem", fontFamily: "'Secular One', sans-serif", textAlign: "center" }}>
