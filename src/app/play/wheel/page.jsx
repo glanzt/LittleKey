@@ -4,10 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PAGE_BG, BACK_BUTTON_STYLE, getAudioCtx, playError, playFeelingSound, playPerfect } from "@/lib/game-constants";
 import { useGame } from "@/lib/game-context";
-import { BuildLoopHud, BuildRewardPopup, ThemePickerOverlay } from "@/components/build-loop";
 import { GameBackgroundMusic } from "@/components/game-background-music";
 import { FloatingLettersBackground } from "@/styles/shared";
-import { useBuildLoop } from "@/lib/build-loop";
 import { fetchFeelingItems, pickRandomFeelings, shuffleArray } from "@/lib/feelings";
 import { FEELING_ITEMS } from "@/lib/match-game";
 
@@ -23,7 +21,6 @@ export default function WheelGamePage() {
   var game = useGame();
   var router = useRouter();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
-  var buildLoop = useBuildLoop("wheel", game.activeProfile ? game.activeProfile.id : null);
   var _af = useState(FEELING_ITEMS); var allFeelingItems = _af[0]; var setAllFeelingItems = _af[1];
   var _fi = useState(function() {
     return pickRandomFeelings(FEELING_ITEMS, Math.min(WHEEL_FEELING_COUNT, FEELING_ITEMS.length));
@@ -370,7 +367,6 @@ export default function WheelGamePage() {
     if (feeling.isCorrect) {
       playPerfect();
       playFeelingSound(selectedFeeling.audioName);
-      buildLoop.unlockForCompletion("wheel-" + roundsPlayed + "-" + selectedFeeling.id + "-" + Date.now());
       setFeedback({
         type: "success",
         text: "נכון מאוד! זו ההרגשה " + selectedFeeling.label + ".",
@@ -434,16 +430,6 @@ export default function WheelGamePage() {
             סיבובים: {roundsPlayed}
           </div>
         </div>
-
-        {buildLoop.hasTheme ? (
-          <BuildLoopHud
-            theme={buildLoop.theme}
-            builtParts={buildLoop.builtParts}
-            isPhone={isPhone}
-            maxWidth={920}
-            margin="0 auto 1rem"
-          />
-        ) : null}
 
         <div style={{
           width: "100%",
@@ -707,69 +693,52 @@ export default function WheelGamePage() {
       </div>
 
       {roundComplete ? (
-        buildLoop.hasTheme && buildLoop.pendingRevealPartId ? (
-          <BuildRewardPopup
-            theme={buildLoop.theme}
-            builtParts={buildLoop.builtParts}
-            revealedPartId={buildLoop.pendingRevealPartId}
-            isPhone={isPhone}
-            onPlayAgain={function() {
-              buildLoop.dismissReveal();
-              resetWheelRound();
-            }}
-          />
-        ) : (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 1200,
+          background: "rgba(17,19,25,0.42)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem",
+        }}>
           <div style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1200,
-            background: "rgba(17,19,25,0.42)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
+            width: "min(100%, 420px)",
+            borderRadius: 30,
+            background: "white",
+            boxShadow: "0 24px 60px rgba(17,19,25,0.22)",
+            padding: "1.8rem 1.2rem 1.2rem",
+            textAlign: "center",
           }}>
-            <div style={{
-              width: "min(100%, 420px)",
-              borderRadius: 30,
-              background: "white",
-              boxShadow: "0 24px 60px rgba(17,19,25,0.22)",
-              padding: "1.8rem 1.2rem 1.2rem",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: "2.8rem", marginBottom: "0.5rem" }}>🎉</div>
-              <div style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "1.6rem" : "1.9rem", color: "#111319", marginBottom: "0.4rem" }}>
-                סיבוב מושלם
-              </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", color: "rgba(17,19,25,0.56)", marginBottom: "1rem" }}>
-                ניחשת נכון. רוצה לשחק שוב?
-              </div>
-              <button
-                onClick={resetWheelRound}
-                style={{
-                  width: "100%",
-                  border: "none",
-                  borderRadius: 22,
-                  background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
-                  color: "white",
-                  cursor: "pointer",
-                  boxShadow: "0 14px 28px rgba(75,137,240,0.3)",
-                  padding: "0.95rem 1rem",
-                  fontFamily: "'Secular One', sans-serif",
-                  fontSize: isPhone ? "1.05rem" : "1.12rem",
-                }}
-              >
-                שחקי שוב
-              </button>
+            <div style={{ fontSize: "2.8rem", marginBottom: "0.5rem" }}>🎉</div>
+            <div style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "1.6rem" : "1.9rem", color: "#111319", marginBottom: "0.4rem" }}>
+              סיבוב מושלם
             </div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", color: "rgba(17,19,25,0.56)", marginBottom: "1rem" }}>
+              ניחשת נכון. רוצה לשחק שוב?
+            </div>
+            <button
+              onClick={resetWheelRound}
+              style={{
+                width: "100%",
+                border: "none",
+                borderRadius: 22,
+                background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
+                color: "white",
+                cursor: "pointer",
+                boxShadow: "0 14px 28px rgba(75,137,240,0.3)",
+                padding: "0.95rem 1rem",
+                fontFamily: "'Secular One', sans-serif",
+                fontSize: isPhone ? "1.05rem" : "1.12rem",
+              }}
+            >
+              שחקי שוב
+            </button>
           </div>
-        )
-      ) : null}
-
-      {!buildLoop.hasTheme ? (
-        <ThemePickerOverlay themes={buildLoop.themes} onChoose={buildLoop.chooseTheme} isPhone={isPhone} />
+        </div>
       ) : null}
     </div>
   );

@@ -3,18 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame } from "@/lib/game-context";
 import { PAGE_BG, playCardFlip, playError, playFeelingSound, playPerfect, playSuccess } from "@/lib/game-constants";
-import { BuildLoopHud, BuildRewardPopup, ThemePickerOverlay } from "@/components/build-loop";
 import { GameBackgroundMusic } from "@/components/game-background-music";
 import { FloatingLettersBackground } from "@/styles/shared";
-import { useBuildLoop } from "@/lib/build-loop";
 import { fetchFeelingItems } from "@/lib/feelings";
 import { FEELING_ITEMS, MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } from "@/lib/match-game";
 
 export default function MatchGamePage() {
   var game = useGame();
   var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
-  var buildLoop = useBuildLoop("match", game.activeProfile ? game.activeProfile.id : null);
-  var themeReadyRef = useRef(false);
   var _fp = useState(FEELING_ITEMS); var feelingPool = _fp[0]; var setFeelingPool = _fp[1];
 
   var _rd = useState(1); var round = _rd[0]; var setRound = _rd[1];
@@ -58,12 +54,6 @@ export default function MatchGamePage() {
     return function() { clearInterval(timer); };
   }, []);
 
-  useEffect(function() {
-    if (!buildLoop.hasTheme || themeReadyRef.current) return;
-    themeReadyRef.current = true;
-    resetRound(1);
-  }, [buildLoop.hasTheme]);
-
   function formatStopwatch(ms) {
     var totalMs = Math.max(0, ms || 0);
     var totalSeconds = Math.floor(totalMs / 1000);
@@ -87,7 +77,6 @@ export default function MatchGamePage() {
   }
 
   function handlePlayAgain() {
-    buildLoop.dismissReveal();
     resetRound(round + 1);
   }
 
@@ -155,7 +144,6 @@ export default function MatchGamePage() {
           });
           playPerfect();
           playFeelingSound(card.audioName);
-          buildLoop.unlockForCompletion("match-" + roundStartedAtRef.current);
           setRoundComplete(true);
         } else {
           playSuccess();
@@ -212,15 +200,6 @@ export default function MatchGamePage() {
         <h1 style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(2rem, 5vw, 3.2rem)", color: "#111319", margin: "0 0 0.4rem", textAlign: "center", lineHeight: 1.05 }}>
           משחק התאמת קלפים
         </h1>
-        {buildLoop.hasTheme ? (
-          <BuildLoopHud
-            theme={buildLoop.theme}
-            builtParts={buildLoop.builtParts}
-            isPhone={isPhone}
-            maxWidth={840}
-            margin="0 auto 0.9rem"
-          />
-        ) : null}
         <div style={{ display: "flex", gap: isPhone ? "0.45rem" : "0.8rem", flexWrap: "nowrap", justifyContent: "center", marginBottom: isPhone ? "0.8rem" : "1.4rem", width: "100%", maxWidth: isPhone ? "100%" : "none" }}>
           {[
             { label: "זמן", value: formatStopwatch(displayDuration), color: "#7C5CFC" },
@@ -413,55 +392,41 @@ export default function MatchGamePage() {
       </div>
 
       {roundComplete ? (
-        buildLoop.hasTheme && buildLoop.pendingRevealPartId ? (
-          <BuildRewardPopup
-            theme={buildLoop.theme}
-            builtParts={buildLoop.builtParts}
-            revealedPartId={buildLoop.pendingRevealPartId}
-            isPhone={isPhone}
-            onPlayAgain={handlePlayAgain}
-          />
-        ) : (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(17,19,25,0.34)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
+        }}>
           <div style={{
-            position: "fixed", inset: 0, zIndex: 1000,
-            background: "rgba(17,19,25,0.34)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
+            width: "100%", maxWidth: 380, borderRadius: 28, background: "white", textAlign: "center",
+            padding: "2rem 1.6rem", boxShadow: "0 20px 60px rgba(17,19,25,0.2)",
           }}>
-            <div style={{
-              width: "100%", maxWidth: 380, borderRadius: 28, background: "white", textAlign: "center",
-              padding: "2rem 1.6rem", boxShadow: "0 20px 60px rgba(17,19,25,0.2)",
-            }}>
-              <div style={{ fontSize: "3rem", marginBottom: "0.6rem" }}>🎉</div>
-              <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.35rem", color: "#111319", margin: "0 0 0.5rem" }}>
-                כל הזוגות נמצאו!
-              </h2>
-              <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.25rem" }}>
-                סיימת בזמן של {formatStopwatch(completedRoundDuration)}.
-              </p>
-              <button
-                onClick={handlePlayAgain}
-                style={{
-                  width: "100%",
-                  border: "none",
-                  borderRadius: 22,
-                  background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
-                  color: "white",
-                  cursor: "pointer",
-                  boxShadow: "0 12px 26px rgba(75,137,240,0.3)",
-                  padding: "0.9rem 1rem",
-                  fontFamily: "'Secular One', sans-serif",
-                  fontSize: "1.15rem",
-                }}
-              >
-                שחק שוב
-              </button>
-            </div>
+            <div style={{ fontSize: "3rem", marginBottom: "0.6rem" }}>🎉</div>
+            <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.35rem", color: "#111319", margin: "0 0 0.5rem" }}>
+              כל הזוגות נמצאו!
+            </h2>
+            <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.25rem" }}>
+              סיימת בזמן של {formatStopwatch(completedRoundDuration)}.
+            </p>
+            <button
+              onClick={handlePlayAgain}
+              style={{
+                width: "100%",
+                border: "none",
+                borderRadius: 22,
+                background: "linear-gradient(180deg, #6FA8FF 0%, #4B89F0 100%)",
+                color: "white",
+                cursor: "pointer",
+                boxShadow: "0 12px 26px rgba(75,137,240,0.3)",
+                padding: "0.9rem 1rem",
+                fontFamily: "'Secular One', sans-serif",
+                fontSize: "1.15rem",
+              }}
+            >
+              שחק שוב
+            </button>
           </div>
-        )
-      ) : null}
-
-      {!buildLoop.hasTheme ? (
-        <ThemePickerOverlay themes={buildLoop.themes} onChoose={buildLoop.chooseTheme} isPhone={isPhone} />
+        </div>
       ) : null}
     </div>
   );

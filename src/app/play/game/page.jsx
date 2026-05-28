@@ -6,8 +6,6 @@ import { useGame } from "@/lib/game-context";
 import { BACK_BUTTON_STYLE, NIKUD_MAP, KEY_TO_LETTER, SUCCESS_MSGS, speakLetter } from "@/lib/game-constants";
 import { Confetti, ProgressTracker, FlippingHintCard } from "@/components/game-ui";
 import { GameBackgroundMusic } from "@/components/game-background-music";
-import { BuildLoopHud, ThemePickerOverlay } from "@/components/build-loop";
-import { useBuildLoop } from "@/lib/build-loop";
 
 export default function GamePage() {
   var game = useGame();
@@ -38,7 +36,6 @@ export default function GamePage() {
   var displayLetter = nikud ? letter + nikud : letter;
   var isCompact = viewportWidth <= 900;
   var isPhone = viewportWidth <= 700;
-  var buildLoop = useBuildLoop("keyboard", game.activeProfile ? game.activeProfile.id : null);
 
   var successMsg = useMemo(function() {
     return SUCCESS_MSGS[Math.floor(Math.random() * SUCCESS_MSGS.length)];
@@ -53,19 +50,11 @@ export default function GamePage() {
   useEffect(function() {
     if (!isPhone || !inputRef.current) return;
     if (game.showSuccess || game.showError) return;
-    if (!buildLoop.hasTheme) return;
     var timer = setTimeout(function() {
       try { inputRef.current.focus(); } catch (e) { /* noop */ }
     }, 50);
     return function() { clearTimeout(timer); };
-  }, [isPhone, game.currentIdx, game.showSuccess, game.showError, buildLoop.hasTheme]);
-
-  useEffect(function() {
-    game.setGameInputLocked(!buildLoop.hasTheme);
-    return function() {
-      game.setGameInputLocked(false);
-    };
-  }, [buildLoop.hasTheme]);
+  }, [isPhone, game.currentIdx, game.showSuccess, game.showError]);
 
   function handlePhoneInput(e) {
     var raw = e.target.value || "";
@@ -137,18 +126,6 @@ export default function GamePage() {
       <div style={{ position: isCompact ? "static" : "absolute", top: "1.5rem", width: "90%", display: "flex", justifyContent: "center", marginBottom: isCompact ? "0.75rem" : 0 }}>
         <ProgressTracker letterResults={game.letterResults} compact={isPhone} />
       </div>
-
-      {buildLoop.hasTheme ? (
-        <div style={{ width: "100%", maxWidth: 760, marginTop: isCompact ? "0.4rem" : "2.2rem", marginBottom: isCompact ? "0.6rem" : "0.8rem" }}>
-          <BuildLoopHud
-            theme={buildLoop.theme}
-            builtParts={buildLoop.builtParts}
-            isPhone={isPhone}
-            maxWidth={760}
-            margin="0 auto"
-          />
-        </div>
-      ) : null}
 
       {/* Wrong key floating indicator */}
       {game.showError && game.lastPressedKey && KEY_TO_LETTER[game.lastPressedKey] ? (
@@ -291,9 +268,6 @@ export default function GamePage() {
         </div>
       ) : null}
 
-      {!buildLoop.hasTheme ? (
-        <ThemePickerOverlay themes={buildLoop.themes} onChoose={buildLoop.chooseTheme} isPhone={isPhone} />
-      ) : null}
     </div>
   );
 }
