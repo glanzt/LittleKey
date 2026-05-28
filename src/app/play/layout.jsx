@@ -10,7 +10,7 @@ function PlayShell(props) {
   var game = useGame();
   var router = useRouter();
   var pathname = usePathname();
-  
+
   function allowsMissingProfile(currentPathname) {
     return currentPathname === "/play/game"
       || currentPathname === "/play/summary"
@@ -19,7 +19,6 @@ function PlayShell(props) {
       || currentPathname.indexOf("/play/gan-sheli") === 0;
   }
 
-  // Coloring ships with local-only progress first, so it stays accessible without a selected profile.
   var needsProfile = game.sync.isAuthenticated && !game.activeProfile
     && !allowsMissingProfile(pathname);
 
@@ -28,27 +27,15 @@ function PlayShell(props) {
     return null;
   }
 
-  if (game.sync.isAuthenticated) {
-    return (
-      <>
-        <GameTopMenu
-          user={game.sync.user}
-          onProfiles={function() { router.push("/play/profiles"); }}
-          onHome={function() { router.push("/play"); }}
-          onDashboard={function() { router.push("/play/dashboard"); }}
-          onSettings={function() { router.push("/play/settings"); }}
-          onSignOut={game.handleSignOut}
-        />
-        <div style={{ paddingTop: TOP_BAR_HEIGHT }}>
-          {children}
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
-      {children}
+      <GameTopMenu
+        user={game.sync.isAuthenticated ? game.sync.user : null}
+        onSignOut={game.handleSignOut}
+      />
+      <div style={{ paddingTop: TOP_BAR_HEIGHT }}>
+        {children}
+      </div>
     </>
   );
 }

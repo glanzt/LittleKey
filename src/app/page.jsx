@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import GameTopMenu from "@/components/game-top-menu";
+import { TOP_BAR_HEIGHT } from "@/lib/game-constants";
 import { FLOATING_LETTERS, FloatingLettersBackground } from "@/styles/shared";
 
 const HERO_EMOTIONS = [
@@ -23,6 +24,7 @@ const HERO_SPARKLES = [
 const S = {
   page: {
     minHeight: "100vh",
+    paddingTop: TOP_BAR_HEIGHT,
     background: "linear-gradient(180deg, #fff8f5 0%, #fff8ec 38%, #f3fbff 100%)",
     position: "relative",
     overflow: "hidden",
@@ -426,10 +428,7 @@ export default function Home() {
       <div style={S.skyGlow} aria-hidden="true" />
       <div style={S.rainbowArc} aria-hidden="true" />
 
-      <nav style={S.nav}>
-        <span style={S.navLogo}>ציידת האותיות</span>
-        <Link href="/auth/register" style={S.navCta}>הרשמה</Link>
-      </nav>
+      <GameTopMenu />
 
       <div style={S.heroArea}>
         <div style={S.heroBadge}>
@@ -446,15 +445,6 @@ export default function Home() {
           <br />
           דרך הצלחה, סקרנות והנאה.
         </p>
-
-        <div style={S.actions}>
-          <Link href="/play" style={{ ...S.btnBase, ...S.btnPrimary }}>
-            בואו נשחק
-          </Link>
-          <Link href="/auth/signin" style={{ ...S.btnBase, ...S.btnSecondary }}>
-            התחברות
-          </Link>
-        </div>
 
         <div style={S.stage} aria-hidden="true">
           <div style={{ ...S.cloudBase, ...S.cloudLeft }}>

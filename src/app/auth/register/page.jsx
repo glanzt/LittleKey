@@ -3,6 +3,8 @@
 import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import GameTopMenu from "@/components/game-top-menu";
+import { TOP_BAR_HEIGHT } from "@/lib/game-constants";
 import { shared, GoogleIcon, FloatingLettersBackground } from "@/styles/shared";
 
 export default function RegisterPage() {
@@ -68,7 +70,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={shared.page}>
+    <div style={{ ...shared.page, paddingTop: TOP_BAR_HEIGHT }}>
+      <GameTopMenu />
       <FloatingLettersBackground />
 
       <h1 style={shared.title}>הרשמה</h1>
@@ -109,9 +112,6 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <button onClick={() => router.push("/play")} style={shared.backLink}>
-        המשיכו בלי חשבון
-      </button>
     </div>
   );
 }
