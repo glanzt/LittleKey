@@ -56,6 +56,16 @@ var GAME_CARDS = [
     href: "/play/gan-sheli",
     actionText: "בואו נשחק!",
   },
+  {
+    id: "alefbet",
+    icon: "🔤",
+    title: "ללמוד את האלף בית",
+    description: "לומדים אות אחרי אות, ומסמנים את התמונה או המילה שמתחילה באות.",
+    accent: "#5B8DEF",
+    accentSoft: "rgba(91,141,239,0.14)",
+    href: "/play/alefbet",
+    actionText: "לבחירת אות",
+  },
 ];
 
 export default function PlayPage() {

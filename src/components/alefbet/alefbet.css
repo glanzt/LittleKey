@@ -1,0 +1,248 @@
+.alefbet-app {
+  --ab-bg-primary: #EEF3FF;
+  --ab-bg-warm: #FFF9F0;
+  --ab-accent: #5B8DEF;
+  --ab-accent-strong: #3A6FD8;
+  --ab-success: #36C28B;
+  --ab-error: #FF6B6B;
+  --ab-text: #2D3436;
+  --ab-text-light: #6b7280;
+  --ab-radius: 18px;
+  --ab-shadow: 0 6px 22px rgba(40, 60, 120, 0.12);
+
+  width: 100%; height: 100dvh;
+  overflow: hidden;
+  font-family: 'Rubik', sans-serif;
+  direction: rtl;
+  background: var(--ab-bg-primary);
+  color: var(--ab-text);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.alefbet-app .ab-back-home {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 8px 18px;
+  font-family: 'Rubik', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.9);
+  border: 2px solid #d9deea;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--ab-text-light);
+  z-index: 10;
+}
+
+/* Title + finale screens */
+.alefbet-app .ab-screen {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px; gap: 16px; overflow: hidden;
+  text-align: center;
+}
+.alefbet-app .ab-title-screen { background: linear-gradient(135deg, #EEF3FF 0%, #FFF9F0 100%); }
+.alefbet-app .ab-title {
+  font-size: clamp(40px, 9vw, 72px);
+  font-family: 'Suez One', serif;
+  color: var(--ab-accent-strong);
+  text-shadow: 2px 2px 0 #fff;
+  margin: 0;
+}
+.alefbet-app .ab-subtitle { font-size: clamp(16px, 3vw, 24px); color: var(--ab-text-light); margin: 0; }
+.alefbet-app .ab-title-letters {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  font-size: clamp(22px, 4vw, 32px); color: var(--ab-accent);
+  font-weight: 700; max-width: 540px; margin-top: 4px;
+}
+.alefbet-app .ab-primary-btn {
+  padding: 16px 48px;
+  font-size: clamp(20px, 3vw, 28px);
+  font-family: inherit; font-weight: 700;
+  background: var(--ab-accent); color: #fff;
+  border: none; border-radius: var(--ab-radius);
+  box-shadow: var(--ab-shadow);
+  cursor: pointer; transition: transform 0.15s;
+  margin-top: 8px;
+}
+.alefbet-app .ab-primary-btn:active { transform: scale(0.95); }
+.alefbet-app .ab-secondary-btn {
+  padding: 12px 28px;
+  font-size: clamp(15px, 2.4vw, 20px);
+  font-family: inherit; font-weight: 600;
+  background: #fff; color: var(--ab-accent-strong);
+  border: 3px solid var(--ab-accent); border-radius: var(--ab-radius);
+  cursor: pointer; transition: transform 0.15s;
+}
+.alefbet-app .ab-secondary-btn:active { transform: scale(0.95); }
+.alefbet-app .ab-progress-hint { font-size: 15px; color: var(--ab-text-light); margin: 0; }
+
+/* Play shell */
+.alefbet-app .ab-play { width: 100%; height: 100%; display: flex; flex-direction: column; background: var(--ab-bg-warm); overflow: hidden; }
+
+.alefbet-app .ab-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  flex-shrink: 0; min-height: 48px;
+}
+.alefbet-app .ab-icon-btn {
+  padding: 8px 16px; font-family: inherit; font-size: 16px; font-weight: 600;
+  background: none; border: 2px solid #d9deea; border-radius: 12px;
+  cursor: pointer; color: var(--ab-text-light);
+}
+.alefbet-app .ab-audio-btn { font-size: 22px; border-color: var(--ab-accent); }
+.alefbet-app .ab-audio-btn:active { transform: scale(0.9); }
+.alefbet-app .ab-progress-label { text-align: center; }
+.alefbet-app .ab-progress-letter { font-size: 18px; font-weight: 700; display: block; }
+.alefbet-app .ab-progress-step { font-size: 13px; color: var(--ab-text-light); }
+
+/* Letter rail */
+.alefbet-app .ab-rail {
+  display: flex; gap: 8px; align-items: center;
+  padding: 10px 14px; overflow-x: auto; overflow-y: hidden;
+  background: #fff; border-top: 1px solid #eef0f6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  flex-shrink: 0; scrollbar-width: none;
+}
+.alefbet-app .ab-rail::-webkit-scrollbar { display: none; }
+.alefbet-app .ab-rail-chip {
+  flex: 0 0 auto;
+  width: 46px; height: 46px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Suez One', serif; font-size: 24px; font-weight: 700;
+  background: #f1f4fb; color: var(--ab-text-light);
+  border: 2px solid transparent; cursor: pointer; position: relative;
+  transition: transform 0.12s, border-color 0.12s, background 0.12s;
+}
+.alefbet-app .ab-rail-chip:active { transform: scale(0.92); }
+.alefbet-app .ab-rail-chip.unlocked { background: #fff; color: var(--ab-accent-strong); border-color: #cfe0ff; }
+.alefbet-app .ab-rail-chip.current {
+  background: var(--ab-accent); color: #fff; border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(91,141,239,0.35);
+}
+.alefbet-app .ab-rail-chip.completed { background: #e7faf2; color: var(--ab-success); border-color: rgba(54,194,139,0.45); }
+.alefbet-app .ab-rail-chip.locked { opacity: 0.55; cursor: default; }
+.alefbet-app .ab-rail-chip .ab-chip-check {
+  position: absolute; top: -6px; left: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ab-success); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.alefbet-app .ab-rail-chip .ab-chip-lock { position: absolute; bottom: 2px; font-size: 11px; }
+
+/* Question area */
+.alefbet-app .ab-instruction {
+  text-align: center; font-size: clamp(20px, 3.6vw, 30px); font-weight: 700;
+  padding: 14px 16px 4px; flex-shrink: 0;
+}
+.alefbet-app .ab-instruction .ab-target {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; height: 38px; padding: 0 8px; margin: 0 4px;
+  border-radius: 12px; background: var(--ab-accent); color: #fff;
+  font-family: 'Suez One', serif; vertical-align: middle;
+}
+
+.alefbet-app .ab-content {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; padding: 8px 16px;
+}
+
+.alefbet-app .ab-options-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(130px, 200px));
+  gap: 16px; width: 100%; max-width: 480px; justify-content: center;
+}
+.alefbet-app .ab-option {
+  background: #fff; border: 3px solid #dfe6f3; border-radius: 22px;
+  cursor: pointer; padding: 14px 12px; min-height: 120px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit; transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s, background 0.14s;
+}
+.alefbet-app .ab-option:hover { border-color: var(--ab-accent); }
+.alefbet-app .ab-option:active { transform: scale(0.94); }
+.alefbet-app .ab-option:disabled { cursor: default; }
+.alefbet-app .ab-option.correct {
+  border-color: var(--ab-success); background: #f0fff8;
+  box-shadow: 0 0 0 4px rgba(54,194,139,0.25);
+}
+.alefbet-app .ab-option.wrong {
+  border-color: var(--ab-error); background: #fff5f5;
+  animation: ab-shake 0.4s;
+}
+.alefbet-app .ab-option-emoji { font-size: clamp(46px, 8vw, 72px); line-height: 1; }
+.alefbet-app .ab-option-label { font-size: clamp(16px, 2.6vw, 22px); font-weight: 700; color: var(--ab-text); }
+.alefbet-app .ab-option.word-only .ab-option-label { font-size: clamp(26px, 5vw, 40px); }
+.alefbet-app .ab-option-mark {
+  position: absolute; margin-top: -96px; margin-inline-start: 96px;
+}
+
+/* Feedback overlay */
+.alefbet-app .ab-feedback-overlay {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  z-index: 100; animation: ab-fadeIn 0.25s;
+}
+.alefbet-app .ab-feedback-overlay.correct { background: rgba(54,194,139,0.22); }
+.alefbet-app .ab-feedback-overlay.incorrect { background: rgba(255,107,107,0.15); }
+.alefbet-app .ab-feedback-card {
+  background: #fff; border-radius: 24px; padding: 30px 44px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15); text-align: center; max-width: 460px;
+  animation: ab-popIn 0.28s;
+}
+.alefbet-app .ab-feedback-stars { font-size: 38px; color: #f1c40f; margin-bottom: 10px; animation: ab-starBounce 0.6s; }
+.alefbet-app .ab-feedback-text { font-size: clamp(19px, 3vw, 26px); font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
+.alefbet-app .ab-feedback-btn {
+  padding: 14px 40px; font-size: clamp(18px, 3vw, 24px);
+  font-family: inherit; font-weight: 700; border: none; border-radius: var(--ab-radius);
+  cursor: pointer; color: #fff; transition: transform 0.15s;
+}
+.alefbet-app .ab-feedback-btn:active { transform: scale(0.92); }
+.alefbet-app .ab-feedback-btn.success { background: var(--ab-success); }
+.alefbet-app .ab-feedback-btn.retry { background: var(--ab-accent); }
+
+/* Letter-done celebration */
+.alefbet-app .ab-letterdone { background: linear-gradient(135deg, #FFF9F0 0%, #EEF3FF 100%); }
+.alefbet-app .ab-letterdone-letter {
+  font-family: 'Suez One', serif; font-size: clamp(64px, 14vw, 120px);
+  color: var(--ab-accent-strong); text-shadow: 3px 3px 0 #fff;
+  width: clamp(120px, 22vw, 180px); height: clamp(120px, 22vw, 180px);
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; border-radius: 36px; box-shadow: var(--ab-shadow);
+}
+.alefbet-app .ab-letterdone-stars { font-size: clamp(34px, 7vw, 52px); color: #f1c40f; animation: ab-starBounce 1s infinite; }
+
+.alefbet-app .ab-finale-stars { font-size: clamp(40px, 8vw, 64px); color: #f1c40f; animation: ab-starBounce 1s infinite; }
+.alefbet-app .ab-finale-title { font-size: clamp(38px, 8vw, 68px); color: var(--ab-accent-strong); margin: 0; }
+.alefbet-app .ab-finale-text { font-size: clamp(18px, 3vw, 26px); color: var(--ab-text); margin: 0; }
+
+@keyframes ab-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ab-popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes ab-starBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes ab-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .alefbet-app .ab-top-bar { padding: 4px 12px; min-height: 36px; }
+  .alefbet-app .ab-progress-letter { font-size: 14px; }
+  .alefbet-app .ab-progress-step { font-size: 11px; }
+  .alefbet-app .ab-icon-btn { padding: 4px 12px; font-size: 13px; }
+  .alefbet-app .ab-rail { padding: 6px 12px; gap: 6px; }
+  .alefbet-app .ab-rail-chip { width: 38px; height: 38px; font-size: 20px; border-radius: 11px; }
+  .alefbet-app .ab-instruction { font-size: clamp(16px, 3vw, 22px); padding: 6px 12px 2px; }
+  .alefbet-app .ab-content { padding: 4px 12px; }
+  .alefbet-app .ab-options-grid { gap: 10px; grid-template-columns: repeat(4, minmax(96px, 130px)); max-width: 640px; }
+  .alefbet-app .ab-option { min-height: 92px; padding: 8px; border-radius: 16px; gap: 4px; }
+  .alefbet-app .ab-option-emoji { font-size: clamp(34px, 6vw, 52px); }
+  .alefbet-app .ab-option-label { font-size: clamp(13px, 2vw, 18px); }
+  .alefbet-app .ab-option.word-only .ab-option-label { font-size: clamp(20px, 3.5vw, 30px); }
+  .alefbet-app .ab-feedback-card { padding: 16px 28px; }
+  .alefbet-app .ab-feedback-stars { font-size: 28px; margin-bottom: 6px; }
+  .alefbet-app .ab-feedback-text { font-size: clamp(16px, 2.5vw, 22px); margin-bottom: 10px; }
+  .alefbet-app .ab-feedback-btn { padding: 8px 28px; font-size: clamp(16px, 2.5vw, 20px); }
+}
