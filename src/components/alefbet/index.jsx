@@ -29,18 +29,6 @@ function saveProgress(completed) {
   }
 }
 
-function speak(text) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  var utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "he-IL";
-  var voice = window.speechSynthesis.getVoices().find(function (v) {
-    return v.lang && v.lang.indexOf("he") === 0;
-  });
-  if (voice) utterance.voice = voice;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utterance);
-}
-
 function instructionFor(question, letter) {
   if (question.type === "word") return "איזו מילה מתחילה באות " + letter + "?";
   return "איזה ציור מתחיל באות " + letter + "?";
@@ -54,6 +42,7 @@ export default function Alefbet() {
   var _comp = useState(loadProgress); var completedLetters = _comp[0]; var setCompletedLetters = _comp[1];
   var _fb = useState("none"); var feedbackState = _fb[0]; var setFeedbackState = _fb[1];
   var _praise = useState(PRAISE[0]); var praise = _praise[0]; var setPraise = _praise[1];
+  var _replay = useState(0); var replaySignal = _replay[0]; var setReplaySignal = _replay[1];
 
   var praiseRef = useRef(PRAISE[0]);
 
@@ -174,19 +163,9 @@ export default function Alefbet() {
     return function () { window.clearTimeout(timeout); };
   }, [feedbackState, advance]);
 
-  // Read the instruction aloud when a new question appears.
-  useEffect(function () {
-    if (screen !== "play" || !currentQuestion) return undefined;
-    var timer = window.setTimeout(function () {
-      speak(instructionFor(currentQuestion, currentLetter.letter));
-    }, 350);
-    return function () {
-      window.clearTimeout(timer);
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, [screen, currentQuestion, currentLetter]);
+  var replayNarration = useCallback(function () {
+    setReplaySignal(function (n) { return n + 1; });
+  }, []);
 
   if (screen === "title") {
     var doneCount = completedLetters.filter(function (l) {
@@ -261,8 +240,8 @@ export default function Alefbet() {
           </div>
           <button
             className="ab-icon-btn ab-audio-btn"
-            onClick={function () { speak(instructionFor(currentQuestion, currentLetter.letter)); }}
-            aria-label="השמע הוראה"
+            onClick={replayNarration}
+            aria-label="השמע שוב"
           >
             🔊
           </button>
@@ -285,6 +264,8 @@ export default function Alefbet() {
         <QuestionCard
           key={currentQuestion.id}
           question={currentQuestion}
+          instruction={instructionFor(currentQuestion, currentLetter.letter)}
+          replaySignal={replaySignal}
           locked={feedbackState === "correct"}
           onCorrect={onCorrect}
           onIncorrect={onIncorrect}

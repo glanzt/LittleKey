@@ -169,6 +169,13 @@
 .alefbet-app .ab-option:hover { border-color: var(--ab-accent); }
 .alefbet-app .ab-option:active { transform: scale(0.94); }
 .alefbet-app .ab-option:disabled { cursor: default; }
+.alefbet-app .ab-option.reading {
+  border-color: var(--ab-accent);
+  background: #eef4ff;
+  box-shadow: 0 0 0 5px rgba(91,141,239,0.30);
+  transform: scale(1.05);
+  animation: ab-reading-pulse 1s ease-in-out infinite;
+}
 .alefbet-app .ab-option.correct {
   border-color: var(--ab-success); background: #f0fff8;
   box-shadow: 0 0 0 4px rgba(54,194,139,0.25);
@@ -222,6 +229,10 @@
 .alefbet-app .ab-finale-title { font-size: clamp(38px, 8vw, 68px); color: var(--ab-accent-strong); margin: 0; }
 .alefbet-app .ab-finale-text { font-size: clamp(18px, 3vw, 26px); color: var(--ab-text); margin: 0; }
 
+@keyframes ab-reading-pulse {
+  0%, 100% { box-shadow: 0 0 0 5px rgba(91,141,239,0.30); }
+  50% { box-shadow: 0 0 0 9px rgba(91,141,239,0.18); }
+}
 @keyframes ab-fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ab-popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes ab-starBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
