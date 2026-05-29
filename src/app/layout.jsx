@@ -13,7 +13,9 @@ export const viewport = {
 };
 
 export default async function RootLayout({ children }) {
-  var appVersion = "v" + packageJson.version;
+  var commitSha = process.env.VERCEL_GIT_COMMIT_SHA || "";
+  var shortSha = commitSha ? commitSha.slice(0, 7) : "";
+  var appVersion = "v" + packageJson.version + (shortSha ? " \u00b7 " + shortSha : "");
   var session = await auth();
 
   return (

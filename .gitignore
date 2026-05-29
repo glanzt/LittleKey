@@ -8,3 +8,4 @@ dist/
 /letters/
 /recordings/
 .gstack/
+.vercel
