@@ -2,69 +2,62 @@
 
 import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game-context";
-import { PAGE_BG } from "@/lib/game-constants";
-import { FloatingLettersBackground } from "@/styles/shared";
+import { SKY, SKY_PAGE_BG, SkyScenery } from "@/styles/sky-theme";
 
 var GAME_CARDS = [
   {
     id: "keyboard",
     icon: "⌨️",
     title: "משחק מקלדת",
-    description: "מקשיבים לאות ומוצאים אותה על המקלדת צעד אחר צעד.",
-    accent: "#E74C3C",
-    accentSoft: "rgba(231,76,60,0.12)",
+    description: "מקשיבים לאות ומוצאים אותה במקלדת.",
+    accent: SKY.rose,
+    accentSoft: "rgba(242,112,156,0.14)",
     href: "/play/levels",
-    actionText: "לבחירת שלבים",
   },
   {
     id: "match",
     icon: "🃏",
     title: "התאמת קלפים",
-    description: "הופכים קלפים, מגלים זוגות, ולומדים תוך כדי משחק.",
-    accent: "#7C5CFC",
-    accentSoft: "rgba(124,92,252,0.12)",
+    description: "הופכים קלפים ומגלים זוגות.",
+    accent: SKY.lilac,
+    accentSoft: "rgba(155,125,232,0.14)",
     href: "/play/match",
-    actionText: "למשחק הקלפים",
   },
   {
     id: "wheel",
     icon: "🎡",
     title: "גלגל הרגשות",
-    description: "מסובבים, מגלים רגש, ובוחרים את התמונה המתאימה.",
-    accent: "#F39C12",
-    accentSoft: "rgba(243,156,18,0.14)",
+    description: "מסובבים, מגלים רגש ובוחרים תמונה.",
+    accent: SKY.butter,
+    accentSoft: "rgba(255,185,56,0.16)",
     href: "/play/wheel",
-    actionText: "לגלגל ולנחש",
   },
   {
     id: "coloring",
     icon: "🎨",
     title: "צביעת סיפורים",
-    description: "בוחרים ציור, ממלאים צבעים, וממשיכים בדיוק מהמקום שעצרתם.",
-    accent: "#16A34A",
-    accentSoft: "rgba(34,197,94,0.14)",
+    description: "בוחרים ציור, צובעים וממשיכים מאיפה שעצרתם.",
+    accent: SKY.mint,
+    accentSoft: "rgba(63,191,140,0.14)",
     href: "/play/coloring",
-    actionText: "לגלריית הציורים",
   },
   {
     id: "gan-sheli",
     icon: "🧒",
     title: "גן שלי",
-    description: "130 משחקים של ספירה, צורות, מיון, סדרות, צלליות ועוד.",
-    accent: "#FF9F43",
-    accentSoft: "rgba(255,159,67,0.14)",
+    description: "ספירה, צורות, מיון, סדרות ועוד.",
+    accent: SKY.peach,
+    accentSoft: "rgba(255,155,131,0.16)",
     href: "/play/gan-sheli",
-    actionText: "בואו נשחק!",
   },
   {
     id: "alefbet",
     icon: "🔤",
     title: "ללמוד את האלף בית",
-    description: "לומדים אות אחרי אות, ומסמנים את התמונה או המילה שמתחילה באות.",
-    accent: "#5B8DEF",
-    accentSoft: "rgba(91,141,239,0.14)",
+    description: "לומדים אות אחרי אות, תמונה אחרי תמונה.",
+    accent: SKY.skyblue,
+    accentSoft: "rgba(79,168,232,0.14)",
     href: "/play/alefbet",
-    actionText: "לבחירת אות",
   },
 ];
 
@@ -72,98 +65,104 @@ export default function PlayPage() {
   var game = useGame();
   var router = useRouter();
 
-  return (
-    <div style={{ ...PAGE_BG, justifyContent: "flex-start", paddingTop: "clamp(2rem, 5vw, 3rem)", fontFamily: "'Secular One', 'Rubik', sans-serif", background: "linear-gradient(180deg, #fff8f4 0%, #fff7ea 42%, #f1fbff 100%)" }}>
-      <FloatingLettersBackground />
-      <div style={{
-        position: "absolute", top: 72, left: "50%", transform: "translateX(-50%)",
-        width: "min(880px, 92vw)", height: 260, borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(255,231,174,0.46) 0%, rgba(255,170,167,0.22) 42%, rgba(147,219,255,0.16) 62%, rgba(255,255,255,0) 76%)",
-        filter: "blur(18px)", pointerEvents: "none", zIndex: 0,
-      }} />
+  var greeting = game.sync.isAuthenticated && game.activeProfile
+    ? "בוקר טוב, " + game.activeProfile.name + "!"
+    : "בוחרים משחק ומתחילים לגלות";
 
-      <div style={{ width: "100%", maxWidth: 1120, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", padding: "0 1rem 2rem", boxSizing: "border-box" }}>
+  return (
+    <div style={{ ...SKY_PAGE_BG, justifyContent: "flex-start", paddingTop: "clamp(1.6rem, 4vw, 2.6rem)" }}>
+      <SkyScenery mode="home" />
+
+      <div style={{ width: "100%", maxWidth: 1120, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", padding: "0 1rem 2.5rem", boxSizing: "border-box" }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "0.45rem",
-          padding: "0.5rem 0.95rem", borderRadius: 999,
-          background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,246,239,0.88))", border: "1px solid rgba(255,188,154,0.32)",
-          boxShadow: "0 14px 28px rgba(255,184,140,0.18)", marginBottom: "0.9rem",
-          fontFamily: "'Rubik', sans-serif", color: "#6f657a", fontSize: "0.92rem",
+          padding: "0.45rem 1rem", borderRadius: 999,
+          background: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.9)",
+          boxShadow: SKY.chipShadow, marginBottom: "0.9rem",
+          fontFamily: "'Rubik', sans-serif", color: SKY.inkSoft, fontSize: "0.92rem",
         }}>
-          בוחרים משחק קטן ומתחילים לגלות
+          <span aria-hidden="true">☀️</span>
+          {greeting}
         </div>
-        <h1 style={{ fontSize: "clamp(2.8rem, 5.8vw, 4.8rem)", fontFamily: "'Suez One', serif", color: "#292338", margin: "0 0 0.5rem", textAlign: "center", letterSpacing: "-0.04em", textShadow: "0 4px 14px rgba(255,255,255,0.35)" }}>
+
+        <h1 style={{
+          fontSize: "clamp(2.5rem, 7vw, 4.2rem)", fontFamily: "'Suez One', serif",
+          color: SKY.ink, margin: "0 0 0.4rem", textAlign: "center", letterSpacing: "-0.02em",
+          textShadow: "0 2px 0 rgba(255,255,255,0.55)",
+        }}>
           ציידת האותיות
         </h1>
         <p style={{
-          margin: "0 0 1.4rem", maxWidth: 640, textAlign: "center",
-          fontFamily: "'Rubik', sans-serif", fontSize: "clamp(1rem, 1.8vw, 1.12rem)",
-          lineHeight: 1.7, color: "rgba(92,84,116,0.72)", padding: "0 0.5rem",
+          margin: "0 0 1.6rem", maxWidth: 620, textAlign: "center",
+          fontFamily: "'Rubik', sans-serif", fontSize: "clamp(1rem, 1.8vw, 1.1rem)",
+          lineHeight: 1.7, color: SKY.inkSoft, padding: "0 0.5rem",
         }}>
-          עולם קטן של משחקי אותיות ורגשות, עם משימות ברורות, הצלחות קטנות,
-          והרבה סקרנות בדרך.
+          עולם קטן של משחקי אותיות ורגשות — לאן נעוף היום?
         </p>
 
         {game.sync.isAuthenticated && game.activeProfile ? (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "0.55rem",
-            background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,246,241,0.9))", borderRadius: 999, padding: "0.6rem 1.1rem", marginBottom: "2rem",
-            border: "1px solid rgba(255,188,154,0.26)", boxShadow: "0 14px 28px rgba(255,184,140,0.14)",
-            color: "#111319", fontFamily: "'Rubik', sans-serif",
+            background: "rgba(255,255,255,0.9)", borderRadius: 999, padding: "0.55rem 1.1rem",
+            marginBottom: "1.6rem", border: "1px solid rgba(255,255,255,0.95)",
+            boxShadow: SKY.chipShadow, color: SKY.ink, fontFamily: "'Rubik', sans-serif",
           }}>
             <span style={{ fontSize: "1.3rem" }}>{game.activeProfile.avatar}</span>
             <span>משחקת עכשיו: <strong>{game.activeProfile.name}</strong></span>
           </div>
         ) : (
-          <div style={{ marginBottom: "1.4rem" }} />
+          <div style={{ marginBottom: "0.4rem" }} />
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.2rem", width: "100%", maxWidth: 940 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "0.9rem", width: "100%", maxWidth: 880 }}>
           {GAME_CARDS.map(function(card) {
             return (
-              <button key={card.id} onClick={function() { router.push(card.href); }} style={{
-                textAlign: "right", background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,249,243,0.94))", border: "1px solid rgba(255,255,255,0.8)",
-                borderRadius: 36, padding: "1.55rem 1.45rem 1.5rem", cursor: "pointer", width: "100%",
-                boxShadow: "0 26px 44px rgba(227,146,123,0.14)", transition: "transform 0.18s ease, box-shadow 0.18s ease",
-                position: "relative", overflow: "hidden",
+              <button key={card.id} className="sky-card" onClick={function() { router.push(card.href); }} style={{
+                display: "flex", alignItems: "center", gap: "0.85rem",
+                textAlign: "right", background: "rgba(255,255,255,0.92)",
+                border: "1px solid rgba(255,255,255,0.95)",
+                borderRadius: 26, padding: "0.8rem 0.9rem", cursor: "pointer", width: "100%",
+                boxShadow: SKY.cardShadow, boxSizing: "border-box",
+                transition: "transform 0.16s ease, box-shadow 0.16s ease",
               }}>
                 <div style={{
-                  position: "absolute", top: -28, left: -24, width: 120, height: 120,
-                  borderRadius: "50%", background: card.accentSoft, filter: "blur(2px)", opacity: 1,
-                }} />
-                <div style={{
-                  position: "absolute", inset: "auto 16px 16px auto", width: 78, height: 78, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.56)", filter: "blur(10px)", pointerEvents: "none",
-                }} />
-                <div style={{
-                  width: 86, height: 86, borderRadius: 28, background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,248,244,0.9))",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.85rem", marginBottom: "1rem",
-                  boxShadow: "0 18px 30px rgba(227,146,123,0.18)", position: "relative", zIndex: 1,
-                  border: "1px solid rgba(255,255,255,0.84)",
+                  width: 56, height: 56, borderRadius: "50%", flexShrink: 0,
+                  background: card.accentSoft,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.8rem",
                 }}>
-                  <div style={{
-                    width: 68, height: 68, borderRadius: 22, background: "linear-gradient(180deg, " + card.accentSoft + ", rgba(255,255,255,0.3))",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>{card.icon}</div>
+                  <span aria-hidden="true">{card.icon}</span>
                 </div>
-                <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.42rem", color: "#2a2238", margin: "0 0 0.45rem", position: "relative", zIndex: 1 }}>
-                  {card.title}
-                </h2>
-                <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.98rem", color: "rgba(83,75,106,0.74)", margin: "0 0 1.25rem", minHeight: 56, lineHeight: 1.62, position: "relative", zIndex: 1 }}>
-                  {card.description}
-                </p>
-                <div style={{
-                  display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                  color: card.accent, fontFamily: "'Secular One', sans-serif", fontSize: "0.98rem", position: "relative", zIndex: 1,
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h2 style={{ fontFamily: "'Suez One', serif", fontSize: "1.12rem", color: SKY.ink, margin: "0 0 0.15rem" }}>
+                    {card.title}
+                  </h2>
+                  <p style={{
+                    fontFamily: "'Rubik', sans-serif", fontSize: "0.84rem", color: SKY.inkSoft,
+                    margin: 0, lineHeight: 1.5,
+                  }}>
+                    {card.description}
+                  </p>
+                </div>
+                <div aria-hidden="true" style={{
+                  width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
+                  background: card.accent, color: "white",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.15rem", fontWeight: 700,
+                  boxShadow: "0 6px 14px " + card.accentSoft.replace("0.14", "0.45").replace("0.16", "0.45"),
                 }}>
-                  <span>{card.actionText}</span>
-                  <span>←</span>
+                  ←
                 </div>
               </button>
             );
           })}
         </div>
       </div>
+
+      <style>{
+        ".sky-card:hover { transform: translateY(-3px); box-shadow: 0 22px 38px rgba(63,114,175,0.26); }" +
+        ".sky-card:active { transform: scale(0.97); }"
+      }</style>
     </div>
   );
 }

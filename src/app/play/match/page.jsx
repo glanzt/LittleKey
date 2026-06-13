@@ -10,7 +10,7 @@ import { FEELING_ITEMS, MATCH_PAIR_COUNT, MATCH_ROW_LAYOUT, createMatchDeck } fr
 
 export default function MatchGamePage() {
   var game = useGame();
-  var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
+  var _vw = useState(1200); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
   var _fp = useState(FEELING_ITEMS); var feelingPool = _fp[0]; var setFeelingPool = _fp[1];
 
   var _rd = useState(1); var round = _rd[0]; var setRound = _rd[1];
@@ -197,14 +197,14 @@ export default function MatchGamePage() {
       <FloatingLettersBackground />
 
       <div style={{ width: "100%", maxWidth: isPhone ? "100%" : 1080, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(2rem, 5vw, 3.2rem)", color: "#111319", margin: "0 0 0.4rem", textAlign: "center", lineHeight: 1.05 }}>
+        <h1 style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(2rem, 5vw, 3.2rem)", color: "#2E3A59", margin: "0 0 0.4rem", textAlign: "center", lineHeight: 1.05, textShadow: "0 2px 0 rgba(255,255,255,0.5)" }}>
           משחק התאמת קלפים
         </h1>
         <div style={{ display: "flex", gap: isPhone ? "0.45rem" : "0.8rem", flexWrap: "nowrap", justifyContent: "center", marginBottom: isPhone ? "0.8rem" : "1.4rem", width: "100%", maxWidth: isPhone ? "100%" : "none" }}>
           {[
-            { label: "זמן", value: formatStopwatch(displayDuration), color: "#7C5CFC" },
-            { label: "זוגות שנמצאו", value: matches + " / " + MATCH_PAIR_COUNT, color: "#27AE60" },
-            { label: "ניסיונות", value: moves, color: "#E67E22" },
+            { label: "זמן", value: formatStopwatch(displayDuration), color: "#4FA8E8" },
+            { label: "זוגות שנמצאו", value: matches + " / " + MATCH_PAIR_COUNT, color: "#3FBF8C" },
+            { label: "ניסיונות", value: moves, color: "#F2994A" },
           ].map(function(stat) {
             return (
               <div key={stat.label} style={{
@@ -221,8 +221,8 @@ export default function MatchGamePage() {
 
         <div style={{
           width: "100%", maxWidth: isPhone ? "100%" : 980, padding: isPhone ? "0.75rem 0.35rem 0.6rem" : "1.4rem 1rem 1.2rem",
-          borderRadius: isPhone ? 26 : 32, background: "linear-gradient(180deg, rgba(255,255,255,0.88), rgba(250,246,240,0.92))",
-          boxShadow: "0 16px 50px rgba(17,19,25,0.08)", border: "1px solid rgba(17,19,25,0.06)",
+          borderRadius: isPhone ? 26 : 32, background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(236,246,253,0.92))",
+          boxShadow: "0 18px 44px rgba(79,134,198,0.16)", border: "1px solid rgba(255,255,255,0.9)",
         }}>
           {rows.map(function(rowCards, rowIndex) {
             return (
@@ -402,7 +402,7 @@ export default function MatchGamePage() {
             padding: "2rem 1.6rem", boxShadow: "0 20px 60px rgba(17,19,25,0.2)",
           }}>
             <div style={{ fontSize: "3rem", marginBottom: "0.6rem" }}>🎉</div>
-            <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.35rem", color: "#111319", margin: "0 0 0.5rem" }}>
+            <h2 style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.35rem", color: "#2E3A59", margin: "0 0 0.5rem" }}>
               כל הזוגות נמצאו!
             </h2>
             <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(17,19,25,0.55)", margin: "0 0 1.25rem" }}>

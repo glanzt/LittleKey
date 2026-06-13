@@ -65,14 +65,14 @@ export default function SummaryPage() {
       <FloatingLettersBackground />
       {currentGameLevel != null ? (
         <div style={{
-          background: "#111319", borderRadius: 30, padding: "0.4rem 1.5rem",
-          marginBottom: "0.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+          background: "linear-gradient(135deg, #4FA8E8, #6FC0F5)", borderRadius: 30, padding: "0.4rem 1.5rem",
+          marginBottom: "0.5rem", boxShadow: "0 10px 22px rgba(79,168,232,0.34)",
           fontSize: "1.1rem", color: "white", fontWeight: "600", fontFamily: "'Secular One', sans-serif", zIndex: 2,
         }}>
           שלב {currentGameLevel}
         </div>
       ) : null}
-      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 6vw, 2.8rem)", color: "#111319", marginBottom: "1.5rem", zIndex: 2 }}>סיכום משחק</h1>
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.8rem, 6vw, 2.8rem)", color: "#2E3A59", marginBottom: "1.5rem", zIndex: 2, textShadow: "0 2px 0 rgba(255,255,255,0.5)" }}>סיכום משחק</h1>
 
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", marginBottom: "1.5rem", maxWidth: 450, zIndex: 2 }}>
         {res.map(function(r, i) {
@@ -105,8 +105,8 @@ export default function SummaryPage() {
           { label: "מושלם!", value: perfectCount, icon: "⭐", color: "#27AE60" },
           { label: "עם טעויות", value: withErrorsCount, icon: "💪", color: "#F39C12" },
           { label: "עם עזרה", value: helpedCount, icon: "👤", color: "#3498DB" },
-          { label: "דיוק (עצמאי)", value: realAccuracy + "%", icon: "🎯", color: "#7C5CFC" },
-          { label: "זמן ממוצע", value: realAvgTtc > 0 ? (realAvgTtc / 1000).toFixed(1) + "s" : "-", icon: "⏱️", color: "#E74C3C" }
+          { label: "דיוק (עצמאי)", value: realAccuracy + "%", icon: "🎯", color: "#9B7DE8" },
+          { label: "זמן ממוצע", value: realAvgTtc > 0 ? (realAvgTtc / 1000).toFixed(1) + "s" : "-", icon: "⏱️", color: "#4FA8E8" }
         ].map(function(stat, i) {
           return (
             <div key={i} style={{
@@ -144,14 +144,14 @@ export default function SummaryPage() {
 
       <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap", justifyContent: "center", marginTop: "1rem", zIndex: 2 }}>
         {isGuest ? (
-          <button onClick={handlePlayAgain} style={{ padding: "0.85rem 2.5rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "#111319", color: "white", border: "none", borderRadius: "999px", cursor: "pointer", boxShadow: "0 4px 20px rgba(0,0,0,0.18)" }}>
+          <button onClick={handlePlayAgain} style={{ padding: "0.85rem 2.5rem", fontSize: "1.2rem", fontFamily: "'Secular One'", background: "linear-gradient(135deg, #4FA8E8, #6FC0F5)", color: "white", border: "none", borderRadius: "999px", cursor: "pointer", boxShadow: "0 12px 26px rgba(79,168,232,0.4)" }}>
             שחקי שוב!
           </button>
         ) : null}
         {!isGuest && currentGameLevel != null ? (
-          <button onClick={function() { router.push("/play/levels"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "white", color: "#111319", border: "1px solid rgba(0,0,0,0.12)", borderRadius: "999px", cursor: "pointer" }}>שלבים</button>
+          <button onClick={function() { router.push("/play/levels"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "rgba(255,255,255,0.92)", color: "#2E3A59", border: "1px solid rgba(255,255,255,0.95)", borderRadius: "999px", cursor: "pointer", boxShadow: "0 8px 18px rgba(79,134,198,0.16)" }}>שלבים</button>
         ) : null}
-        <button onClick={function() { router.push("/play"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "white", color: "#666", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "999px", cursor: "pointer" }}>
+        <button onClick={function() { router.push("/play"); }} style={{ padding: "0.7rem 1.8rem", fontSize: "0.95rem", fontFamily: "'Secular One'", background: "rgba(255,255,255,0.92)", color: "rgba(46,58,89,0.7)", border: "1px solid rgba(255,255,255,0.95)", borderRadius: "999px", cursor: "pointer", boxShadow: "0 8px 18px rgba(79,134,198,0.16)" }}>
           {isGuest ? "מסך ראשי" : "בית"}
         </button>
       </div>

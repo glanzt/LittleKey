@@ -20,7 +20,7 @@ var WHEEL_FEELING_COUNT = 8;
 export default function WheelGamePage() {
   var game = useGame();
   var router = useRouter();
-  var _vw = useState(typeof window === "undefined" ? 1200 : window.innerWidth); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
+  var _vw = useState(1200); var viewportWidth = _vw[0]; var setViewportWidth = _vw[1];
   var _af = useState(FEELING_ITEMS); var allFeelingItems = _af[0]; var setAllFeelingItems = _af[1];
   var _fi = useState(function() {
     return pickRandomFeelings(FEELING_ITEMS, Math.min(WHEEL_FEELING_COUNT, FEELING_ITEMS.length));
@@ -402,10 +402,11 @@ export default function WheelGamePage() {
         <h1 style={{
           fontFamily: "'Suez One', serif",
           fontSize: isPhone ? "clamp(1.8rem, 8vw, 2.4rem)" : "clamp(2.4rem, 5vw, 3.5rem)",
-          color: "#111319",
+          color: "#2E3A59",
           margin: "0 0 0.4rem",
           textAlign: "center",
           lineHeight: 1.05,
+          textShadow: "0 2px 0 rgba(255,255,255,0.5)",
         }}>
           גלגל הרגשות
         </h1>
@@ -423,10 +424,10 @@ export default function WheelGamePage() {
         </p>
 
         <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "1.4rem" }}>
-          <div style={{ background: "white", borderRadius: 999, padding: "0.55rem 1rem", boxShadow: "0 6px 20px rgba(17,19,25,0.08)", fontFamily: "'Secular One', sans-serif", color: "#111319" }}>
+          <div style={{ background: "white", borderRadius: 999, padding: "0.55rem 1rem", boxShadow: "0 6px 20px rgba(17,19,25,0.08)", fontFamily: "'Secular One', sans-serif", color: "#2E3A59" }}>
             רגשות בגלגל: {feelingItems.length}
           </div>
-          <div style={{ background: "white", borderRadius: 999, padding: "0.55rem 1rem", boxShadow: "0 6px 20px rgba(17,19,25,0.08)", fontFamily: "'Secular One', sans-serif", color: "#111319" }}>
+          <div style={{ background: "white", borderRadius: 999, padding: "0.55rem 1rem", boxShadow: "0 6px 20px rgba(17,19,25,0.08)", fontFamily: "'Secular One', sans-serif", color: "#2E3A59" }}>
             סיבובים: {roundsPlayed}
           </div>
         </div>
@@ -457,7 +458,7 @@ export default function WheelGamePage() {
               height: 0,
               borderLeft: (isPhone ? 14 : 16) + "px solid transparent",
               borderRight: (isPhone ? 14 : 16) + "px solid transparent",
-              borderTop: (isPhone ? 24 : 28) + "px solid #111319",
+              borderTop: (isPhone ? 24 : 28) + "px solid #2E3A59",
               zIndex: 3,
               filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.16))",
             }} />
@@ -555,8 +556,8 @@ export default function WheelGamePage() {
                 fontSize: isPhone ? "1rem" : "1.08rem",
                 color: "white",
                 cursor: isSpinning || isDragging ? "wait" : "pointer",
-                background: isSpinning || isDragging ? "#BCA9F6" : "linear-gradient(135deg, #7C5CFC, #F39C12)",
-                boxShadow: isSpinning || isDragging ? "none" : "0 10px 22px rgba(124,92,252,0.28)",
+                background: isSpinning || isDragging ? "#A9D4F2" : "linear-gradient(135deg, #4FA8E8, #FFB938)",
+                boxShadow: isSpinning || isDragging ? "none" : "0 12px 24px rgba(79,168,232,0.3)",
                 minWidth: isPhone ? 180 : 220,
               }}
             >
@@ -571,7 +572,7 @@ export default function WheelGamePage() {
             boxShadow: "0 18px 50px rgba(17,19,25,0.08)",
             padding: isPhone ? "1rem 0.9rem 1.1rem" : "1.4rem 1.3rem",
           }}>
-            <h2 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One', sans-serif", color: "#111319", fontSize: isPhone ? "1.15rem" : "1.3rem" }}>
+            <h2 style={{ margin: "0 0 0.8rem", fontFamily: "'Secular One', sans-serif", color: "#2E3A59", fontSize: isPhone ? "1.15rem" : "1.3rem" }}>
               {selectedFeeling ? "איזו הרגשה זו?" : "חכי לתוצאה"}
             </h2>
 
@@ -602,7 +603,7 @@ export default function WheelGamePage() {
               ) : (
                 <div style={{ textAlign: "center", padding: "1.4rem" }}>
                   <div style={{ fontSize: isPhone ? "2.4rem" : "3rem", marginBottom: "0.5rem" }}>🎯</div>
-                  <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: isPhone ? "1.05rem" : "1.2rem", color: "#111319", marginBottom: "0.35rem" }}>
+                  <div style={{ fontFamily: "'Secular One', sans-serif", fontSize: isPhone ? "1.05rem" : "1.2rem", color: "#2E3A59", marginBottom: "0.35rem" }}>
                     עדיין אין רגש לנחש
                   </div>
                   <div style={{ fontFamily: "'Rubik', sans-serif", color: "rgba(17,19,25,0.55)", lineHeight: 1.5 }}>
@@ -631,14 +632,14 @@ export default function WheelGamePage() {
                     style={{
                       borderRadius: 18,
                       border: isRevealedCorrect
-                        ? "2px solid #27AE60"
+                        ? "2px solid #3FBF8C"
                         : isWrongPick
-                          ? "2px solid #E74C3C"
-                          : "1px solid rgba(17,19,25,0.08)",
+                          ? "2px solid #F2709C"
+                          : "1px solid rgba(46,58,89,0.1)",
                       background: isRevealedCorrect
-                        ? "#EAF8EF"
+                        ? "#E8F8F0"
                         : isWrongPick
-                          ? "#FFF0F0"
+                          ? "#FDEEF3"
                           : "white",
                       padding: isPhone ? "0.45rem" : "0.55rem",
                       cursor: !selectedFeeling || isSpinning || isSolved ? "default" : "pointer",
@@ -714,7 +715,7 @@ export default function WheelGamePage() {
             textAlign: "center",
           }}>
             <div style={{ fontSize: "2.8rem", marginBottom: "0.5rem" }}>🎉</div>
-            <div style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "1.6rem" : "1.9rem", color: "#111319", marginBottom: "0.4rem" }}>
+            <div style={{ fontFamily: "'Suez One', serif", fontSize: isPhone ? "1.6rem" : "1.9rem", color: "#2E3A59", marginBottom: "0.4rem" }}>
               סיבוב מושלם
             </div>
             <div style={{ fontFamily: "'Rubik', sans-serif", color: "rgba(17,19,25,0.56)", marginBottom: "1rem" }}>

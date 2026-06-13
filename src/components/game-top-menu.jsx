@@ -6,15 +6,15 @@ import { useSession, signOut } from "next-auth/react";
 import { TOP_BAR_HEIGHT } from "@/lib/game-constants";
 
 const MENU_BTN = {
-  background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,245,240,0.88))",
-  border: "1px solid rgba(255,194,162,0.28)",
+  background: "rgba(255,255,255,0.92)",
+  border: "1px solid rgba(79,168,232,0.22)",
   borderRadius: 999,
   padding: "0.46rem 1rem",
   cursor: "pointer",
   fontSize: "0.84rem",
   fontFamily: "'Secular One', sans-serif",
-  color: "#5c5470",
-  boxShadow: "0 10px 24px rgba(236,160,137,0.14)",
+  color: "#4A5578",
+  boxShadow: "0 10px 24px rgba(79,134,198,0.14)",
   textDecoration: "none",
   display: "inline-flex",
   alignItems: "center",
@@ -24,13 +24,13 @@ const MENU_BTN = {
 
 const MENU_BTN_ACTIVE = {
   ...MENU_BTN,
-  background: "linear-gradient(180deg, rgba(255,243,233,1), rgba(255,232,219,0.96))",
-  borderColor: "rgba(255,159,136,0.5)",
-  color: "#2a2238",
+  background: "linear-gradient(180deg, #EAF6FF, #D9EEFC)",
+  borderColor: "rgba(79,168,232,0.45)",
+  color: "#2E3A59",
 };
 
 const PRIMARY_BTN = {
-  background: "linear-gradient(135deg, #ff9b83, #ffbf6d)",
+  background: "linear-gradient(135deg, #FFB938, #FF9B83)",
   border: "none",
   borderRadius: 999,
   padding: "0.5rem 1.15rem",
@@ -38,7 +38,7 @@ const PRIMARY_BTN = {
   fontSize: "0.88rem",
   fontFamily: "'Secular One', sans-serif",
   color: "white",
-  boxShadow: "0 12px 24px rgba(255,165,132,0.24)",
+  boxShadow: "0 12px 24px rgba(255,165,90,0.3)",
   textDecoration: "none",
   display: "inline-flex",
   alignItems: "center",
@@ -49,13 +49,13 @@ const PRIMARY_BTN = {
 const LOGO = {
   fontFamily: "'Suez One', serif",
   fontSize: "1rem",
-  color: "#111319",
+  color: "#2E3A59",
   textDecoration: "none",
-  background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,247,243,0.88))",
-  border: "1px solid rgba(255,178,154,0.28)",
+  background: "rgba(255,255,255,0.95)",
+  border: "1px solid rgba(79,168,232,0.25)",
   borderRadius: 999,
   padding: "0.46rem 0.9rem",
-  boxShadow: "0 10px 24px rgba(255,166,133,0.14)",
+  boxShadow: "0 10px 24px rgba(79,134,198,0.14)",
   whiteSpace: "nowrap",
 };
 
@@ -87,7 +87,7 @@ export default function GameTopMenu(props) {
   }
 
   return (
-    <div style={{
+    <div className="gtm-bar" style={{
       position: "fixed",
       top: 0,
       left: 0,
@@ -99,33 +99,38 @@ export default function GameTopMenu(props) {
       direction: "rtl",
       padding: "0 1rem",
       gap: "0.45rem",
-      background: "linear-gradient(180deg, rgba(255,249,243,0.96), rgba(255,244,238,0.86))",
+      background: "linear-gradient(180deg, rgba(255,255,255,0.94), rgba(222,240,253,0.88))",
       backdropFilter: "blur(16px)",
       WebkitBackdropFilter: "blur(16px)",
-      borderBottom: "1px solid rgba(255,194,162,0.2)",
-      boxShadow: "0 12px 26px rgba(236,160,137,0.12)",
+      borderBottom: "1px solid rgba(79,168,232,0.2)",
+      boxShadow: "0 12px 26px rgba(79,134,198,0.12)",
       boxSizing: "border-box",
+      flexWrap: "nowrap",
+      overflowX: "auto",
+      overflowY: "hidden",
+      scrollbarWidth: "none",
+      WebkitOverflowScrolling: "touch",
     }}>
-      <Link href="/" style={LOGO}>ציידת האותיות</Link>
+      <Link href="/" className="gtm-logo" style={LOGO}>ציידת האותיות</Link>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "nowrap" }}>
         {isAuthenticated ? (
           <>
-            <Link href="/play/profiles" style={{ ...MENU_BTN, maxWidth: 220, background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,243,236,0.92))" }}>
+            <Link href="/play/profiles" style={{ ...MENU_BTN, maxWidth: 220, background: "rgba(255,255,255,0.98)" }}>
               {user && user.image ? (
                 <img
                   src={user.image}
                   alt={userLabel}
-                  style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover", boxShadow: "0 4px 10px rgba(236,160,137,0.16)" }}
+                  style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover", boxShadow: "0 4px 10px rgba(79,134,198,0.18)", flexShrink: 0 }}
                 />
               ) : (
                 <div style={{
-                  width: 24, height: 24, borderRadius: "50%",
-                  background: "linear-gradient(135deg, rgba(255,176,146,0.42), rgba(180,191,255,0.42))",
+                  width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+                  background: "linear-gradient(135deg, rgba(255,185,56,0.4), rgba(79,168,232,0.4))",
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem",
                 }}>{userInitial}</div>
               )}
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }}>{userLabel}</span>
+              <span className="gtm-username" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }}>{userLabel}</span>
             </Link>
             {navLink("/play", "משחקים")}
             {navLink("/play/dashboard", "התקדמות")}
@@ -134,9 +139,9 @@ export default function GameTopMenu(props) {
         ) : null}
       </div>
 
-      <div style={{ flex: 1 }} />
+      <div style={{ flex: 1, minWidth: "0.45rem" }} />
 
-      <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "nowrap" }}>
         {isAuthenticated ? (
           <button onClick={onSignOut} style={PRIMARY_BTN}>התנתקות</button>
         ) : (
@@ -147,6 +152,16 @@ export default function GameTopMenu(props) {
           </>
         )}
       </div>
+
+      <style>{
+        ".gtm-bar::-webkit-scrollbar { display: none; }" +
+        "@media (max-width: 640px) {" +
+        "  .gtm-bar { gap: 0.3rem !important; padding-left: 0.55rem !important; padding-right: 0.55rem !important; }" +
+        "  .gtm-bar a, .gtm-bar button { font-size: 0.72rem !important; padding: 0.38rem 0.62rem !important; }" +
+        "  .gtm-logo { font-size: 0.82rem !important; }" +
+        "  .gtm-username { display: none !important; }" +
+        "}"
+      }</style>
     </div>
   );
 }

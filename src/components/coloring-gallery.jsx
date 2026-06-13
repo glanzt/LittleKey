@@ -165,16 +165,17 @@ export default function ColoringGallery() {
     <div style={{
       minHeight: "100vh",
       direction: "rtl",
-      background: "linear-gradient(180deg, #fdf7f0 0%, #f8fbff 42%, #eef7ff 100%)",
+      background: "linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 34%, #FFF3CF 78%, #FFE9B8 100%)",
+      backgroundAttachment: "fixed",
       padding: "clamp(1.4rem, 3vw, 2.1rem)",
       boxSizing: "border-box",
     }}>
       <div style={{ maxWidth: 1240, margin: "0 auto" }}>
         <div style={{
           borderRadius: 24,
-          background: "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,250,244,0.88))",
-          border: "1px solid rgba(255,194,149,0.26)",
-          boxShadow: "0 12px 32px rgba(116, 90, 70, 0.08)",
+          background: "rgba(255,255,255,0.92)",
+          border: "1px solid rgba(255,255,255,0.95)",
+          boxShadow: "0 14px 32px rgba(79, 134, 198, 0.16)",
           padding: "1rem 1.5rem",
           marginBottom: "1rem",
           display: "flex",
@@ -188,11 +189,11 @@ export default function ColoringGallery() {
             borderRadius: 999,
             textDecoration: "none",
             padding: "0.5rem 0.9rem",
-            background: "rgba(255,255,255,0.88)",
-            color: "#4c5ca9",
+            background: "rgba(255,255,255,0.9)",
+            color: "#4FA8E8",
             fontFamily: "'Secular One', sans-serif",
             fontSize: "0.85rem",
-            border: "1px solid rgba(103,112,181,0.2)",
+            border: "1px solid rgba(79,168,232,0.28)",
           }}>
             חזרה לתפריט
           </Link>
@@ -200,7 +201,7 @@ export default function ColoringGallery() {
             margin: 0,
             fontFamily: "'Suez One', serif",
             fontSize: "clamp(1.8rem, 4vw, 3rem)",
-            color: "#2b2540",
+            color: "#2E3A59",
             lineHeight: 1.1,
             textAlign: "center",
           }}>

@@ -1,3 +1,5 @@
+import { SkyScenery } from "@/styles/sky-theme";
+
 export const FLOATING_LETTERS = [
   { char: "א", x: "5%",  y: "10%", size: "5rem",   rot: -12, opacity: 0.18 },
   { char: "ב", x: "88%", y: "7%",  size: "4.2rem", rot: 8,   opacity: 0.15 },
@@ -19,7 +21,9 @@ export const FLOATING_LETTERS = [
 export const shared = {
   page: {
     minHeight: "100vh",
-    background: "#fafafa",
+    background: "linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 34%, #FFF3CF 78%, #FFE9B8 100%)",
+    backgroundAttachment: "fixed",
+    color: "#2E3A59",
     position: "relative",
     overflow: "hidden",
     display: "flex",
@@ -69,16 +73,19 @@ export const shared = {
   title: {
     fontFamily: '"Suez One", serif',
     fontSize: "clamp(1.8rem, 5vw, 2.4rem)",
-    color: "#111319",
+    color: "#2E3A59",
     margin: "0 0 0.3rem",
     textAlign: "center",
+    textShadow: "0 2px 0 rgba(255,255,255,0.5)",
+    zIndex: 2,
   },
 
   subtitle: {
-    color: "rgba(20,23,32,0.45)",
+    color: "rgba(46,58,89,0.6)",
     fontSize: "0.95rem",
     marginBottom: "1.8rem",
     textAlign: "center",
+    zIndex: 2,
   },
 
   googleBtn: {
@@ -134,13 +141,13 @@ export const shared = {
     padding: "0.85rem",
     borderRadius: 12,
     border: "none",
-    background: "#111319",
+    background: "linear-gradient(135deg, #4FA8E8, #6FC0F5)",
     color: "#fff",
     fontSize: "1.05rem",
     fontFamily: "'Rubik', sans-serif",
-    fontWeight: 500,
+    fontWeight: 600,
     cursor: "pointer",
-    boxShadow: "0 6px 18px rgba(17,19,25,0.2)",
+    boxShadow: "0 10px 22px rgba(79,168,232,0.34)",
     transition: "opacity 0.15s, transform 0.15s",
     marginTop: "0.3rem",
   },
@@ -164,7 +171,7 @@ export const shared = {
   },
 
   footerLink: {
-    color: "#111319",
+    color: "#4FA8E8",
     textDecoration: "none",
     fontWeight: 600,
   },
@@ -191,26 +198,9 @@ export const GoogleIcon = () => (
   </svg>
 );
 
+// Sky Morning scenery (clouds + hills). Replaces the old grid + faded letters,
+// so every screen that already renders <FloatingLettersBackground /> inherits the
+// shared storybook-sky backdrop. The sun is reserved for the play home screen.
 export function FloatingLettersBackground() {
-  return (
-    <>
-      <div style={shared.bgGrid} aria-hidden="true" />
-      {FLOATING_LETTERS.map((fl, i) => (
-        <span
-          key={i}
-          style={{
-            ...shared.floatingLetter,
-            left: fl.x,
-            top: fl.y,
-            fontSize: fl.size,
-            transform: `rotate(${fl.rot}deg)`,
-            opacity: fl.opacity,
-          }}
-          aria-hidden="true"
-        >
-          {fl.char}
-        </span>
-      ))}
-    </>
-  );
+  return <SkyScenery mode="game" />;
 }

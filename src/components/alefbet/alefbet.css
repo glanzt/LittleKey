@@ -1,20 +1,21 @@
 .alefbet-app {
-  --ab-bg-primary: #EEF3FF;
-  --ab-bg-warm: #FFF9F0;
-  --ab-accent: #5B8DEF;
-  --ab-accent-strong: #3A6FD8;
-  --ab-success: #36C28B;
-  --ab-error: #FF6B6B;
-  --ab-text: #2D3436;
-  --ab-text-light: #6b7280;
+  /* "בוקר בשמיים" (Sky Morning) palette */
+  --ab-bg-primary: #DCF0FD;
+  --ab-bg-warm: #FFF6E0;
+  --ab-accent: #4FA8E8;
+  --ab-accent-strong: #2E86D8;
+  --ab-success: #3FBF8C;
+  --ab-error: #F2709C;
+  --ab-text: #2E3A59;
+  --ab-text-light: #6B7596;
   --ab-radius: 18px;
-  --ab-shadow: 0 6px 22px rgba(40, 60, 120, 0.12);
+  --ab-shadow: 0 10px 24px rgba(79, 134, 198, 0.16);
 
   width: 100%; height: 100dvh;
   overflow: hidden;
   font-family: 'Rubik', sans-serif;
   direction: rtl;
-  background: var(--ab-bg-primary);
+  background: linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 34%, #FFF3CF 78%, #FFE9B8 100%);
   color: var(--ab-text);
   -webkit-user-select: none;
   user-select: none;
@@ -48,7 +49,7 @@
   padding: 24px; gap: 16px; overflow: hidden;
   text-align: center;
 }
-.alefbet-app .ab-title-screen { background: linear-gradient(135deg, #EEF3FF 0%, #FFF9F0 100%); }
+.alefbet-app .ab-title-screen { background: linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 36%, #FFF3CF 100%); }
 .alefbet-app .ab-title {
   font-size: clamp(40px, 9vw, 72px);
   font-family: 'Suez One', serif;
@@ -215,7 +216,7 @@
 .alefbet-app .ab-feedback-btn.retry { background: var(--ab-accent); }
 
 /* Letter-done celebration */
-.alefbet-app .ab-letterdone { background: linear-gradient(135deg, #FFF9F0 0%, #EEF3FF 100%); }
+.alefbet-app .ab-letterdone { background: linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 36%, #FFF3CF 100%); }
 .alefbet-app .ab-letterdone-letter {
   font-family: 'Suez One', serif; font-size: clamp(64px, 14vw, 120px);
   color: var(--ab-accent-strong); text-shadow: 3px 3px 0 #fff;

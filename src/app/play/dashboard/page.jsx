@@ -82,7 +82,7 @@ export default function DashboardPage() {
       <button onClick={function() { router.push("/play"); }} style={BACK_BUTTON_STYLE}>← חזרה</button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", width: "100%", maxWidth: 900, zIndex: 2 }}>
-        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#111319", margin: 0 }}>התקדמות</h1>
+        <h1 style={{ fontFamily: "'Secular One'", fontSize: "1.5rem", color: "#2E3A59", margin: 0 }}>התקדמות</h1>
       </div>
 
       <div style={{ background: "#FFF3CD", border: "1px solid #FFEEBA", borderRadius: 12, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#856404", zIndex: 2, width: "100%", maxWidth: 900, boxSizing: "border-box" }}>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             <button key={id} onClick={function() { setTab(id); }} style={{
               padding: "0.6rem 1.5rem", borderRadius: 30, border: "none", cursor: "pointer",
               fontFamily: "'Secular One'", fontSize: "0.95rem",
-              background: tab === id ? "#7C5CFC" : "white", color: tab === id ? "white" : "#666",
+              background: tab === id ? "#4FA8E8" : "white", color: tab === id ? "white" : "#666",
               boxShadow: tab === id ? "0 4px 12px rgba(124,92,252,0.3)" : "0 2px 8px rgba(0,0,0,0.05)"
             }}>{labels[id]}</button>
           );
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                   <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>⌨️ משחק המקלדת</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem" }}>
                     {[
-                      { label: "סשנים", value: keyboardSessions.length, color: "#7C5CFC" },
+                      { label: "סשנים", value: keyboardSessions.length, color: "#4FA8E8" },
                       { label: "דיוק ממוצע", value: Math.round(keyboardSessions.reduce(function(s, x) { return s + x.accuracy; }, 0) / keyboardSessions.length) + "%", color: "#27AE60" },
                       { label: "זמן ממוצע", value: (keyboardSessions.reduce(function(s, x) { return s + x.avgTtc; }, 0) / keyboardSessions.length / 1000).toFixed(1) + "s", color: "#E74C3C" }
                     ].map(function(s, i) {
@@ -169,8 +169,8 @@ export default function DashboardPage() {
                   <svg viewBox={"0 0 " + chartW + " " + chartH} style={{ width: "100%", overflow: "visible" }} preserveAspectRatio="xMidYMid meet">
                     <defs>
                       <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#7C5CFC" stopOpacity="0.18" />
-                        <stop offset="100%" stopColor="#7C5CFC" stopOpacity="0.02" />
+                        <stop offset="0%" stopColor="#4FA8E8" stopOpacity="0.18" />
+                        <stop offset="100%" stopColor="#4FA8E8" stopOpacity="0.02" />
                       </linearGradient>
                     </defs>
                     {gridLines.map(function(val) {
@@ -183,11 +183,11 @@ export default function DashboardPage() {
                       );
                     })}
                     <path d={areaPath} fill="url(#lineGrad)" />
-                    <polyline points={polyline} fill="none" stroke="#7C5CFC" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    <polyline points={polyline} fill="none" stroke="#4FA8E8" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
                     {points.map(function(p, i) {
                       return (
                         <g key={i}>
-                          <circle cx={p.x} cy={p.y} r="3.5" fill="#7C5CFC" stroke="white" strokeWidth="1.5" />
+                          <circle cx={p.x} cy={p.y} r="3.5" fill="#4FA8E8" stroke="white" strokeWidth="1.5" />
                           <text x={p.x} y={p.y - 6} textAnchor="middle" fontSize="6.5" fill="#555" fontWeight="600" fontFamily="'Secular One', sans-serif">{p.accuracy}%</text>
                           <text x={p.x} y={padT + innerH + 10} textAnchor="middle" fontSize="6" fill="#bbb" fontFamily="'Rubik', sans-serif">{p.date}</text>
                         </g>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
                   <h3 style={{ margin: "0 0 1rem", fontFamily: "'Secular One'", color: "#2C3E50", fontSize: "1rem" }}>🃏 התאמת קלפים</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem" }}>
                     {[
-                      { label: "זמן סיום אחרון", value: formatDuration(matchTimingStats.latest), color: "#7C5CFC" },
+                      { label: "זמן סיום אחרון", value: formatDuration(matchTimingStats.latest), color: "#4FA8E8" },
                       { label: "זמן סיום ממוצע", value: formatDuration(matchTimingStats.avg), color: "#E67E22" },
                       { label: "זמן סיום הכי מהיר", value: formatDuration(matchTimingStats.best), color: "#27AE60" }
                     ].map(function(s, i) {

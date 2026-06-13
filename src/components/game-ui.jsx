@@ -24,7 +24,7 @@ export function Confetti(props) {
       x: Math.random() * 100,
       delay: Math.random() * 0.4,
       dur: 1.2 + Math.random() * 1,
-      color: ["#FFD700","#FF6B9D","#00D4AA","#7C5CFC","#FF8C42","#45E3FF","#FF4757","#2ED573"][i % 8],
+      color: ["#FFB938","#FF9B83","#4FA8E8","#3FBF8C","#9B7DE8","#F2709C","#FFE082","#FFFFFF"][i % 8],
       size: 6 + Math.random() * 8,
       drift: -30 + Math.random() * 60
     });
@@ -65,8 +65,8 @@ export function ProgressTracker(props) {
   var pendingFontSize = compact ? "2rem" : "3rem";
   var doneFontSize = compact ? "1.8rem" : "2.5rem";
   var currentScale = compact ? "scale(1.06)" : "scale(1.15)";
-  var currentBorder = compact ? "2px solid #E74C3C" : "3px solid #E74C3C";
-  var currentShadow = compact ? "0 0 10px rgba(231,76,60,0.24)" : "0 0 12px rgba(231,76,60,0.3)";
+  var currentBorder = compact ? "2px solid #FFB938" : "3px solid #FFB938";
+  var currentShadow = compact ? "0 0 10px rgba(255,185,56,0.35)" : "0 0 12px rgba(255,185,56,0.45)";
   return (
     <div style={{ display: "flex", gap: tileGap, flexWrap: "wrap", justifyContent: "center", padding: compact ? "0.25rem" : "0.5rem", maxWidth: "100%" }}>
       {letterResults.map(function(r, i) {
@@ -76,25 +76,25 @@ export function ProgressTracker(props) {
         var helped = r.status === "helpedPerfect" || r.status === "helpedWithErrors";
         var done = perf || werr || helped;
 
-        var bg = "rgba(0,0,0,0.06)";
-        var col = "#ccc";
+        var bg = "rgba(255,255,255,0.55)";
+        var col = "rgba(46,58,89,0.35)";
         var bor = "2px solid transparent";
         var shd = "none";
         var sc = "scale(1)";
         var icon = r.letter;
 
         if (cur) {
-          bg = "white"; col = "#E74C3C"; bor = currentBorder;
+          bg = "white"; col = "#4FA8E8"; bor = currentBorder;
           shd = currentShadow; sc = currentScale;
         } else if (perf) {
-          bg = "linear-gradient(135deg,#27AE60,#2ECC71)"; col = "white";
-          icon = "\u2713"; shd = "0 2px 8px rgba(39,174,96,0.3)";
+          bg = "linear-gradient(135deg,#3FBF8C,#5BD4A4)"; col = "white";
+          icon = "\u2713"; shd = "0 2px 8px rgba(63,191,140,0.35)";
         } else if (werr) {
-          bg = "linear-gradient(135deg,#F39C12,#E67E22)"; col = "white";
-          icon = "\u2713"; shd = "0 2px 8px rgba(243,156,18,0.3)";
+          bg = "linear-gradient(135deg,#FFB938,#FFA726)"; col = "white";
+          icon = "\u2713"; shd = "0 2px 8px rgba(255,185,56,0.4)";
         } else if (helped) {
-          bg = "linear-gradient(135deg,#3498DB,#2980B9)"; col = "white";
-          icon = "\u2713"; shd = "0 2px 8px rgba(52,152,219,0.3)";
+          bg = "linear-gradient(135deg,#4FA8E8,#7CC4F5)"; col = "white";
+          icon = "\u2713"; shd = "0 2px 8px rgba(79,168,232,0.4)";
         }
 
         return (
@@ -114,7 +114,7 @@ export function ProgressTracker(props) {
         );
       })}
       <style>{
-        "@keyframes pulseDot { 0%,100%{ box-shadow: 0 0 12px rgba(231,76,60,0.3) } 50%{ box-shadow: 0 0 20px rgba(231,76,60,0.5) } }" +
+        "@keyframes pulseDot { 0%,100%{ box-shadow: 0 0 12px rgba(255,185,56,0.4) } 50%{ box-shadow: 0 0 20px rgba(255,185,56,0.65) } }" +
         "@keyframes popIn { 0%{ transform: scale(0.5); opacity: 0 } 100%{ transform: scale(1); opacity: 1 } }"
       }</style>
     </div>
@@ -149,10 +149,10 @@ export function FlippingHintCard(props) {
         <div style={{
           position: "absolute", inset: 0,
           backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
-          borderRadius: 18, background: "linear-gradient(135deg, #7C5CFC, #9B7DFF)",
+          borderRadius: 18, background: "linear-gradient(135deg, #9B7DE8, #B79BF5)",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           gap: "0.3rem", color: "white",
-          boxShadow: "0 3px 14px rgba(124,92,252,0.35)"
+          boxShadow: "0 10px 22px rgba(155,125,232,0.4)"
         }}>
           <span style={{ fontSize: "clamp(2rem, 8vw, 3.5rem)" }}>⌨️</span>
           <span style={{ fontSize: "clamp(0.9rem, 3vw, 1.3rem)", fontFamily: "'Secular One', sans-serif" }}>רמז</span>

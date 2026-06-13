@@ -27,6 +27,15 @@ function PlayShell(props) {
     return null;
   }
 
+  // Immersive full-screen games render their own top bar + back button.
+  // The global menu (fixed, z-index 250) would overlap those controls, so hide it.
+  var isImmersive = pathname.indexOf("/play/gan-sheli") === 0
+    || pathname.indexOf("/play/alefbet") === 0;
+
+  if (isImmersive) {
+    return <>{children}</>;
+  }
+
   return (
     <>
       <GameTopMenu

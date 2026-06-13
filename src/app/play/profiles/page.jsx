@@ -56,7 +56,7 @@ export default function ProfilesPage() {
     <div style={{ ...PAGE_BG, fontFamily: "'Secular One', 'Rubik', sans-serif" }}>
       <FloatingLettersBackground />
 
-      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 7vw, 3rem)", color: "#111319", margin: "0 0 0.3rem", textAlign: "center", zIndex: 2 }}>
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(2rem, 7vw, 3rem)", color: "#2E3A59", margin: "0 0 0.3rem", textAlign: "center", zIndex: 2, textShadow: "0 2px 0 rgba(255,255,255,0.5)" }}>
         מי משחק?
       </h1>
       <p style={{ fontSize: "1rem", color: "rgba(20,23,32,0.45)", marginBottom: "2rem", fontFamily: "'Rubik', sans-serif", zIndex: 2 }}>
@@ -80,7 +80,7 @@ export default function ProfilesPage() {
                     boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
                     transition: "all 0.2s ease", padding: "1rem 0.5rem",
                   }}
-                  onMouseEnter={function(e) { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.borderColor = "#7C5CFC"; }}
+                  onMouseEnter={function(e) { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.borderColor = "#4FA8E8"; }}
                   onMouseLeave={function(e) { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.borderColor = "transparent"; }}
                 >
                   <span style={{ fontSize: "3rem" }}>{profile.avatar}</span>
@@ -90,7 +90,7 @@ export default function ProfilesPage() {
                 </button>
                 {confirmDeleteId === profile.id ? (
                   <div style={{ position: "absolute", top: -8, right: -8, display: "flex", gap: 4 }}>
-                    <button onClick={function() { handleDelete(profile.id); }} style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#E74C3C", color: "white", fontSize: "0.7rem", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>✓</button>
+                    <button onClick={function() { handleDelete(profile.id); }} style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#F2709C", color: "white", fontSize: "0.7rem", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>✓</button>
                     <button onClick={function() { setConfirmDeleteId(null); }} style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#ccc", color: "white", fontSize: "0.7rem", cursor: "pointer" }}>✕</button>
                   </div>
                 ) : (
@@ -115,16 +115,16 @@ export default function ProfilesPage() {
             onClick={function() { setShowForm(true); }}
             style={{
               width: 130, minHeight: 140, borderRadius: 24,
-              border: "3px dashed rgba(124,92,252,0.3)", background: "rgba(255,255,255,0.5)",
+              border: "3px dashed rgba(79,168,232,0.3)", background: "rgba(255,255,255,0.5)",
               cursor: "pointer", display: "flex", flexDirection: "column",
               alignItems: "center", justifyContent: "center", gap: "0.5rem",
               transition: "all 0.2s ease", padding: "1rem 0.5rem",
             }}
-            onMouseEnter={function(e) { e.currentTarget.style.background = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "#7C5CFC"; }}
-            onMouseLeave={function(e) { e.currentTarget.style.background = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "rgba(124,92,252,0.3)"; }}
+            onMouseEnter={function(e) { e.currentTarget.style.background = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "#4FA8E8"; }}
+            onMouseLeave={function(e) { e.currentTarget.style.background = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "rgba(79,168,232,0.3)"; }}
           >
-            <span style={{ fontSize: "2.5rem", color: "#7C5CFC" }}>+</span>
-            <span style={{ fontSize: "0.95rem", color: "#7C5CFC", fontFamily: "'Secular One', sans-serif" }}>פרופיל חדש</span>
+            <span style={{ fontSize: "2.5rem", color: "#4FA8E8" }}>+</span>
+            <span style={{ fontSize: "0.95rem", color: "#4FA8E8", fontFamily: "'Secular One', sans-serif" }}>פרופיל חדש</span>
           </button>
         </div>
       )}
@@ -159,7 +159,7 @@ export default function ProfilesPage() {
                   fontFamily: "'Rubik', sans-serif", direction: "rtl",
                   boxSizing: "border-box", transition: "border-color 0.2s"
                 }}
-                onFocus={function(e) { e.target.style.borderColor = "#7C5CFC"; }}
+                onFocus={function(e) { e.target.style.borderColor = "#4FA8E8"; }}
                 onBlur={function(e) { e.target.style.borderColor = "#e0e0e0"; }}
               />
             </div>
@@ -171,10 +171,10 @@ export default function ProfilesPage() {
                   return (
                     <button key={av} onClick={function() { setNewAvatar(av); }} style={{
                       width: 46, height: 46, borderRadius: 12, border: "none",
-                      background: newAvatar === av ? "linear-gradient(135deg, #7C5CFC, #9B7DFF)" : "#f5f5f5",
+                      background: newAvatar === av ? "linear-gradient(135deg, #4FA8E8, #6FC0F5)" : "#f5f5f5",
                       fontSize: "1.5rem", cursor: "pointer", transition: "all 0.2s",
                       transform: newAvatar === av ? "scale(1.15)" : "scale(1)",
-                      boxShadow: newAvatar === av ? "0 4px 12px rgba(124,92,252,0.3)" : "none"
+                      boxShadow: newAvatar === av ? "0 4px 12px rgba(79,168,232,0.3)" : "none"
                     }}>{av}</button>
                   );
                 })}
@@ -186,8 +186,8 @@ export default function ProfilesPage() {
                 flex: 1, padding: "0.9rem", fontSize: "1.1rem",
                 fontFamily: "'Secular One'", border: "none", borderRadius: 16,
                 cursor: newName.trim() && !creating ? "pointer" : "not-allowed",
-                background: newName.trim() && !creating ? "linear-gradient(135deg, #7C5CFC, #5B3FD4)" : "#e0e0e0",
-                color: "white", boxShadow: newName.trim() ? "0 4px 16px rgba(124,92,252,0.3)" : "none"
+                background: newName.trim() && !creating ? "linear-gradient(135deg, #4FA8E8, #3A8FD8)" : "#e0e0e0",
+                color: "white", boxShadow: newName.trim() ? "0 4px 16px rgba(79,168,232,0.3)" : "none"
               }}>{creating ? "יוצר..." : "צרי פרופיל"}</button>
               <button onClick={function() { setShowForm(false); }} style={{
                 padding: "0.9rem 1.5rem", fontSize: "1.1rem",

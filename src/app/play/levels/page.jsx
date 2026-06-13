@@ -27,15 +27,16 @@ export default function LevelsPage() {
     var isCompleted = levels[lvl] && levels[lvl].completed;
     var isCurrent = lvl === currentLevel;
     var isLocked = lvl > currentLevel;
-    var bg = isCurrent ? "#E74C3C" : isCompleted ? "#27AE60" : "rgba(0,0,0,0.05)";
-    var color = (isCurrent || isCompleted) ? "white" : "rgba(0,0,0,0.25)";
+    var bg = isCurrent ? "#4FA8E8" : isCompleted ? "#3FBF8C" : "rgba(255,255,255,0.62)";
+    var color = (isCurrent || isCompleted) ? "white" : "rgba(46,58,89,0.4)";
     return {
-      width: 104, height: 104, borderRadius: 20,
+      width: 104, height: 104, borderRadius: 24,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       background: bg, color: color,
+      border: "1px solid rgba(255,255,255,0.8)",
       fontFamily: "'Secular One', sans-serif", fontSize: "2rem", fontWeight: 700,
       cursor: isLocked ? "default" : "pointer",
-      boxShadow: isCurrent ? "0 4px 16px rgba(231,76,60,0.35)" : isCompleted ? "0 2px 8px rgba(39,174,96,0.2)" : "none",
+      boxShadow: isCurrent ? "0 10px 22px rgba(79,168,232,0.4)" : isCompleted ? "0 8px 18px rgba(63,191,140,0.28)" : "0 6px 14px rgba(79,134,198,0.12)",
       transition: "transform 0.15s",
       position: "relative",
     };
@@ -54,16 +55,16 @@ export default function LevelsPage() {
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: 1050, marginBottom: "0.8rem", zIndex: 2 }}>
         <a href="/" style={{
-          fontFamily: "'Suez One', serif", fontSize: "1.2rem", color: "#111319",
+          fontFamily: "'Suez One', serif", fontSize: "1.2rem", color: "#2E3A59",
           textDecoration: "none", letterSpacing: "-0.02em",
         }}>ציידת האותיות</a>
         <div />
       </div>
 
-      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.6rem, 4vw, 2.2rem)", color: "#111319", margin: "0 0 0.3rem", textAlign: "center", zIndex: 2 }}>
+      <h1 style={{ fontFamily: "'Suez One', serif", fontSize: "clamp(1.6rem, 4vw, 2.2rem)", color: "#2E3A59", margin: "0 0 0.3rem", textAlign: "center", zIndex: 2, textShadow: "0 2px 0 rgba(255,255,255,0.5)" }}>
         שלבים
       </h1>
-      <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.9rem", color: "rgba(17,19,25,0.45)", margin: "0 0 1.2rem", textAlign: "center", zIndex: 2 }}>
+      <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.9rem", color: "rgba(46,58,89,0.55)", margin: "0 0 1.2rem", textAlign: "center", zIndex: 2 }}>
         עמוד {page} מתוך {totalPages}
       </p>
 
@@ -111,7 +112,7 @@ export default function LevelsPage() {
             opacity: page >= totalPages ? 0.3 : 1, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
         >→</button>
-        <span style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", color: "#111319", minWidth: 60, textAlign: "center" }}>
+        <span style={{ fontFamily: "'Secular One', sans-serif", fontSize: "1.1rem", color: "#2E3A59", minWidth: 60, textAlign: "center" }}>
           {totalPages} / {page}
         </span>
         <button
@@ -127,19 +128,19 @@ export default function LevelsPage() {
       </div>
 
       <div style={{ width: "100%", maxWidth: 500, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(17,19,25,0.55)", margin: "0 0 0.6rem", textAlign: "center" }}>
+        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.95rem", color: "rgba(46,58,89,0.62)", margin: "0 0 0.6rem", textAlign: "center" }}>
           בכל שלב תקבלו {sessionLength} אותיות רנדומליות. ההתקדמות נשמרת לפי הפרופיל המחובר.
         </p>
-        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.85rem", color: "rgba(17,19,25,0.4)", margin: "0 0 1rem", textAlign: "center" }}>
+        <p style={{ fontFamily: "'Rubik', sans-serif", fontSize: "0.85rem", color: "rgba(46,58,89,0.45)", margin: "0 0 1rem", textAlign: "center" }}>
           שלבים שהושלמו: {completedCount}
         </p>
       </div>
 
       <button onClick={function() { game.startGame(currentLevel); }} style={{
         padding: "0.85rem 3rem", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", fontFamily: "'Secular One', sans-serif",
-        background: "#111319", color: "white",
+        background: "linear-gradient(135deg, #4FA8E8, #6FC0F5)", color: "white",
         border: "none", borderRadius: "999px", cursor: "pointer",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+        boxShadow: "0 12px 26px rgba(79,168,232,0.4)",
         marginBottom: "2rem", width: "100%", maxWidth: 420, zIndex: 2,
       }}>שחקי עכשיו!</button>
     </div>

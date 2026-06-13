@@ -1,19 +1,20 @@
 .gan-sheli-app {
-  --gs-bg-primary: #E8F4FD;
-  --gs-bg-warm: #FFF8E7;
-  --gs-accent: #FF9F43;
-  --gs-success: #78E08F;
-  --gs-error: #ff6b6b;
-  --gs-text: #2D3436;
-  --gs-text-light: #636e72;
+  /* "בוקר בשמיים" (Sky Morning) palette */
+  --gs-bg-primary: #DCF0FD;
+  --gs-bg-warm: #FFF6E0;
+  --gs-accent: #FFB938;
+  --gs-success: #3FBF8C;
+  --gs-error: #F2709C;
+  --gs-text: #2E3A59;
+  --gs-text-light: #6B7596;
   --gs-radius: 16px;
-  --gs-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  --gs-shadow: 0 10px 24px rgba(79,134,198,0.16);
 
   width: 100%; height: 100dvh;
   overflow: hidden;
   font-family: 'Rubik', sans-serif;
   direction: rtl;
-  background: var(--gs-bg-primary);
+  background: linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 34%, #FFF3CF 78%, #FFE9B8 100%);
   color: var(--gs-text);
   -webkit-user-select: none;
   user-select: none;
@@ -48,7 +49,7 @@
 }
 
 .gan-sheli-app .title-screen {
-  background: linear-gradient(135deg, #E8F4FD 0%, #FFF8E7 100%);
+  background: linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 36%, #FFF3CF 100%);
   gap: 16px;
 }
 .gan-sheli-app .title {
@@ -396,7 +397,7 @@
 .gan-sheli-app .map-screen {
   width: 100%; height: 100%;
   display: flex; flex-direction: column;
-  background: var(--gs-bg-primary);
+  background: linear-gradient(180deg, #9FD4F7 0%, #C7E8FC 40%, #FFF3CF 100%);
   overflow: hidden;
 }
 .gan-sheli-app .map-header {
@@ -550,7 +551,7 @@
   background: transparent;
 }
 
-.gan-sheli-app .finale-screen { background: linear-gradient(135deg, #FFF8E7 0%, #E8F4FD 100%); gap: 16px; }
+.gan-sheli-app .finale-screen { background: linear-gradient(180deg, #8ECDF6 0%, #BDE4FB 36%, #FFF3CF 100%); gap: 16px; }
 .gan-sheli-app .finale-stars { font-size: clamp(40px, 8vw, 64px); color: #f1c40f; animation: gs-starBounce 1s infinite; }
 .gan-sheli-app .finale-title { font-size: clamp(40px, 8vw, 72px); color: var(--gs-accent); }
 .gan-sheli-app .finale-text { font-size: clamp(20px, 3vw, 28px); color: var(--gs-text); }
