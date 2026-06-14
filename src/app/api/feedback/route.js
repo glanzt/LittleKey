@@ -3,10 +3,17 @@ import nodemailer from "nodemailer";
 
 export async function POST(request) {
   try {
-    const { message, rating } = await request.json();
+    const body = await request.json();
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+    // Clamp rating to 1-5 (or null); ignore anything else.
+    const rating = Number.isInteger(body.rating) && body.rating >= 1 && body.rating <= 5 ? body.rating : null;
 
-    if (!message || !message.trim()) {
+    if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
+    // This endpoint is public and unauthenticated; cap payload to limit abuse.
+    if (message.length > 4000) {
+      return NextResponse.json({ error: "Message too long" }, { status: 400 });
     }
 
     const text = [

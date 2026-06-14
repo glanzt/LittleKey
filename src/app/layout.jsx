@@ -2,14 +2,49 @@ import AuthSessionProvider from "@/components/session-provider";
 import { auth } from "@/lib/auth";
 import packageJson from "../../package.json";
 
+const SITE_URL = "https://www.littlekey.live";
+
 export const metadata = {
-  title: "ציידת האותיות",
-  description: "בואי נלמד את האותיות!",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "ציידת האותיות — משחק לימוד אלף־בית ורגשות לילדים",
+    template: "%s · ציידת האותיות",
+  },
+  description:
+    "משחק חינמי בעברית ללימוד האלף־בית: זיהוי אותיות, רגשות, ספירה, צורות וצביעה — לגיל הרך. עם מעקב התקדמות, משחקי זיכרון והקראה קולית.",
+  applicationName: "ציידת האותיות",
+  keywords: [
+    "אלף בית", "לימוד אותיות", "ללמוד לקרוא", "משחקים לילדים", "משחק חינוכי",
+    "עברית לילדים", "גן חובה", "גיל הרך", "רגשות", "ציידת האותיות", "LittleKey",
+  ],
+  authors: [{ name: "LittleKey" }],
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    type: "website",
+    locale: "he_IL",
+    url: SITE_URL,
+    siteName: "ציידת האותיות",
+    title: "ציידת האותיות — משחק לימוד אלף־בית ורגשות לילדים",
+    description:
+      "משחק חינמי בעברית ללימוד האלף־בית, רגשות, ספירה וצורות לגיל הרך.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ציידת האותיות — משחק לימוד אלף־בית לילדים",
+    description:
+      "משחק חינמי בעברית ללימוד האלף־בית, רגשות, ספירה וצורות לגיל הרך.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#8ECDF6",
 };
 
 export default async function RootLayout({ children }) {
